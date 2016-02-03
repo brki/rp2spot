@@ -1,0 +1,524 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
+		D3C0CA7F1C6248E10055B650 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7E1C6248E10055B650 /* ViewController.swift */; };
+		D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA801C6248E10055B650 /* Main.storyboard */; };
+		D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */; };
+		D3C0CA871C6248E10055B650 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA861C6248E10055B650 /* Assets.xcassets */; };
+		D3C0CA8A1C6248E10055B650 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */; };
+		D3C0CA951C6248E10055B650 /* rp2spotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA941C6248E10055B650 /* rp2spotTests.swift */; };
+		D3C0CAA01C6248E10055B650 /* rp2spotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		D3C0CA911C6248E10055B650 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D3C0CA711C6248E10055B650 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D3C0CA781C6248E10055B650;
+			remoteInfo = rp2spot;
+		};
+		D3C0CA9C1C6248E10055B650 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D3C0CA711C6248E10055B650 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D3C0CA781C6248E10055B650;
+			remoteInfo = rp2spot;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		D3C0CA7E1C6248E10055B650 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D3C0CA811C6248E10055B650 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		D3C0CA841C6248E10055B650 /* rp2spot.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = rp2spot.xcdatamodel; sourceTree = "<group>"; };
+		D3C0CA861C6248E10055B650 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D3C0CA891C6248E10055B650 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		D3C0CA8B1C6248E10055B650 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3C0CA901C6248E10055B650 /* rp2spotTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rp2spotTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3C0CA941C6248E10055B650 /* rp2spotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = rp2spotTests.swift; sourceTree = "<group>"; };
+		D3C0CA961C6248E10055B650 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3C0CA9B1C6248E10055B650 /* rp2spotUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rp2spotUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = rp2spotUITests.swift; sourceTree = "<group>"; };
+		D3C0CAA11C6248E10055B650 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D3C0CA761C6248E10055B650 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3C0CA8D1C6248E10055B650 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3C0CA981C6248E10055B650 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D3C0CA701C6248E10055B650 = {
+			isa = PBXGroup;
+			children = (
+				D3C0CA7B1C6248E10055B650 /* rp2spot */,
+				D3C0CA931C6248E10055B650 /* rp2spotTests */,
+				D3C0CA9E1C6248E10055B650 /* rp2spotUITests */,
+				D3C0CA7A1C6248E10055B650 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D3C0CA7A1C6248E10055B650 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D3C0CA791C6248E10055B650 /* rp2spot.app */,
+				D3C0CA901C6248E10055B650 /* rp2spotTests.xctest */,
+				D3C0CA9B1C6248E10055B650 /* rp2spotUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
+			isa = PBXGroup;
+			children = (
+				D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */,
+				D3C0CA7E1C6248E10055B650 /* ViewController.swift */,
+				D3C0CA801C6248E10055B650 /* Main.storyboard */,
+				D3C0CA861C6248E10055B650 /* Assets.xcassets */,
+				D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */,
+				D3C0CA8B1C6248E10055B650 /* Info.plist */,
+				D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */,
+			);
+			path = rp2spot;
+			sourceTree = "<group>";
+		};
+		D3C0CA931C6248E10055B650 /* rp2spotTests */ = {
+			isa = PBXGroup;
+			children = (
+				D3C0CA941C6248E10055B650 /* rp2spotTests.swift */,
+				D3C0CA961C6248E10055B650 /* Info.plist */,
+			);
+			path = rp2spotTests;
+			sourceTree = "<group>";
+		};
+		D3C0CA9E1C6248E10055B650 /* rp2spotUITests */ = {
+			isa = PBXGroup;
+			children = (
+				D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */,
+				D3C0CAA11C6248E10055B650 /* Info.plist */,
+			);
+			path = rp2spotUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		D3C0CA781C6248E10055B650 /* rp2spot */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3C0CAA41C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spot" */;
+			buildPhases = (
+				D3C0CA751C6248E10055B650 /* Sources */,
+				D3C0CA761C6248E10055B650 /* Frameworks */,
+				D3C0CA771C6248E10055B650 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = rp2spot;
+			productName = rp2spot;
+			productReference = D3C0CA791C6248E10055B650 /* rp2spot.app */;
+			productType = "com.apple.product-type.application";
+		};
+		D3C0CA8F1C6248E10055B650 /* rp2spotTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3C0CAA71C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spotTests" */;
+			buildPhases = (
+				D3C0CA8C1C6248E10055B650 /* Sources */,
+				D3C0CA8D1C6248E10055B650 /* Frameworks */,
+				D3C0CA8E1C6248E10055B650 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D3C0CA921C6248E10055B650 /* PBXTargetDependency */,
+			);
+			name = rp2spotTests;
+			productName = rp2spotTests;
+			productReference = D3C0CA901C6248E10055B650 /* rp2spotTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		D3C0CA9A1C6248E10055B650 /* rp2spotUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = D3C0CAAA1C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spotUITests" */;
+			buildPhases = (
+				D3C0CA971C6248E10055B650 /* Sources */,
+				D3C0CA981C6248E10055B650 /* Frameworks */,
+				D3C0CA991C6248E10055B650 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				D3C0CA9D1C6248E10055B650 /* PBXTargetDependency */,
+			);
+			name = rp2spotUITests;
+			productName = rp2spotUITests;
+			productReference = D3C0CA9B1C6248E10055B650 /* rp2spotUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D3C0CA711C6248E10055B650 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0720;
+				LastUpgradeCheck = 0720;
+				ORGANIZATIONNAME = "truckin'";
+				TargetAttributes = {
+					D3C0CA781C6248E10055B650 = {
+						CreatedOnToolsVersion = 7.2;
+					};
+					D3C0CA8F1C6248E10055B650 = {
+						CreatedOnToolsVersion = 7.2;
+						TestTargetID = D3C0CA781C6248E10055B650;
+					};
+					D3C0CA9A1C6248E10055B650 = {
+						CreatedOnToolsVersion = 7.2;
+						TestTargetID = D3C0CA781C6248E10055B650;
+					};
+				};
+			};
+			buildConfigurationList = D3C0CA741C6248E10055B650 /* Build configuration list for PBXProject "rp2spot" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = D3C0CA701C6248E10055B650;
+			productRefGroup = D3C0CA7A1C6248E10055B650 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D3C0CA781C6248E10055B650 /* rp2spot */,
+				D3C0CA8F1C6248E10055B650 /* rp2spotTests */,
+				D3C0CA9A1C6248E10055B650 /* rp2spotUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		D3C0CA771C6248E10055B650 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3C0CA8A1C6248E10055B650 /* LaunchScreen.storyboard in Resources */,
+				D3C0CA871C6248E10055B650 /* Assets.xcassets in Resources */,
+				D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3C0CA8E1C6248E10055B650 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3C0CA991C6248E10055B650 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D3C0CA751C6248E10055B650 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
+				D3C0CA7F1C6248E10055B650 /* ViewController.swift in Sources */,
+				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3C0CA8C1C6248E10055B650 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3C0CA951C6248E10055B650 /* rp2spotTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		D3C0CA971C6248E10055B650 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D3C0CAA01C6248E10055B650 /* rp2spotUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D3C0CA921C6248E10055B650 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D3C0CA781C6248E10055B650 /* rp2spot */;
+			targetProxy = D3C0CA911C6248E10055B650 /* PBXContainerItemProxy */;
+		};
+		D3C0CA9D1C6248E10055B650 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D3C0CA781C6248E10055B650 /* rp2spot */;
+			targetProxy = D3C0CA9C1C6248E10055B650 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		D3C0CA801C6248E10055B650 /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D3C0CA811C6248E10055B650 /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				D3C0CA891C6248E10055B650 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		D3C0CAA21C6248E10055B650 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		D3C0CAA31C6248E10055B650 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 9.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		D3C0CAA51C6248E10055B650 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = rp2spot/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		D3C0CAA61C6248E10055B650 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				INFOPLIST_FILE = rp2spot/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		D3C0CAA81C6248E10055B650 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = rp2spotTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spotTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/rp2spot.app/rp2spot";
+			};
+			name = Debug;
+		};
+		D3C0CAA91C6248E10055B650 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				INFOPLIST_FILE = rp2spotTests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spotTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/rp2spot.app/rp2spot";
+			};
+			name = Release;
+		};
+		D3C0CAAB1C6248E10055B650 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = rp2spotUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spotUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = rp2spot;
+				USES_XCTRUNNER = YES;
+			};
+			name = Debug;
+		};
+		D3C0CAAC1C6248E10055B650 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				INFOPLIST_FILE = rp2spotUITests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spotUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TEST_TARGET_NAME = rp2spot;
+				USES_XCTRUNNER = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		D3C0CA741C6248E10055B650 /* Build configuration list for PBXProject "rp2spot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C0CAA21C6248E10055B650 /* Debug */,
+				D3C0CAA31C6248E10055B650 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		D3C0CAA41C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spot" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C0CAA51C6248E10055B650 /* Debug */,
+				D3C0CAA61C6248E10055B650 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		D3C0CAA71C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spotTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C0CAA81C6248E10055B650 /* Debug */,
+				D3C0CAA91C6248E10055B650 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+		D3C0CAAA1C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spotUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D3C0CAAB1C6248E10055B650 /* Debug */,
+				D3C0CAAC1C6248E10055B650 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCVersionGroup section */
+		D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */ = {
+			isa = XCVersionGroup;
+			children = (
+				D3C0CA841C6248E10055B650 /* rp2spot.xcdatamodel */,
+			);
+			currentVersion = D3C0CA841C6248E10055B650 /* rp2spot.xcdatamodel */;
+			path = rp2spot.xcdatamodeld;
+			sourceTree = "<group>";
+			versionGroupType = wrapper.xcdatamodel;
+		};
+/* End XCVersionGroup section */
+	};
+	rootObject = D3C0CA711C6248E10055B650 /* Project object */;
+}
