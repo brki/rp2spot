@@ -13,3 +13,11 @@ and the availability of songs varies for different Spotify regions.
   writing this README) provide a possibility to include their framework via Carthage,
   so it has been included directly in this repository.
 
+### Building notes
+
+#### Carthage
+Run ``carthage update --platform ios`` 
+
+#### Secrets.swift
+Copy ``rp2spot/Secrets.swift-dist`` to ``rp2spot/Secrets.swift`` and edit it, setting
+values for the Spotify client ID and related values.

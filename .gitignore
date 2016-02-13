@@ -1,5 +1,7 @@
-# Xcode
-#
+# File with client id, etc:
+rp2spot/Secrets.swift
+
+# Standard artifacts to ignore:
 build/
 *.pbxuser
 !default.pbxuser
