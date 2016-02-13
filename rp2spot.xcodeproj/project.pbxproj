@@ -17,6 +17,8 @@
 		D3C0CAA01C6248E10055B650 /* rp2spotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */; };
 		D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E561C6F2E3A00443F68 /* Spotify.framework */; };
 		D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E581C6F2EB600443F68 /* Alamofire.framework */; };
+		D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */; };
+		D3FC5E5E1C6F34CA00443F68 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +55,9 @@
 		D3C0CAA11C6248E10055B650 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D3FC5E561C6F2E3A00443F68 /* Spotify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Spotify.framework; sourceTree = "<group>"; };
 		D3FC5E581C6F2EB600443F68 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
+		D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
+		D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
+		D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Spotify-Bridging.h"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -60,6 +65,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3FC5E5E1C6F34CA00443F68 /* SystemConfiguration.framework in Frameworks */,
+				D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */,
 				D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */,
 				D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */,
 			);
@@ -113,6 +120,7 @@
 				D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */,
 				D3C0CA8B1C6248E10055B650 /* Info.plist */,
 				D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */,
+				D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */,
 			);
 			path = rp2spot;
 			sourceTree = "<group>";
@@ -138,6 +146,8 @@
 		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */,
+				D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */,
 				D3FC5E581C6F2EB600443F68 /* Alamofire.framework */,
 				D3FC5E561C6F2E3A00443F68 /* Spotify.framework */,
 			);
@@ -278,12 +288,13 @@
 			files = (
 			);
 			inputPaths = (
+				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
 			);
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = "/usr/local/bin/carthage copy-frameworks";
-			shellScript = "$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework";
+			shellPath = /bin/sh;
+			shellScript = "/usr/local/bin/carthage copy-frameworks";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -443,8 +454,10 @@
 				);
 				INFOPLIST_FILE = rp2spot/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "rp2spot/Spotify-Bridging.h";
 			};
 			name = Debug;
 		};
@@ -459,8 +472,10 @@
 				);
 				INFOPLIST_FILE = rp2spot/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				"OTHER_LDFLAGS[arch=*]" = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "rp2spot/Spotify-Bridging.h";
 			};
 			name = Release;
 		};
