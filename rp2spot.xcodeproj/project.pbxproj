@@ -15,6 +15,8 @@
 		D3C0CA8A1C6248E10055B650 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */; };
 		D3C0CA951C6248E10055B650 /* rp2spotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA941C6248E10055B650 /* rp2spotTests.swift */; };
 		D3C0CAA01C6248E10055B650 /* rp2spotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */; };
+		D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E561C6F2E3A00443F68 /* Spotify.framework */; };
+		D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E581C6F2EB600443F68 /* Alamofire.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +51,8 @@
 		D3C0CA9B1C6248E10055B650 /* rp2spotUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rp2spotUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = rp2spotUITests.swift; sourceTree = "<group>"; };
 		D3C0CAA11C6248E10055B650 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3FC5E561C6F2E3A00443F68 /* Spotify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Spotify.framework; sourceTree = "<group>"; };
+		D3FC5E581C6F2EB600443F68 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +60,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */,
+				D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,6 +85,7 @@
 		D3C0CA701C6248E10055B650 = {
 			isa = PBXGroup;
 			children = (
+				D3FC5E551C6F2DE400443F68 /* Frameworks */,
 				D3C0CA7B1C6248E10055B650 /* rp2spot */,
 				D3C0CA931C6248E10055B650 /* rp2spotTests */,
 				D3C0CA9E1C6248E10055B650 /* rp2spotUITests */,
@@ -128,6 +135,15 @@
 			path = rp2spotUITests;
 			sourceTree = "<group>";
 		};
+		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D3FC5E581C6F2EB600443F68 /* Alamofire.framework */,
+				D3FC5E561C6F2E3A00443F68 /* Spotify.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -138,6 +154,7 @@
 				D3C0CA751C6248E10055B650 /* Sources */,
 				D3C0CA761C6248E10055B650 /* Frameworks */,
 				D3C0CA771C6248E10055B650 /* Resources */,
+				D3FC5E5A1C6F2F0A00443F68 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -253,6 +270,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		D3FC5E5A1C6F2F0A00443F68 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = "/usr/local/bin/carthage copy-frameworks";
+			shellScript = "$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		D3C0CA751C6248E10055B650 /* Sources */ = {
@@ -403,6 +436,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = rp2spot/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
@@ -414,6 +452,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)",
+					"$(PROJECT_DIR)/Carthage/Build/iOS",
+				);
 				INFOPLIST_FILE = rp2spot/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
@@ -488,6 +531,7 @@
 				D3C0CAA61C6248E10055B650 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D3C0CAA71C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spotTests" */ = {
 			isa = XCConfigurationList;
@@ -496,6 +540,7 @@
 				D3C0CAA91C6248E10055B650 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		D3C0CAAA1C6248E10055B650 /* Build configuration list for PBXNativeTarget "rp2spotUITests" */ = {
 			isa = XCConfigurationList;
@@ -504,6 +549,7 @@
 				D3C0CAAC1C6248E10055B650 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 
