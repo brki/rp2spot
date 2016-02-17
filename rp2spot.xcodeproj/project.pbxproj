@@ -7,8 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
+		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
-		D3C0CA7F1C6248E10055B650 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7E1C6248E10055B650 /* ViewController.swift */; };
+		D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */; };
 		D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA801C6248E10055B650 /* Main.storyboard */; };
 		D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */; };
 		D3C0CA871C6248E10055B650 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA861C6248E10055B650 /* Assets.xcassets */; };
@@ -24,6 +26,10 @@
 		D3FC5E651C6F5AA100443F68 /* SpotifyAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */; };
 		D3FC5E671C6F5C0C00443F68 /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E661C6F5C0C00443F68 /* Constant.swift */; };
 		D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E681C6FC2BF00443F68 /* Secrets.swift */; };
+		D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E6C1C70A1C500443F68 /* RadioParadise.swift */; };
+		D3FC5E701C70A51000443F68 /* PlayedSong+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E6E1C70A51000443F68 /* PlayedSong+CoreDataProperties.swift */; };
+		D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E6F1C70A51000443F68 /* PlayedSong.swift */; };
+		D3FC5E741C70AFF100443F68 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E731C70AFF100443F68 /* Date.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,9 +50,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
+		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		D3C0CA7E1C6248E10055B650 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
 		D3C0CA811C6248E10055B650 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		D3C0CA841C6248E10055B650 /* rp2spot.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = rp2spot.xcdatamodel; sourceTree = "<group>"; };
 		D3C0CA861C6248E10055B650 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -68,6 +76,10 @@
 		D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuth.swift; sourceTree = "<group>"; };
 		D3FC5E661C6F5C0C00443F68 /* Constant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		D3FC5E681C6FC2BF00443F68 /* Secrets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		D3FC5E6C1C70A1C500443F68 /* RadioParadise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RadioParadise.swift; sourceTree = "<group>"; };
+		D3FC5E6E1C70A51000443F68 /* PlayedSong+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "PlayedSong+CoreDataProperties.swift"; sourceTree = "<group>"; };
+		D3FC5E6F1C70A51000443F68 /* PlayedSong.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSong.swift; sourceTree = "<group>"; };
+		D3FC5E731C70AFF100443F68 /* Date.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -124,18 +136,20 @@
 		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
 			isa = PBXGroup;
 			children = (
+				D3FC5E721C70A52200443F68 /* CoreData Models */,
+				D3FC5E6B1C70A1B300443F68 /* Models */,
+				D3FC5E6A1C70A14200443F68 /* View Controllers */,
+				D3FC5E661C6F5C0C00443F68 /* Constant.swift */,
+				D3FC5E681C6FC2BF00443F68 /* Secrets.swift */,
+				D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */,
 				D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */,
-				D3C0CA7E1C6248E10055B650 /* ViewController.swift */,
+				D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */,
 				D3C0CA801C6248E10055B650 /* Main.storyboard */,
 				D3C0CA861C6248E10055B650 /* Assets.xcassets */,
 				D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */,
 				D3C0CA8B1C6248E10055B650 /* Info.plist */,
 				D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */,
 				D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */,
-				D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */,
-				D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */,
-				D3FC5E661C6F5C0C00443F68 /* Constant.swift */,
-				D3FC5E681C6FC2BF00443F68 /* Secrets.swift */,
 			);
 			path = rp2spot;
 			sourceTree = "<group>";
@@ -168,6 +182,34 @@
 				D3FC5E561C6F2E3A00443F68 /* Spotify.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D3FC5E6A1C70A14200443F68 /* View Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */,
+			);
+			name = "View Controllers";
+			sourceTree = "<group>";
+		};
+		D3FC5E6B1C70A1B300443F68 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				D3FC5E6C1C70A1C500443F68 /* RadioParadise.swift */,
+				D3FC5E731C70AFF100443F68 /* Date.swift */,
+				D379645E1C70C7B9001FC20E /* PlayedSongData.swift */,
+				D37964601C70C862001FC20E /* Alamofire-extensions.swift */,
+			);
+			name = Models;
+			sourceTree = "<group>";
+		};
+		D3FC5E721C70A52200443F68 /* CoreData Models */ = {
+			isa = PBXGroup;
+			children = (
+				D3FC5E6E1C70A51000443F68 /* PlayedSong+CoreDataProperties.swift */,
+				D3FC5E6F1C70A51000443F68 /* PlayedSong.swift */,
+			);
+			name = "CoreData Models";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -319,12 +361,18 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3FC5E701C70A51000443F68 /* PlayedSong+CoreDataProperties.swift in Sources */,
+				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
+				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
 				D3FC5E651C6F5AA100443F68 /* SpotifyAuth.swift in Sources */,
+				D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */,
 				D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */,
-				D3C0CA7F1C6248E10055B650 /* ViewController.swift in Sources */,
+				D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
+				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
+				D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */,
 				D3FC5E671C6F5C0C00443F68 /* Constant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

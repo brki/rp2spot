@@ -1,4 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model name="Test1.xcdatamodel" userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="1" systemVersion="11A491" minimumToolsVersion="Automatic" macOSVersion="Automatic" iOSVersion="Automatic">
-    <elements/>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15D21" minimumToolsVersion="Automatic">
+    <entity name="PlayedSong" representedClassName=".PlayedSong" syncable="YES">
+        <attribute name="albumTitle" attributeType="String" syncable="YES"/>
+        <attribute name="artistName" attributeType="String" syncable="YES"/>
+        <attribute name="largeImageURL" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="playedAt" attributeType="Date" syncable="YES"/>
+        <attribute name="radioParadiseSongId" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="smallImageURL" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="spotifyTrackId" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="title" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="PlayedSong" positionX="-63" positionY="-18" width="128" height="165"/>
+    </elements>
 </model>
