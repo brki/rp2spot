@@ -59,6 +59,7 @@ class CoreDataStack {
 		let coordinator = self.persistentStoreCoordinator
 		var managedObjectContext = NSManagedObjectContext(concurrencyType: .MainQueueConcurrencyType)
 		managedObjectContext.persistentStoreCoordinator = coordinator
+//		managedObjectContext.mergePolicy = NSMergePolicy(mergeType: .MergeByPropertyObjectTrumpMergePolicyType)
 		return managedObjectContext
 	}()
 
