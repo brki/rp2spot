@@ -175,3 +175,10 @@ extension HistoryViewController {
 		}
 	}
 }
+
+// MARK: UITableViewDelegate methods
+extension HistoryViewController {
+	override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
+		return tableView.rowHeight
+	}
+}

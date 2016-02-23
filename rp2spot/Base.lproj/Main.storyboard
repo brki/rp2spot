@@ -1,11 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="Yni-F7-bJN">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="9532" systemVersion="15D21" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" initialViewController="XDA-0H-yDz">
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
+        <!--Navigation Controller-->
+        <scene sceneID="whX-Rr-83R">
+            <objects>
+                <navigationController id="XDA-0H-yDz" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" id="bSi-Vb-gRX">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="Yni-F7-bJN" kind="relationship" relationship="rootViewController" id="4Bl-Ne-J1m"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="AAN-d4-g09" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="-310" y="283"/>
+        </scene>
         <!--History View Controller-->
         <scene sceneID="s4f-3e-VIp">
             <objects>
@@ -16,7 +32,7 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="PlainSongHistoryCell" rowHeight="64" id="zRr-Ny-rfm" customClass="PlainHistoryTableViewCell" customModule="rp2spot" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="28" width="600" height="64"/>
+                                <rect key="frame" x="0.0" y="92" width="600" height="64"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zRr-Ny-rfm" id="NqA-OO-wuU">
                                     <rect key="frame" x="0.0" y="0.0" width="553" height="63"/>
@@ -66,6 +82,7 @@
                                         <constraint firstItem="KV8-dY-8i4" firstAttribute="height" secondItem="NqA-OO-wuU" secondAttribute="height" id="tZJ-Gd-vCU"/>
                                     </constraints>
                                 </tableViewCellContentView>
+                                <color key="backgroundColor" red="0.84705882352941175" green="0.85882352941176465" blue="0.8784313725490196" alpha="1" colorSpace="calibratedRGB"/>
                                 <connections>
                                     <outlet property="albumImageView" destination="KV8-dY-8i4" id="jPb-WJ-3yx"/>
                                     <outlet property="artist" destination="9XP-1E-zF5" id="FAb-CV-inO"/>
@@ -79,6 +96,8 @@
                             <outlet property="delegate" destination="Yni-F7-bJN" id="dNY-pj-w7M"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="IFN-uf-yof"/>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" prompted="NO"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="mCh-vV-DGh" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
