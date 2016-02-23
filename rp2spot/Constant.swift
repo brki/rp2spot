@@ -16,4 +16,13 @@ struct Constant {
 	static let SPOTIFY_SESSION_USER_DEFAULTS_KEY = "SpotifySession"
 
 	static let RADIO_PARADISE_HISTORY_URL_BASE = Secrets.RADIO_PARADISE_HISTORY_URL_BASE
+
+	enum Color: UInt {
+		case SageGreen = 0xEEFFEC
+		case LightGrey = 0xD8DBE0
+
+		func color(alpha: CGFloat = 1.0) -> UIColor {
+			return UIColor.colorWithRGB(self.rawValue, alpha: alpha)
+		}
+	}
 }

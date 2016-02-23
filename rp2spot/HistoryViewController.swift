@@ -139,6 +139,7 @@ extension HistoryViewController {
 		if let song = fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
 
 			var imageURL: NSURL?
+			var spotifyTrackAvailable = false
 			context.performBlockAndWait {
 				cell.songTitle.text = song.title
 				cell.artist.text = song.artistName
@@ -148,6 +149,7 @@ extension HistoryViewController {
 				} else if let asin = song.asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(asin, size: .Medium)) {
 					imageURL = radioParadiseImageURL
 				}
+				spotifyTrackAvailable = song.spotifyTrackId != nil
 			}
 
 			if let url = imageURL {
@@ -155,11 +157,15 @@ extension HistoryViewController {
 			} else {
 				cell.albumImageView.image = albumThumbnailPlaceholder
 			}
+
+			if spotifyTrackAvailable {
+				cell.backgroundColor = Constant.Color.SageGreen.color()
+			} else {
+				cell.backgroundColor = Constant.Color.LightGrey.color()
+			}
 		}
 		return cell
 	}
-
-
 
 	override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		if let sections = fetchedResultsController.sections {
