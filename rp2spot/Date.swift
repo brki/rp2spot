@@ -31,12 +31,24 @@ class Date {
 		return formatter
 	}()
 
+	lazy var calendar = NSCalendar.currentCalendar()
+
 	func toUTCString(date: NSDate) -> String {
 		return UTCDateFormatter.stringFromDate(date)
 	}
 
 	func dateFromRPDateString(date: String) -> NSDate? {
 		return RPDateParser.dateFromString(date)
+	}
+
+	func oneDayAgo() -> NSDate {
+		// First try the correct way:
+		if let date = calendar.dateByAddingUnit(NSCalendarUnit.Day, value: -1, toDate: NSDate(), options: NSCalendarOptions(rawValue: 0)) {
+			return date
+		} else {
+			// If that for some reason fails, return the 24 hours ago time:
+			return NSDate(timeInterval: -24 * 60 * 60, sinceDate: NSDate())
+		}
 	}
 
 }

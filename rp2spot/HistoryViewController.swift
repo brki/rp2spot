@@ -26,7 +26,7 @@ class HistoryViewController: UITableViewController {
 
 		tableView.rowHeight = 64
 		refreshFetchRequest()
-		fetchRPSongs()
+		refreshSongHistory()
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -44,6 +44,27 @@ class HistoryViewController: UITableViewController {
 		return frc
 	}()
 
+	@IBAction func refreshRequested(sender: UIRefreshControl) {
+		refreshSongHistory()
+		sender.endRefreshing()
+	}
+
+	func refreshSongHistory() {
+		var fromDate: NSDate?
+		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
+			context.performBlockAndWait {
+				// If the last locally available song was broadcast less than a day ago, refresh only since that song.
+				if let song = fetchedObjects[0] as? PlayedSong {
+					let oneDayAgo = Date.sharedInstance.oneDayAgo()
+					if song.playedAt.earlierDate(oneDayAgo) == oneDayAgo {
+						fromDate = song.playedAt
+					}
+				}
+			}
+		}
+		fetchRPSongs(fromDate)
+	}
+
 	/**
 	(Re)fetch the data for the fetchedResultsController.
 	*/
@@ -58,8 +79,8 @@ class HistoryViewController: UITableViewController {
 		}
 	}
 
-	func fetchRPSongs(completionHandler: ((success: Bool, fetchedCount: Int, error: NSError?) -> Void)? = nil) {
-		RadioParadise.fetchPeriod("CH") { playedSongs, error, response in
+	func fetchRPSongs(fromDate: NSDate? = nil, toDate: NSDate? = nil, completionHandler: ((success: Bool, fetchedCount: Int, error: NSError?) -> Void)? = nil) {
+		RadioParadise.fetchPeriod("CH", fromDate: fromDate, toDate: toDate) { playedSongs, error, response in
 			print("error: \(error)")  // on network timeout: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out."
 			print("response: \(response)")  // NSURLHTTPResponse
 
