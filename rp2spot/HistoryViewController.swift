@@ -8,15 +8,24 @@
 
 import UIKit
 import CoreData
+import AlamofireImage
 
 class HistoryViewController: UITableViewController {
 
 	let context = CoreDataStack.sharedInstance.managedObjectContext
 
+	let albumThumbnailFilter =  AspectScaledToFillSizeWithRoundedCornersFilter(
+		size: CGSize(width: 128, height: 128),
+		radius: 15.0
+	)
+
+	let albumThumbnailPlaceholder = UIImage(named: "vinyl")
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
+
+		tableView.rowHeight = 64
 		refreshFetchRequest()
-		// Do any additional setup after loading the view, typically from a nib.
 		fetchRPSongs()
 	}
 
@@ -126,10 +135,31 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 
 extension HistoryViewController {
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-		let cell = tableView.dequeueReusableCellWithIdentifier("PlainSongHistoryCell", forIndexPath: indexPath)
-		cell.textLabel?.text = "hello"
+		let cell = tableView.dequeueReusableCellWithIdentifier("PlainSongHistoryCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
+		if let song = fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
+
+			var imageURL: NSURL?
+			context.performBlockAndWait {
+				cell.songTitle.text = song.title
+				cell.artist.text = song.artistName
+				cell.date.text = song.playedAt.description // TODO: use a date format w/ user's locale settings
+				if let imageURLText = song.smallImageURL, spotifyImageURL = NSURL(string: imageURLText) {
+					imageURL = spotifyImageURL
+				} else if let asin = song.asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(asin, size: .Medium)) {
+					imageURL = radioParadiseImageURL
+				}
+			}
+
+			if let url = imageURL {
+				cell.albumImageView.af_setImageWithURL(url, placeholderImage: albumThumbnailPlaceholder, filter: albumThumbnailFilter)
+			} else {
+				cell.albumImageView.image = albumThumbnailPlaceholder
+			}
+		}
 		return cell
 	}
+
+
 
 	override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		if let sections = fetchedResultsController.sections {

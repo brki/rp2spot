@@ -10,6 +10,12 @@ import Foundation
 import Alamofire
 
 struct RadioParadise {
+
+	enum ImageSize: String {
+		case Small = "s"
+		case Medium = "m"
+		case Large = "l"
+	}
 	
 	static func fetchPeriod(region: String, fromDate: NSDate? = nil, toDate: NSDate? = nil,
 		handler: ((playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) -> Void)? = nil) -> Request {
@@ -37,5 +43,9 @@ struct RadioParadise {
 			}
 		}
 		return request
+	}
+
+	static func imageURLText(asin: String, size: ImageSize) -> String {
+		return "https://www.radioparadise.com/graphics/covers/\(size.rawValue)/\(asin).jpg"
 	}
 }

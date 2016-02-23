@@ -17,6 +17,7 @@ extension PlayedSong {
     @NSManaged var title: String
     @NSManaged var playedAt: NSDate
     @NSManaged var albumTitle: String
+	@NSManaged var asin: String?
     @NSManaged var largeImageURL: String?
     @NSManaged var smallImageURL: String?
     @NSManaged var spotifyTrackId: String?

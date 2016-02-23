@@ -3,6 +3,7 @@
     <entity name="PlayedSong" representedClassName=".PlayedSong" syncable="YES">
         <attribute name="albumTitle" attributeType="String" syncable="YES"/>
         <attribute name="artistName" attributeType="String" syncable="YES"/>
+        <attribute name="asin" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="largeImageURL" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="playedAt" attributeType="Date" syncable="YES"/>
         <attribute name="radioParadiseSongId" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
@@ -16,6 +17,6 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="PlayedSong" positionX="-63" positionY="-18" width="128" height="165"/>
+        <element name="PlayedSong" positionX="-63" positionY="-18" width="128" height="180"/>
     </elements>
 </model>

@@ -78,6 +78,9 @@ class PlayedSong: NSManagedObject {
 		if !checkBeforeAssignment || self.albumTitle != data.albumTitle {
 			self.albumTitle = data.albumTitle
 		}
+		if !checkBeforeAssignment || self.asin != data.asin {
+			self.asin = data.asin
+		}
 		if !checkBeforeAssignment || self.artistName != data.artistName {
 			self.artistName = data.artistName
 		}

@@ -19,6 +19,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	var title: String!
 	var playedAt: NSDate!
 	var albumTitle: String!
+	var asin: String?
 	var largeImageURL: String?
 	var smallImageURL: String?
 	var spotifyTrackId: String?
@@ -58,6 +59,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.radioParadiseSongId = radioParadiseSongId
 		self.artistName = artistName
 
+		self.asin = representation.valueForKeyPath("asin") as? String ?? nil
 		self.spotifyTrackId = representation.valueForKeyPath("spotify_track_id") as? String ?? nil
 		self.smallImageURL = representation.valueForKeyPath("spotify_album_img_small_url") as? String ?? nil
 		self.largeImageURL = representation.valueForKeyPath("spotify_album_img_large_url") as? String ?? nil

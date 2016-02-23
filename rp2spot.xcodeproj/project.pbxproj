@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
+		D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */; };
+		D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
 		D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */; };
 		D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA801C6248E10055B650 /* Main.storyboard */; };
@@ -52,6 +54,8 @@
 /* Begin PBXFileReference section */
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
+		D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
+		D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlainHistoryTableViewCell.swift; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
@@ -90,6 +94,7 @@
 				D3FC5E611C6F542F00443F68 /* CoreData.framework in Frameworks */,
 				D3FC5E5E1C6F34CA00443F68 /* SystemConfiguration.framework in Frameworks */,
 				D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */,
+				D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */,
 				D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */,
 				D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */,
 			);
@@ -112,6 +117,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D3992AAE1C7A0A590077DDA7 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */,
+			);
+			name = Views;
+			sourceTree = "<group>";
+		};
 		D3C0CA701C6248E10055B650 = {
 			isa = PBXGroup;
 			children = (
@@ -136,6 +149,7 @@
 		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
 			isa = PBXGroup;
 			children = (
+				D3992AAE1C7A0A590077DDA7 /* Views */,
 				D3FC5E721C70A52200443F68 /* CoreData Models */,
 				D3FC5E6B1C70A1B300443F68 /* Models */,
 				D3FC5E6A1C70A14200443F68 /* View Controllers */,
@@ -175,6 +189,7 @@
 		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */,
 				D3FC5E601C6F542F00443F68 /* CoreData.framework */,
 				D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */,
 				D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */,
@@ -347,6 +362,7 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/AlamofireImage.framework",
 			);
 			outputPaths = (
 			);
@@ -362,6 +378,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3FC5E701C70A51000443F68 /* PlayedSong+CoreDataProperties.swift in Sources */,
+				D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */,
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,

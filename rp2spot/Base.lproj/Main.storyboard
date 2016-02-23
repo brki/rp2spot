@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
         <!--History View Controller-->
@@ -14,13 +15,63 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <prototypes>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" reuseIdentifier="PlainSongHistoryCell" id="zRr-Ny-rfm">
-                                <rect key="frame" x="0.0" y="28" width="600" height="44"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" accessoryType="detailButton" indentationWidth="10" reuseIdentifier="PlainSongHistoryCell" rowHeight="64" id="zRr-Ny-rfm" customClass="PlainHistoryTableViewCell" customModule="rp2spot" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="28" width="600" height="64"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="zRr-Ny-rfm" id="NqA-OO-wuU">
-                                    <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="553" height="63"/>
                                     <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="top" translatesAutoresizingMaskIntoConstraints="NO" id="c2W-Fh-bBW">
+                                            <rect key="frame" x="78" y="0.0" width="483" height="63"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="3/16/2016 12:23:18" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Sup-qO-18d" userLabel="Date">
+                                                    <rect key="frame" x="0.0" y="8" width="101" height="10"/>
+                                                    <constraints>
+                                                        <constraint firstAttribute="height" constant="10" id="PlT-0p-xFW"/>
+                                                    </constraints>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="11"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="749" text="Light Will Keep Your Heart Beating in the Future" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GA1-8p-37o" userLabel="Song title">
+                                                    <rect key="frame" x="0.0" y="18" width="340" height="19"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="750" text="Mike Doughty" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9XP-1E-zF5" userLabel="Artist name">
+                                                    <rect key="frame" x="0.0" y="37" width="95" height="18"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                            </subviews>
+                                            <edgeInsets key="layoutMargins" top="8" left="0.0" bottom="8" right="0.0"/>
+                                        </stackView>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="KV8-dY-8i4">
+                                            <rect key="frame" x="8" y="0.0" width="64" height="63"/>
+                                            <constraints>
+                                                <constraint firstAttribute="width" constant="64" id="hrI-00-Syx"/>
+                                            </constraints>
+                                        </imageView>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="c2W-Fh-bBW" firstAttribute="leading" secondItem="KV8-dY-8i4" secondAttribute="trailing" constant="6" id="57K-O6-qhA"/>
+                                        <constraint firstItem="c2W-Fh-bBW" firstAttribute="width" secondItem="NqA-OO-wuU" secondAttribute="width" constant="-70" id="DGP-Qv-VL1"/>
+                                        <constraint firstItem="KV8-dY-8i4" firstAttribute="leading" secondItem="NqA-OO-wuU" secondAttribute="leadingMargin" id="dLy-Ne-VEH"/>
+                                        <constraint firstItem="c2W-Fh-bBW" firstAttribute="height" secondItem="NqA-OO-wuU" secondAttribute="height" id="g7P-PV-YqS"/>
+                                        <constraint firstItem="KV8-dY-8i4" firstAttribute="centerY" secondItem="NqA-OO-wuU" secondAttribute="centerY" id="o36-6i-kou"/>
+                                        <constraint firstItem="c2W-Fh-bBW" firstAttribute="centerY" secondItem="NqA-OO-wuU" secondAttribute="centerY" id="ohP-9h-Cve"/>
+                                        <constraint firstItem="KV8-dY-8i4" firstAttribute="height" secondItem="NqA-OO-wuU" secondAttribute="height" id="tZJ-Gd-vCU"/>
+                                    </constraints>
                                 </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="albumImageView" destination="KV8-dY-8i4" id="jPb-WJ-3yx"/>
+                                    <outlet property="artist" destination="9XP-1E-zF5" id="FAb-CV-inO"/>
+                                    <outlet property="date" destination="Sup-qO-18d" id="IJG-WO-vZf"/>
+                                    <outlet property="songTitle" destination="GA1-8p-37o" id="0Kv-bb-vaT"/>
+                                </connections>
                             </tableViewCell>
                         </prototypes>
                         <connections>
