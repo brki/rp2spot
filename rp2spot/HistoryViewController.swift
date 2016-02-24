@@ -10,6 +10,8 @@ import UIKit
 import CoreData
 import AlamofireImage
 
+typealias RPFetchResultHandler = (success: Bool, fetchedCount: Int, error: NSError?) -> Void
+
 class HistoryViewController: UITableViewController {
 
 	let context = CoreDataStack.sharedInstance.managedObjectContext
@@ -23,19 +25,6 @@ class HistoryViewController: UITableViewController {
 
 	let albumThumbnailPlaceholder = UIImage(named: "vinyl")
 
-	override func viewDidLoad() {
-		super.viewDidLoad()
-
-		tableView.rowHeight = 64
-		refreshFetchRequest()
-		refreshSongHistory()
-	}
-
-	override func didReceiveMemoryWarning() {
-		super.didReceiveMemoryWarning()
-		// Dispose of any resources that can be recreated.
-	}
-
 	lazy var fetchedResultsController: NSFetchedResultsController = {
 		var frc: NSFetchedResultsController!
 		self.context.performBlockAndWait {
@@ -46,12 +35,39 @@ class HistoryViewController: UITableViewController {
 		return frc
 	}()
 
-	@IBAction func refreshRequested(sender: UIRefreshControl) {
-		refreshSongHistory()
-		sender.endRefreshing()
+
+	override func viewDidLoad() {
+		super.viewDidLoad()
+
+		tableView.rowHeight = 64
+		refreshFetchRequest()
+
+		// If there is no song history yet, load the latest songs.
+		if (fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
+			refreshSongHistory()
+		}
 	}
 
-	func refreshSongHistory() {
+	override func didReceiveMemoryWarning() {
+		super.didReceiveMemoryWarning()
+		// Dispose of any resources that can be recreated.
+	}
+
+	@IBAction func refreshRequested(sender: UIRefreshControl) {
+		refreshSongHistory() { success, fetchedCount, error in
+			sender.endRefreshing()
+			if let err = error {
+				let title = "Unable to get latest song history"
+				var message: String?
+				if ErrorInfo.isRequestTimedOut(err) {
+					message = "The request timed out - check your network connection"
+				}
+				Utility.presentAlert(title, message: message)
+			}
+		}
+	}
+
+	func refreshSongHistory(completionHandler: RPFetchResultHandler? = nil) {
 		var fromDate: NSDate?
 		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
 			context.performBlockAndWait {
@@ -64,7 +80,7 @@ class HistoryViewController: UITableViewController {
 				}
 			}
 		}
-		fetchRPSongs(fromDate)
+		fetchRPSongs(fromDate, completionHandler: completionHandler)
 	}
 
 	/**
@@ -81,10 +97,13 @@ class HistoryViewController: UITableViewController {
 		}
 	}
 
-	func fetchRPSongs(fromDate: NSDate? = nil, toDate: NSDate? = nil, completionHandler: ((success: Bool, fetchedCount: Int, error: NSError?) -> Void)? = nil) {
+	func fetchRPSongs(fromDate: NSDate? = nil, toDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
 		RadioParadise.fetchPeriod("CH", fromDate: fromDate, toDate: toDate) { playedSongs, error, response in
-			print("error: \(error)")  // on network timeout: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out."
-			print("response: \(response)")  // NSURLHTTPResponse
+
+			guard error == nil else {
+				completionHandler?(success: false, fetchedCount: 0,	error: error)
+				return
+			}
 
 			guard let songHistory = playedSongs else {
 				let status = "playedSong list is unexpectedly nil"
@@ -93,8 +112,8 @@ class HistoryViewController: UITableViewController {
 				completionHandler?(
 					success: false,
 					fetchedCount: 0,
-					error: NSError(domain: "HistoryViewController", code: 1, userInfo: [NSLocalizedDescriptionKey: status]))
-
+					error: NSError(domain: "HistoryViewController", code: 1, userInfo: [NSLocalizedDescriptionKey: status])
+				)
 				return
 			}
 
@@ -184,7 +203,7 @@ extension HistoryViewController {
 			if spotifyTrackAvailable {
 				cell.backgroundColor = Constant.Color.SageGreen.color()
 			} else {
-				cell.backgroundColor = Constant.Color.LightGrey.color()
+				cell.backgroundColor = Constant.Color.LightOrange.color()
 			}
 		}
 		return cell

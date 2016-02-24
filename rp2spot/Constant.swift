@@ -20,6 +20,7 @@ struct Constant {
 	enum Color: UInt {
 		case SageGreen = 0xEEFFEC
 		case LightGrey = 0xD8DBE0
+		case LightOrange = 0xFFF4EC
 
 		func color(alpha: CGFloat = 1.0) -> UIColor {
 			return UIColor.colorWithRGB(self.rawValue, alpha: alpha)

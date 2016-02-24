@@ -1,5 +1,5 @@
 //
-//  Error.swift
+//  ErrorInfo.swift
 //  rp2spot
 //
 //  Created by Brian on 24/02/16.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-class Error {
+class ErrorInfo {
 	static func isRequestTimedOut(error: NSError) -> Bool {
 		return error.domain == NSURLErrorDomain && error.code == NSURLErrorTimedOut
 	}
