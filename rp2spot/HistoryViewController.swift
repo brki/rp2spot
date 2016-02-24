@@ -19,6 +19,8 @@ class HistoryViewController: UITableViewController {
 		radius: 15.0
 	)
 
+	let date = Date.sharedInstance
+
 	let albumThumbnailPlaceholder = UIImage(named: "vinyl")
 
 	override func viewDidLoad() {
@@ -55,7 +57,7 @@ class HistoryViewController: UITableViewController {
 			context.performBlockAndWait {
 				// If the last locally available song was broadcast less than a day ago, refresh only since that song.
 				if let song = fetchedObjects[0] as? PlayedSong {
-					let oneDayAgo = Date.sharedInstance.oneDayAgo()
+					let oneDayAgo = self.date.oneDayAgo()
 					if song.playedAt.earlierDate(oneDayAgo) == oneDayAgo {
 						fromDate = song.playedAt
 					}
@@ -164,7 +166,7 @@ extension HistoryViewController {
 			context.performBlockAndWait {
 				cell.songTitle.text = song.title
 				cell.artist.text = song.artistName
-				cell.date.text = song.playedAt.description // TODO: use a date format w/ user's locale settings
+				cell.date.text = self.date.shortLocalizedString(song.playedAt)
 				if let imageURLText = song.smallImageURL, spotifyImageURL = NSURL(string: imageURLText) {
 					imageURL = spotifyImageURL
 				} else if let asin = song.asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(asin, size: .Medium)) {

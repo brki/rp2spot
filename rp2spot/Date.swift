@@ -41,6 +41,11 @@ class Date {
 		return RPDateParser.dateFromString(date)
 	}
 
+	// Returns a compact representation of the date / time.
+	func shortLocalizedString(date: NSDate) -> String {
+		return NSDateFormatter.localizedStringFromDate(date, dateStyle: .ShortStyle, timeStyle: .ShortStyle)
+	}
+
 	func oneDayAgo() -> NSDate {
 		// First try the correct way:
 		if let date = calendar.dateByAddingUnit(NSCalendarUnit.Day, value: -1, toDate: NSDate(), options: NSCalendarOptions(rawValue: 0)) {
