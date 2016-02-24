@@ -12,6 +12,8 @@
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
 		D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */; };
 		D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */; };
+		D3AD910E1C7E0AEA0076FE76 /* ErrorInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */; };
+		D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910F1C7E0CA80076FE76 /* Utilities.swift */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
 		D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */; };
 		D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA801C6248E10055B650 /* Main.storyboard */; };
@@ -58,6 +60,8 @@
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
 		D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
 		D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlainHistoryTableViewCell.swift; sourceTree = "<group>"; };
+		D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorInfo.swift; sourceTree = "<group>"; };
+		D3AD910F1C7E0CA80076FE76 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryViewController.swift; sourceTree = "<group>"; };
@@ -167,6 +171,7 @@
 				D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */,
 				D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */,
 				D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */,
+				D3AD910F1C7E0CA80076FE76 /* Utilities.swift */,
 			);
 			path = rp2spot;
 			sourceTree = "<group>";
@@ -217,6 +222,7 @@
 				D3FC5E731C70AFF100443F68 /* Date.swift */,
 				D379645E1C70C7B9001FC20E /* PlayedSongData.swift */,
 				D37964601C70C862001FC20E /* Alamofire-extensions.swift */,
+				D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -380,6 +386,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D3AD910E1C7E0AEA0076FE76 /* ErrorInfo.swift in Sources */,
 				D3FC5E701C70A51000443F68 /* PlayedSong+CoreDataProperties.swift in Sources */,
 				D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */,
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
@@ -389,6 +396,7 @@
 				D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */,
 				D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */,
 				D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */,
+				D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
