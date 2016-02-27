@@ -24,15 +24,6 @@ class HistoryViewController: UITableViewController {
 
 	let userSettings = UserSetting.sharedInstance
 
-	let albumThumbnailFilter =  AspectScaledToFillSizeWithRoundedCornersFilter(
-		size: CGSize(width: 128, height: 128),
-		radius: 15.0
-	)
-
-	let date = Date.sharedInstance
-
-	let albumThumbnailPlaceholder = UIImage(named: "vinyl")
-
 	lazy var fetchedResultsController: NSFetchedResultsController = {
 		var frc: NSFetchedResultsController!
 		self.context.performBlockAndWait {
@@ -229,35 +220,12 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 extension HistoryViewController {
 	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCellWithIdentifier("PlainSongHistoryCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
+
 		if let song = fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
-
-			var imageURL: NSURL?
-			var spotifyTrackAvailable = false
-			context.performBlockAndWait {
-				cell.songTitle.text = song.title
-				cell.artist.text = song.artistName
-				cell.date.text = self.date.shortLocalizedString(song.playedAt)
-				if let imageURLText = song.smallImageURL, spotifyImageURL = NSURL(string: imageURLText) {
-					imageURL = spotifyImageURL
-				} else if let asin = song.asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(asin, size: .Medium)) {
-					imageURL = radioParadiseImageURL
-				}
-				spotifyTrackAvailable = song.spotifyTrackId != nil
-			}
-
-			if let url = imageURL {
-				cell.albumImageView.af_setImageWithURL(url, placeholderImage: albumThumbnailPlaceholder, filter: albumThumbnailFilter)
-			} else {
-				cell.albumImageView.image = albumThumbnailPlaceholder
-			}
-
-			if spotifyTrackAvailable {
-				cell.backgroundColor = Constant.Color.SageGreen.color()
-			} else {
-				cell.backgroundColor = Constant.Color.LightOrange.color()
-			}
+			cell.configureForSong(song)
 		}
 
+		// If user has scrolled all the way down to the last row, try to fetch some older song history.
 		loadMoreIfAtLastRow(indexPath.row)
 
 		return cell
