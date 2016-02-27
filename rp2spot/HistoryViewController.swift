@@ -12,9 +12,17 @@ import AlamofireImage
 
 typealias RPFetchResultHandler = (success: Bool, fetchedCount: Int, error: NSError?) -> Void
 
+// TODO: add concurrency control: only allow one history fetch at once; ignore new history fetch requests if one is already in progress.
+
 class HistoryViewController: UITableViewController {
 
+	enum CurrentlyFetchingType: Int {
+		case None, Top, Bottom
+	}
+
 	let context = CoreDataStack.sharedInstance.managedObjectContext
+
+	let userSettings = UserSetting.sharedInstance
 
 	let albumThumbnailFilter =  AspectScaledToFillSizeWithRoundedCornersFilter(
 		size: CGSize(width: 128, height: 128),
@@ -35,7 +43,6 @@ class HistoryViewController: UITableViewController {
 		return frc
 	}()
 
-
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
@@ -44,7 +51,7 @@ class HistoryViewController: UITableViewController {
 
 		// If there is no song history yet, load the latest songs.
 		if (fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
-			refreshSongHistory()
+			attemptHistoryFetch(newerHistory: false)
 		}
 	}
 
@@ -54,52 +61,41 @@ class HistoryViewController: UITableViewController {
 	}
 
 	@IBAction func refreshRequested(sender: UIRefreshControl) {
-		refreshSongHistory() { success, fetchedCount, error in
+		attemptHistoryFetch(newerHistory: true) { success in
 			sender.endRefreshing()
-			if let err = error {
-				let title = "Unable to get latest song history"
-				var message: String?
-				if ErrorInfo.isRequestTimedOut(err) {
-					message = "The request timed out - check your network connection"
-				}
-				Utility.presentAlert(title, message: message)
-			}
 		}
-	}
-
-	func refreshSongHistory(completionHandler: RPFetchResultHandler? = nil) {
-		var fromDate: NSDate?
-		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
-			context.performBlockAndWait {
-				// If the last locally available song was broadcast less than a day ago, refresh only since that song.
-				if let song = fetchedObjects[0] as? PlayedSong {
-					let oneDayAgo = self.date.oneDayAgo()
-					if song.playedAt.earlierDate(oneDayAgo) == oneDayAgo {
-						fromDate = song.playedAt
-					}
-				}
-			}
-		}
-		fetchRPSongs(fromDate, completionHandler: completionHandler)
 	}
 
 	/**
-	(Re)fetch the data for the fetchedResultsController.
+	Get the newest (or oldest) song.
 	*/
-	func refreshFetchRequest() {
-		context.performBlockAndWait {
-			do {
-				try self.fetchedResultsController.performFetch()
-				self.fetchedResultsController.delegate = self
-			} catch {
-				print("HistoryViewController: error on fetchedResultsController.performFetch: \(error)")
+	func extremitySong(newest: Bool) -> PlayedSong? {
+		var song: PlayedSong?
+		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
+			context.performBlockAndWait {
+				if newest {
+					song = fetchedObjects[0] as? PlayedSong
+				} else {
+					song = fetchedObjects[fetchedObjects.count - 1] as? PlayedSong
+				}
 			}
 		}
+		return song
 	}
 
-	func fetchRPSongs(fromDate: NSDate? = nil, toDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
-		RadioParadise.fetchPeriod("CH", fromDate: fromDate, toDate: toDate) { playedSongs, error, response in
+	/**
+	Get newer (or older) song history.
+	*/
+	func fetchMoreHistory(newer newer: Bool, completionHandler: RPFetchResultHandler? = nil) {
 
+		/**
+		This method handles the data returned from the fetchNewer() or fetchOlder() calls.
+		
+		If a song list is returned, it triggers the saving of those songs.
+		
+		It calls the RPFetchResultsHandler completionHandler, if present.
+		*/
+		func songProcessingHandler(playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) {
 			guard error == nil else {
 				completionHandler?(success: false, fetchedCount: 0,	error: error)
 				return
@@ -124,9 +120,43 @@ class HistoryViewController: UITableViewController {
 
 			PlayedSong.upsertSongs(songHistory, context: self.context)
 			completionHandler?(success: true, fetchedCount: songHistory.count, error: nil)
+		}
 
-			// TODO: remove songs from the store if the max-song-count constant exceeded.
-			// TODO: make the max-song-count constant a configurable variable.
+		var limitDate: NSDate
+		let limitSong = extremitySong(newer)
+		if let song = limitSong {
+			limitDate = song.playedAt
+		} else {
+			limitDate = NSDate()
+		}
+
+		// If there is no limitSong there are no songs, so use the fetchOlder() method, which will result in some
+		// songs being loaded.  An alternative would have been to calculate some time back from now and call
+		// fetchNewer(), but the result is the same.
+		if newer && limitSong != nil {
+			RadioParadise.fetchNewer(userSettings.spotifyRegion, newerThan: limitDate, handler: songProcessingHandler)
+		} else {
+			RadioParadise.fetchOlder(userSettings.spotifyRegion, olderThan: limitDate, handler: songProcessingHandler)
+		}
+	}
+
+	func attemptHistoryFetch(newerHistory newerHistory: Bool, afterFetch: ((success: Bool) -> Void)? = nil) {
+		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
+			afterFetch?(success: success)
+			if let err = error {
+				let title = "Unable to get \(newerHistory ? "newer" : "older") song history"
+				var message: String?
+				if ErrorInfo.isRequestTimedOut(err) {
+					message = "The request timed out - check your network connection"
+				}
+				Utility.presentAlert(title, message: message)
+			}
+		}
+	}
+
+	func loadMoreIfAtLastRow(row: Int) {
+		if isLastRow(row) {
+			attemptHistoryFetch(newerHistory: false)
 		}
 	}
 }
@@ -170,6 +200,27 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 			CoreDataStack.sharedInstance.saveContext()
 		}
 	}
+
+	/**
+	(Re)fetch the data for the fetchedResultsController.
+	*/
+	func refreshFetchRequest() {
+		context.performBlockAndWait {
+			do {
+				try self.fetchedResultsController.performFetch()
+				self.fetchedResultsController.delegate = self
+			} catch {
+				print("HistoryViewController: error on fetchedResultsController.performFetch: \(error)")
+			}
+		}
+	}
+
+	func isLastRow(row: Int) -> Bool {
+		if let fetchedObjects = fetchedResultsController.fetchedObjects {
+			return row == fetchedObjects.count - 1
+		}
+		return false
+	}
 }
 
 
@@ -206,6 +257,9 @@ extension HistoryViewController {
 				cell.backgroundColor = Constant.Color.LightOrange.color()
 			}
 		}
+
+		loadMoreIfAtLastRow(indexPath.row)
+
 		return cell
 	}
 

@@ -12,6 +12,7 @@
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
 		D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */; };
 		D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */; };
+		D39992641C81E500008AECD4 /* UserSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39992631C81E4FF008AECD4 /* UserSetting.swift */; };
 		D3AD910E1C7E0AEA0076FE76 /* ErrorInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */; };
 		D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910F1C7E0CA80076FE76 /* Utilities.swift */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
@@ -60,6 +61,7 @@
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
 		D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
 		D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlainHistoryTableViewCell.swift; sourceTree = "<group>"; };
+		D39992631C81E4FF008AECD4 /* UserSetting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSetting.swift; sourceTree = "<group>"; };
 		D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorInfo.swift; sourceTree = "<group>"; };
 		D3AD910F1C7E0CA80076FE76 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -159,7 +161,6 @@
 				D3FC5E721C70A52200443F68 /* CoreData Models */,
 				D3FC5E6B1C70A1B300443F68 /* Models */,
 				D3FC5E6A1C70A14200443F68 /* View Controllers */,
-				D3FC5E661C6F5C0C00443F68 /* Constant.swift */,
 				D3FC5E681C6FC2BF00443F68 /* Secrets.swift */,
 				D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */,
 				D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */,
@@ -218,11 +219,13 @@
 		D3FC5E6B1C70A1B300443F68 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				D3FC5E661C6F5C0C00443F68 /* Constant.swift */,
 				D3FC5E6C1C70A1C500443F68 /* RadioParadise.swift */,
 				D3FC5E731C70AFF100443F68 /* Date.swift */,
 				D379645E1C70C7B9001FC20E /* PlayedSongData.swift */,
 				D37964601C70C862001FC20E /* Alamofire-extensions.swift */,
 				D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */,
+				D39992631C81E4FF008AECD4 /* UserSetting.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -395,6 +398,7 @@
 				D3FC5E651C6F5AA100443F68 /* SpotifyAuth.swift in Sources */,
 				D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */,
 				D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */,
+				D39992641C81E500008AECD4 /* UserSetting.swift in Sources */,
 				D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */,
 				D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,

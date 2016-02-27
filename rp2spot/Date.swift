@@ -56,4 +56,8 @@ class Date {
 		}
 	}
 
+	func timeWithHourDifference(date: NSDate, hours: Double) -> NSDate {
+		return NSDate(timeInterval: hours * 60 * 60, sinceDate: date)
+	}
+
 }

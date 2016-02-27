@@ -9,6 +9,9 @@
 import Foundation
 import Alamofire
 
+
+typealias RPFetchHandler = (playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) -> Void
+
 struct RadioParadise {
 
 	enum ImageSize: String {
@@ -16,21 +19,26 @@ struct RadioParadise {
 		case Medium = "m"
 		case Large = "l"
 	}
-	
-	static func fetchPeriod(region: String, fromDate: NSDate? = nil, toDate: NSDate? = nil,
-		handler: ((playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) -> Void)? = nil) -> Request {
 
-		var params = [String: String]()
-		if let from = fromDate {
-			// Get the 24-hour period beginning at ``from``.
-			params["start_time"] = Date.sharedInstance.toUTCString(from)
-		} else if let to = toDate {
-			// Get the 24-hour period ending at ``to``.
-			params["end_time"] = Date.sharedInstance.toUTCString(to)
-		} else {
-			// Get the 24-hour period ending now.
-			params["end_time"] = Date.sharedInstance.toUTCString(NSDate())
-		}
+	static let userSettings = UserSetting.sharedInstance
+
+	static func fetchNewer(region: String, newerThan: NSDate, handler: RPFetchHandler? = nil) -> Request {
+		let from = newerThan ?? NSDate()
+		let to = Date.sharedInstance.timeWithHourDifference(from, hours: userSettings.historyFetchPeriodInHours)
+		return fetchPeriod(region, fromDate: from, toDate: to, handler: handler)
+	}
+
+	static func fetchOlder(region: String, olderThan: NSDate, handler: RPFetchHandler? = nil) -> Request {
+		let from = Date.sharedInstance.timeWithHourDifference(olderThan, hours: -userSettings.historyFetchPeriodInHours)
+		return fetchPeriod(region, fromDate: from, toDate: olderThan, handler: handler)
+	}
+
+	static func fetchPeriod(region: String, fromDate: NSDate, toDate: NSDate, handler: RPFetchHandler? = nil) -> Request {
+
+		let params = [
+			"start_time": Date.sharedInstance.toUTCString(fromDate),
+			"end_time": Date.sharedInstance.toUTCString(toDate),
+		]
 
 		let url = Constant.RADIO_PARADISE_HISTORY_URL_BASE + region + "/"
 
