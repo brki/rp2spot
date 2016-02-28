@@ -16,13 +16,17 @@ typealias RPFetchResultHandler = (success: Bool, fetchedCount: Int, error: NSErr
 
 class HistoryViewController: UITableViewController {
 
-	enum CurrentlyFetchingType: Int {
-		case None, Top, Bottom
+	enum CurrentRefreshType {
+		case Newer, Older
 	}
 
 	let context = CoreDataStack.sharedInstance.managedObjectContext
 
 	let userSettings = UserSetting.sharedInstance
+
+	var currentRefresh = CurrentRefreshType.Newer
+
+	var isRefreshing = false
 
 	lazy var fetchedResultsController: NSFetchedResultsController = {
 		var frc: NSFetchedResultsController!
@@ -131,8 +135,24 @@ class HistoryViewController: UITableViewController {
 		}
 	}
 
+	/**
+	Get more history, if no other history request is already running.
+	*/
 	func attemptHistoryFetch(newerHistory newerHistory: Bool, afterFetch: ((success: Bool) -> Void)? = nil) {
+		defer {
+			objc_sync_exit(self)
+		}
+		objc_sync_enter(self)
+		guard !isRefreshing else {
+			afterFetch?(success: false)
+			return
+		}
+		isRefreshing = true
+
 		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
+			if fetchedCount > 0 {
+				self.removeExcessLocalHistory(fromBottom: newerHistory)
+			}
 			afterFetch?(success: success)
 			if let err = error {
 				let title = "Unable to get \(newerHistory ? "newer" : "older") song history"
@@ -142,11 +162,54 @@ class HistoryViewController: UITableViewController {
 				}
 				Utility.presentAlert(title, message: message)
 			}
+			objc_sync_enter(self)
+			self.isRefreshing = false
+			objc_sync_exit(self)
+		}
+	}
+
+	/**
+	If, after a fetch, there are too many songs in local storage, remove the excess from
+	the other side (e.g. if refresh was done at the top, remove songs from the bottom of 
+	the tableview).
+	*/
+	func removeExcessLocalHistory(fromBottom fromBottom: Bool) {
+
+		// TODO possibly: optimization: use a bulk delete action for this (bulk delete actions do not fire notifications
+		//                though, so it might require refreshing the tableview / fetchedResultsController.
+
+		context.performBlock {
+			if let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] {
+				let maxHoursDifference = Double(self.userSettings.maxLocalSongHistoryInHours)
+				var index: Int
+				let step: Int
+				let limitDate: NSDate
+				let unacceptableComparison: NSComparisonResult
+
+				if fromBottom {
+					index = songs.count - 1
+					step = -1
+					limitDate = Date.sharedInstance.timeWithHourDifference(songs[0].playedAt, hours: -maxHoursDifference)
+					unacceptableComparison = NSComparisonResult.OrderedAscending
+				} else {
+					index = 0
+					step = 1
+					limitDate = Date.sharedInstance.timeWithHourDifference(songs[songs.count - 1].playedAt, hours: maxHoursDifference)
+					unacceptableComparison = NSComparisonResult.OrderedDescending
+				}
+
+				var song = songs[index]
+				while song.playedAt.compare(limitDate) == unacceptableComparison {
+					self.context.deleteObject(song)
+					index += step
+					song = songs[index]
+				}
+			}
 		}
 	}
 
 	func loadMoreIfAtLastRow(row: Int) {
-		if isLastRow(row) {
+		if !isRefreshing && isLastRow(row) {
 			attemptHistoryFetch(newerHistory: false)
 		}
 	}
@@ -155,6 +218,11 @@ class HistoryViewController: UITableViewController {
 extension HistoryViewController: NSFetchedResultsControllerDelegate {
 
 	func controllerWillChangeContent(controller: NSFetchedResultsController) {
+		if currentRefresh == .Older {
+			// Disable animations to avoid a disconcerting animation effect caused by addition + deletion of rows when at the bottome
+			// of the tableview.
+			UIView.setAnimationsEnabled(false)
+		}
 		tableView.beginUpdates()
 	}
 
@@ -173,6 +241,11 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 
 		case .Delete:
 			tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
+			// Adjust position so that deletion of rows at top of tableview after fetching older history
+			// for the bottom of tableview does not result in scrolling down, which can trigger repeated fetching
+			// of older history when the bottommost row triggers another history fetch.
+			// tldr; scroll up when deleting rows:
+			tableView.contentOffset = CGPointMake(tableView.contentOffset.x, tableView.contentOffset.y - tableView.rowHeight)
 
 		case .Insert:
 			tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
@@ -189,6 +262,10 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 		tableView.endUpdates()
 		self.context.performBlock {
 			CoreDataStack.sharedInstance.saveContext()
+		}
+		if !(UIView.areAnimationsEnabled()) {
+			// Re-enable animation if it was disabled for a fetch of older items.
+			UIView.setAnimationsEnabled(true)
 		}
 	}
 

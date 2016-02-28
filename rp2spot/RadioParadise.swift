@@ -24,12 +24,12 @@ struct RadioParadise {
 
 	static func fetchNewer(region: String, newerThan: NSDate, handler: RPFetchHandler? = nil) -> Request {
 		let from = newerThan ?? NSDate()
-		let to = Date.sharedInstance.timeWithHourDifference(from, hours: userSettings.historyFetchPeriodInHours)
+		let to = Date.sharedInstance.timeWithHourDifference(from, hours: Double(userSettings.historyFetchPeriodInHours))
 		return fetchPeriod(region, fromDate: from, toDate: to, handler: handler)
 	}
 
 	static func fetchOlder(region: String, olderThan: NSDate, handler: RPFetchHandler? = nil) -> Request {
-		let from = Date.sharedInstance.timeWithHourDifference(olderThan, hours: -userSettings.historyFetchPeriodInHours)
+		let from = Date.sharedInstance.timeWithHourDifference(olderThan, hours: -Double(userSettings.historyFetchPeriodInHours))
 		return fetchPeriod(region, fromDate: from, toDate: olderThan, handler: handler)
 	}
 

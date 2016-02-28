@@ -12,6 +12,13 @@ class UserSetting {
 	static let sharedInstance = UserSetting()
 
 	// TODO: make these configurable variables
-	var historyFetchPeriodInHours = 0.5
+
+	// How big should the chunks of history that are grabbed in a request be:
+	var historyFetchPeriodInHours = 1
+
+	// How many hours, at most, should be stored locally:
+	var maxLocalSongHistoryInHours = 4
+
+	// User's spotifyRegion (autodetected, but configurable)
 	var spotifyRegion = "CH"
 }
