@@ -149,6 +149,7 @@ class HistoryViewController: UITableViewController {
 		}
 		isRefreshing = true
 
+		currentRefresh = newerHistory ? .Newer : .Older
 		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
 			if fetchedCount > 0 {
 				self.removeExcessLocalHistory(fromBottom: newerHistory)
@@ -206,7 +207,7 @@ class HistoryViewController: UITableViewController {
 	}
 
 	func loadMoreIfAtLastRow(row: Int) {
-		if !isRefreshing && isLastRow(row) {
+		if !isRefreshing && isNearlyLastRow(row) {
 			attemptHistoryFetch(newerHistory: false)
 		}
 	}
@@ -215,7 +216,7 @@ class HistoryViewController: UITableViewController {
 extension HistoryViewController: NSFetchedResultsControllerDelegate {
 
 	func controllerWillChangeContent(controller: NSFetchedResultsController) {
-		if currentRefresh == .Older {
+		if currentRefresh != .Newer {
 			// Disable animations to avoid a disconcerting animation effect caused by addition + deletion of rows when at the bottome
 			// of the tableview.
 			UIView.setAnimationsEnabled(false)
@@ -280,9 +281,9 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 		}
 	}
 
-	func isLastRow(row: Int) -> Bool {
+	func isNearlyLastRow(row: Int) -> Bool {
 		if let fetchedObjects = fetchedResultsController.fetchedObjects {
-			return row == fetchedObjects.count - 1
+			return row == fetchedObjects.count - 10
 		}
 		return false
 	}

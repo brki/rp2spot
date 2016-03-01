@@ -14,11 +14,11 @@ class UserSetting {
 	// TODO: make these configurable variables
 
 	// How many songs should be fetched in a history request:
-	var historyFetchSongCount = 100
+	var historyFetchSongCount = 20
 
 	// TODO: when configurable, ensure that historyFetchSongCount <= maxLocalSongHistoryCount
 	// How many song items, at most, should be stored locally:
-	var maxLocalSongHistoryCount = 150
+	var maxLocalSongHistoryCount = 90
 
 	// User's spotifyRegion (autodetected, but configurable)
 	var spotifyRegion = "CH"
