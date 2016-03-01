@@ -20,24 +20,23 @@ struct RadioParadise {
 		case Large = "l"
 	}
 
+	static let DEFAULT_FETCH_COUNT = 100
+
 	static let userSettings = UserSetting.sharedInstance
 
-	static func fetchNewer(region: String, newerThan: NSDate, handler: RPFetchHandler? = nil) -> Request {
-		let from = newerThan ?? NSDate()
-		let to = Date.sharedInstance.timeWithHourDifference(from, hours: Double(userSettings.historyFetchPeriodInHours))
-		return fetchPeriod(region, fromDate: from, toDate: to, handler: handler)
+	static func fetchNewer(region: String, newerThan: NSDate, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
+		return fetchPeriod(region, date: newerThan, vectorCount: count, handler: handler)
 	}
 
-	static func fetchOlder(region: String, olderThan: NSDate, handler: RPFetchHandler? = nil) -> Request {
-		let from = Date.sharedInstance.timeWithHourDifference(olderThan, hours: -Double(userSettings.historyFetchPeriodInHours))
-		return fetchPeriod(region, fromDate: from, toDate: olderThan, handler: handler)
+	static func fetchOlder(region: String, olderThan: NSDate, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
+		return fetchPeriod(region, date: olderThan, vectorCount: -count, handler: handler)
 	}
 
-	static func fetchPeriod(region: String, fromDate: NSDate, toDate: NSDate, handler: RPFetchHandler? = nil) -> Request {
+	static func fetchPeriod(region: String, date: NSDate, vectorCount: Int, handler: RPFetchHandler? = nil) -> Request {
 
-		let params = [
-			"start_time": Date.sharedInstance.toUTCString(fromDate),
-			"end_time": Date.sharedInstance.toUTCString(toDate),
+		let params: [String: AnyObject] = [
+			"base_time": Date.sharedInstance.toUTCString(date),
+			"count_vector": vectorCount,
 		]
 
 		let url = Constant.RADIO_PARADISE_HISTORY_URL_BASE + region + "/"
@@ -54,6 +53,6 @@ struct RadioParadise {
 	}
 
 	static func imageURLText(asin: String, size: ImageSize) -> String {
-		return "https://www.radioparadise.com/graphics/covers/\(size.rawValue)/\(asin).jpg"
+		return Constant.RADIO_PARADISE_IMAGE_URL_BASE + "\(size.rawValue)/\(asin).jpg"
 	}
 }

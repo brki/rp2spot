@@ -16,6 +16,7 @@ struct Constant {
 	static let SPOTIFY_SESSION_USER_DEFAULTS_KEY = "SpotifySession"
 
 	static let RADIO_PARADISE_HISTORY_URL_BASE = Secrets.RADIO_PARADISE_HISTORY_URL_BASE
+	static let RADIO_PARADISE_IMAGE_URL_BASE = "https://www.radioparadise.com/graphics/covers/"
 
 	enum Color: UInt {
 		case SageGreen = 0xEEFFEC

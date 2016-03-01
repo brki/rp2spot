@@ -129,9 +129,9 @@ class HistoryViewController: UITableViewController {
 		// songs being loaded.  An alternative would have been to calculate some time back from now and call
 		// fetchNewer(), but the result is the same.
 		if newer && limitSong != nil {
-			RadioParadise.fetchNewer(userSettings.spotifyRegion, newerThan: limitDate, handler: songProcessingHandler)
+			RadioParadise.fetchNewer(userSettings.spotifyRegion, newerThan: limitDate, count: userSettings.historyFetchSongCount, handler: songProcessingHandler)
 		} else {
-			RadioParadise.fetchOlder(userSettings.spotifyRegion, olderThan: limitDate, handler: songProcessingHandler)
+			RadioParadise.fetchOlder(userSettings.spotifyRegion, olderThan: limitDate, count: userSettings.historyFetchSongCount, handler: songProcessingHandler)
 		}
 	}
 
@@ -178,32 +178,29 @@ class HistoryViewController: UITableViewController {
 		// TODO possibly: optimization: use a bulk delete action for this (bulk delete actions do not fire notifications
 		//                though, so it might require refreshing the tableview / fetchedResultsController.
 
+		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
+
 		context.performBlock {
-			if let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] {
-				let maxHoursDifference = Double(self.userSettings.maxLocalSongHistoryInHours)
-				var index: Int
-				let step: Int
-				let limitDate: NSDate
-				let unacceptableComparison: NSComparisonResult
+			guard let songCount = self.fetchedResultsController.fetchedObjects?.count where songCount > maxHistoryCount else {
+				// No need to do anything.
+				return
+			}
+			guard let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] else {
+				print("removeExcessLocalHistory: unable to get PlayedSong objects")
+				return
+			}
 
-				if fromBottom {
-					index = songs.count - 1
-					step = -1
-					limitDate = Date.sharedInstance.timeWithHourDifference(songs[0].playedAt, hours: -maxHoursDifference)
-					unacceptableComparison = NSComparisonResult.OrderedAscending
-				} else {
-					index = 0
-					step = 1
-					limitDate = Date.sharedInstance.timeWithHourDifference(songs[songs.count - 1].playedAt, hours: maxHoursDifference)
-					unacceptableComparison = NSComparisonResult.OrderedDescending
-				}
+			let toBeDeleted: Range<Int>
 
-				var song = songs[index]
-				while song.playedAt.compare(limitDate) == unacceptableComparison {
-					self.context.deleteObject(song)
-					index += step
-					song = songs[index]
-				}
+			if fromBottom {
+				toBeDeleted = (maxHistoryCount - 1)...(songCount - 1)
+			} else {
+				toBeDeleted = 0...(songCount - maxHistoryCount)
+			}
+
+			for index in toBeDeleted {
+				let song = songs[index]
+				self.context.deleteObject(song)
 			}
 		}
 	}
