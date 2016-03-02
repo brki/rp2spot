@@ -62,20 +62,37 @@ class HistoryViewController: UITableViewController {
 	}
 
 	/**
-	Get the newest (or oldest) song.
+	Get more history, if no other history request is already running.
 	*/
-	func extremitySong(newest: Bool) -> PlayedSong? {
-		var song: PlayedSong?
-		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
-			context.performBlockAndWait {
-				if newest {
-					song = fetchedObjects[0] as? PlayedSong
-				} else {
-					song = fetchedObjects[fetchedObjects.count - 1] as? PlayedSong
-				}
-			}
+	func attemptHistoryFetch(newerHistory newerHistory: Bool, afterFetch: ((success: Bool) -> Void)? = nil) {
+		defer {
+			objc_sync_exit(self)
 		}
-		return song
+		objc_sync_enter(self)
+		guard !isRefreshing else {
+			afterFetch?(success: false)
+			return
+		}
+		isRefreshing = true
+
+		currentRefresh = newerHistory ? .Newer : .Older
+		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
+			if fetchedCount > 0 {
+				self.removeExcessLocalHistory(fromBottom: newerHistory)
+			}
+			afterFetch?(success: success)
+			if let err = error {
+				let title = "Unable to get \(newerHistory ? "newer" : "older") song history"
+				var message: String?
+				if ErrorInfo.isRequestTimedOut(err) {
+					message = "The request timed out - check your network connection"
+				}
+				Utility.presentAlert(title, message: message)
+			}
+			objc_sync_enter(self)
+			self.isRefreshing = false
+			objc_sync_exit(self)
+		}
 	}
 
 	/**
@@ -132,77 +149,6 @@ class HistoryViewController: UITableViewController {
 			RadioParadise.fetchNewer(userSettings.spotifyRegion, newerThan: limitDate, count: userSettings.historyFetchSongCount, handler: songProcessingHandler)
 		} else {
 			RadioParadise.fetchOlder(userSettings.spotifyRegion, olderThan: limitDate, count: userSettings.historyFetchSongCount, handler: songProcessingHandler)
-		}
-	}
-
-	/**
-	Get more history, if no other history request is already running.
-	*/
-	func attemptHistoryFetch(newerHistory newerHistory: Bool, afterFetch: ((success: Bool) -> Void)? = nil) {
-		defer {
-			objc_sync_exit(self)
-		}
-		objc_sync_enter(self)
-		guard !isRefreshing else {
-			afterFetch?(success: false)
-			return
-		}
-		isRefreshing = true
-
-		currentRefresh = newerHistory ? .Newer : .Older
-		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
-			if fetchedCount > 0 {
-				self.removeExcessLocalHistory(fromBottom: newerHistory)
-			}
-			afterFetch?(success: success)
-			if let err = error {
-				let title = "Unable to get \(newerHistory ? "newer" : "older") song history"
-				var message: String?
-				if ErrorInfo.isRequestTimedOut(err) {
-					message = "The request timed out - check your network connection"
-				}
-				Utility.presentAlert(title, message: message)
-			}
-			objc_sync_enter(self)
-			self.isRefreshing = false
-			objc_sync_exit(self)
-		}
-	}
-
-	/**
-	If, after a fetch, there are too many songs in local storage, remove the excess from
-	the other side (e.g. if refresh was done at the top, remove songs from the bottom of 
-	the tableview).
-	*/
-	func removeExcessLocalHistory(fromBottom fromBottom: Bool) {
-
-		// TODO possibly: optimization: use a bulk delete action for this (bulk delete actions do not fire notifications
-		//                though, so it might require refreshing the tableview / fetchedResultsController.
-
-		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
-
-		context.performBlock {
-			guard let songCount = self.fetchedResultsController.fetchedObjects?.count where songCount > maxHistoryCount else {
-				// No need to do anything.
-				return
-			}
-			guard let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] else {
-				print("removeExcessLocalHistory: unable to get PlayedSong objects")
-				return
-			}
-
-			let toBeDeleted: Range<Int>
-
-			if fromBottom {
-				toBeDeleted = (maxHistoryCount - 1)...(songCount - 1)
-			} else {
-				toBeDeleted = 0...(songCount - maxHistoryCount)
-			}
-
-			for index in toBeDeleted {
-				let song = songs[index]
-				self.context.deleteObject(song)
-			}
 		}
 	}
 
@@ -286,6 +232,60 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 			return row == fetchedObjects.count - 10
 		}
 		return false
+	}
+
+	/**
+	Get the newest (or oldest) song.
+	*/
+	func extremitySong(newest: Bool) -> PlayedSong? {
+		var song: PlayedSong?
+		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
+			context.performBlockAndWait {
+				if newest {
+					song = fetchedObjects[0] as? PlayedSong
+				} else {
+					song = fetchedObjects[fetchedObjects.count - 1] as? PlayedSong
+				}
+			}
+		}
+		return song
+	}
+
+	/**
+	If, after a fetch, there are too many songs in local storage, remove the excess from
+	the other side (e.g. if refresh was done at the top, remove songs from the bottom of
+	the tableview).
+	*/
+	func removeExcessLocalHistory(fromBottom fromBottom: Bool) {
+
+		// TODO possibly: optimization: use a bulk delete action for this (bulk delete actions do not fire notifications
+		//                though, so it might require refreshing the tableview / fetchedResultsController.
+
+		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
+
+		context.performBlock {
+			guard let songCount = self.fetchedResultsController.fetchedObjects?.count where songCount > maxHistoryCount else {
+				// No need to do anything.
+				return
+			}
+			guard let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] else {
+				print("removeExcessLocalHistory: unable to get PlayedSong objects")
+				return
+			}
+
+			let toBeDeleted: Range<Int>
+
+			if fromBottom {
+				toBeDeleted = (maxHistoryCount - 1)...(songCount - 1)
+			} else {
+				toBeDeleted = 0...(songCount - maxHistoryCount)
+			}
+
+			for index in toBeDeleted {
+				let song = songs[index]
+				self.context.deleteObject(song)
+			}
+		}
 	}
 }
 
