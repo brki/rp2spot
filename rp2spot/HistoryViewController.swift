@@ -61,6 +61,26 @@ class HistoryViewController: UITableViewController {
 		}
 	}
 
+	@IBAction func selectDate(sender: UIBarButtonItem) {
+		guard let datePickerVC = storyboard?.instantiateViewControllerWithIdentifier("HistoryDateSelectorViewController") as? HistoryDateSelectorViewController else {
+			return
+		}
+
+		datePickerVC.modalPresentationStyle = .OverCurrentContext
+		let displayDate = extremitySong(true)?.playedAt ?? NSDate()
+		datePickerVC.startingDate = displayDate
+		datePickerVC.delegate = self
+
+		presentViewController(datePickerVC, animated: true, completion: nil)
+
+		guard let popover = datePickerVC.popoverPresentationController else {
+			return
+		}
+		popover.permittedArrowDirections = .Up
+		popover.barButtonItem = sender
+		popover.delegate = self
+	}
+
 	/**
 	Get more history, if no other history request is already running.
 	*/
@@ -97,14 +117,79 @@ class HistoryViewController: UITableViewController {
 
 	/**
 	Get newer (or older) song history.
-	*/
-	func fetchMoreHistory(newer newer: Bool, completionHandler: RPFetchResultHandler? = nil) {
 
+	- Parameters:
+	- newer: should songs
+	*/
+	func fetchMoreHistory(newer newer: Bool, forDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
+
+		var baseDate: NSDate
+		let limitSong = extremitySong(newer)
+		if let song = limitSong {
+			baseDate = song.playedAt
+		} else {
+			baseDate = NSDate()
+		}
+
+		// Avoid trying to fetch history earlier than the known limit:
+		guard baseDate.earlierDate(Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE) != baseDate else {
+			completionHandler?(success: true, fetchedCount: 0, error: nil)
+			return
+		}
+
+		var vectorCount = userSettings.historyFetchSongCount
+		if !newer || limitSong == nil {
+			vectorCount = -vectorCount
+		}
+		updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
+	}
+	
+	/**
+	Replace local history with the history from the given date, if the history fetch is successful.
+	*/
+	func replaceLocalHistory(newDate: NSDate) {
+		defer {
+			objc_sync_exit(self)
+		}
+		objc_sync_enter(self)
+		guard !isRefreshing else {
+			print("replaceHistory: abandoning refresh because a refresh is already running")
+			return
+		}
+
+		isRefreshing = true
+		currentRefresh = .Newer
+
+		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
+			if let err = error {
+				let title = "Unable to get song history for selected data"
+				var message: String?
+				if ErrorInfo.isRequestTimedOut(err) {
+					message = "The request timed out - check your network connection"
+				}
+				Utility.presentAlert(title, message: message)
+			} else {
+				self.refreshFetchRequest()
+				async_main {
+					self.tableView.reloadData()
+					self.tableView.contentOffset = CGPointMake(0, 0 - self.tableView.contentInset.top)
+				}
+			}
+			objc_sync_enter(self)
+			self.isRefreshing = false
+			objc_sync_exit(self)
+		}
+	}
+
+	/**
+	Fetches song history and inserts the fetched data into the local store.
+	*/
+	func updateWithHistoryFromDate(date: NSDate, vectorCount: Int, purgeBeforeUpdating: Bool = false, completionHandler: RPFetchResultHandler? = nil ) {
 		/**
 		This method handles the data returned from the fetchNewer() or fetchOlder() calls.
-		
+
 		If a song list is returned, it triggers the saving of those songs.
-		
+
 		It calls the RPFetchResultsHandler completionHandler, if present.
 		*/
 		func songProcessingHandler(playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) {
@@ -130,32 +215,33 @@ class HistoryViewController: UITableViewController {
 				return
 			}
 
-			PlayedSong.upsertSongs(songHistory, context: self.context)
+			if purgeBeforeUpdating {
+				removeAllHistory()
+			}
+
+			PlayedSong.upsertSongs(songHistory, context: self.context, onlyInserts: purgeBeforeUpdating)
 			completionHandler?(success: true, fetchedCount: songHistory.count, error: nil)
 		}
 
-		var limitDate: NSDate
-		let limitSong = extremitySong(newer)
-		if let song = limitSong {
-			limitDate = song.playedAt
-		} else {
-			limitDate = NSDate()
-		}
-
-		// If there is no limitSong there are no songs, so use the fetchOlder() method, which will result in some
-		// songs being loaded.  An alternative would have been to calculate some time back from now and call
-		// fetchNewer(), but the result is the same.
-		if newer && limitSong != nil {
-			RadioParadise.fetchNewer(userSettings.spotifyRegion, newerThan: limitDate, count: userSettings.historyFetchSongCount, handler: songProcessingHandler)
-		} else {
-			RadioParadise.fetchOlder(userSettings.spotifyRegion, olderThan: limitDate, count: userSettings.historyFetchSongCount, handler: songProcessingHandler)
-		}
+		RadioParadise.fetchHistory(userSettings.spotifyRegion, date: date, vectorCount: vectorCount, handler: songProcessingHandler)
 	}
 
-	func loadMoreIfAtLastRow(row: Int) {
+	func loadMoreIfNearLastRow(row: Int) {
 		if !isRefreshing && isNearlyLastRow(row) {
 			attemptHistoryFetch(newerHistory: false)
 		}
+	}
+}
+
+extension HistoryViewController: DateSelectionAcceptingProtocol {
+	func dateSelected(date: NSDate) {
+		replaceLocalHistory(date)
+	}
+}
+
+extension HistoryViewController: UIPopoverPresentationControllerDelegate {
+	func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {
+		return .None
 	}
 }
 
@@ -287,6 +373,21 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 			}
 		}
 	}
+
+	func removeAllHistory() {
+		let fetchRequest = NSFetchRequest(entityName: "PlayedSong")
+		let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+
+		context.performBlockAndWait {
+			do {
+				try self.context.executeRequest(deleteRequest)
+			} catch {
+				print("Unable to bulk delete all PlayedSong history: \(error)")
+				return
+			}
+		}
+		CoreDataStack.sharedInstance.saveContext()
+	}
 }
 
 
@@ -300,8 +401,8 @@ extension HistoryViewController {
 			cell.configureForSong(song)
 		}
 
-		// If user has scrolled all the way down to the last row, try to fetch some older song history.
-		loadMoreIfAtLastRow(indexPath.row)
+		// If user has scrolled almost all the way down to the last row, try to fetch some older song history.
+		loadMoreIfNearLastRow(indexPath.row)
 
 		return cell
 	}

@@ -3,6 +3,7 @@
     <dependencies>
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="9530"/>
+        <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
     </dependencies>
     <scenes>
@@ -96,7 +97,13 @@
                             <outlet property="delegate" destination="Yni-F7-bJN" id="dNY-pj-w7M"/>
                         </connections>
                     </tableView>
-                    <navigationItem key="navigationItem" id="IFN-uf-yof"/>
+                    <navigationItem key="navigationItem" id="IFN-uf-yof">
+                        <barButtonItem key="rightBarButtonItem" image="clock-bar-icon" id="Bcr-Hk-xG5" userLabel="DateTimePicker">
+                            <connections>
+                                <action selector="selectDate:" destination="Yni-F7-bJN" id="cHd-q5-nM6"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" prompted="NO"/>
                     <refreshControl key="refreshControl" opaque="NO" multipleTouchEnabled="YES" contentMode="center" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" id="8U6-r7-k03">
                         <autoresizingMask key="autoresizingMask"/>
@@ -117,5 +124,86 @@
             </objects>
             <point key="canvasLocation" x="438" y="276"/>
         </scene>
+        <!--History Date Selector View Controller-->
+        <scene sceneID="Guu-16-TRO">
+            <objects>
+                <viewController storyboardIdentifier="HistoryDateSelectorViewController" modalPresentationStyle="overCurrentContext" id="2kz-67-UVE" customClass="HistoryDateSelectorViewController" customModule="rp2spot" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="NqY-W0-zPP"/>
+                        <viewControllerLayoutGuide type="bottom" id="81x-hv-VDH"/>
+                    </layoutGuides>
+                    <view key="view" opaque="NO" contentMode="scaleToFill" id="I0G-1e-0oF">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8eV-iR-cgP" userLabel="Background for stack view">
+                                <rect key="frame" x="260" y="50" width="320" height="276"/>
+                                <color key="backgroundColor" red="0.93333333330000001" green="1" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
+                            </view>
+                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="NA2-bk-fUo" userLabel="Vertical Stack View">
+                                <rect key="frame" x="260" y="50" width="320" height="276"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="2fC-Ov-q15" userLabel="Horizontal Top Stack View">
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="30"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lny-dq-rc6" userLabel="Now">
+                                                <rect key="frame" x="0.0" y="0.0" width="155" height="30"/>
+                                                <state key="normal" title="Now"/>
+                                                <connections>
+                                                    <action selector="setDateToToday:" destination="2kz-67-UVE" eventType="touchUpInside" id="gzU-7V-rvC"/>
+                                                </connections>
+                                            </button>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i80-db-MZQ" userLabel="Cancel">
+                                                <rect key="frame" x="165" y="0.0" width="155" height="30"/>
+                                                <state key="normal" title="Cancel"/>
+                                                <connections>
+                                                    <action selector="cancel:" destination="2kz-67-UVE" eventType="touchUpInside" id="0kK-39-ujW"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
+                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="10" translatesAutoresizingMaskIntoConstraints="NO" id="9FE-78-ZNf">
+                                        <rect key="frame" x="0.0" y="30" width="320" height="216"/>
+                                        <date key="date" timeIntervalSinceReferenceDate="478601173.116368">
+                                            <!--2016-03-02 08:46:13 +0000-->
+                                        </date>
+                                    </datePicker>
+                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vxf-uP-rGA" userLabel="Horizontal Bottom Stack View">
+                                        <rect key="frame" x="0.0" y="246" width="320" height="30"/>
+                                        <subviews>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v3F-xV-lTt" userLabel="Date select button">
+                                                <rect key="frame" x="0.0" y="0.0" width="320" height="30"/>
+                                                <state key="normal" title="Go"/>
+                                                <connections>
+                                                    <action selector="dateSelected:" destination="2kz-67-UVE" eventType="touchUpInside" id="UP1-oY-0HG"/>
+                                                </connections>
+                                            </button>
+                                        </subviews>
+                                    </stackView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                            </stackView>
+                        </subviews>
+                        <constraints>
+                            <constraint firstItem="NA2-bk-fUo" firstAttribute="trailing" secondItem="I0G-1e-0oF" secondAttribute="trailingMargin" id="JcM-xH-tZZ"/>
+                            <constraint firstItem="8eV-iR-cgP" firstAttribute="width" secondItem="NA2-bk-fUo" secondAttribute="width" id="O1J-Im-3cf"/>
+                            <constraint firstItem="NA2-bk-fUo" firstAttribute="top" secondItem="NqY-W0-zPP" secondAttribute="bottom" constant="30" id="YNp-iy-4p0"/>
+                            <constraint firstItem="8eV-iR-cgP" firstAttribute="trailing" secondItem="NA2-bk-fUo" secondAttribute="trailingMargin" id="gkD-5j-70u"/>
+                            <constraint firstItem="8eV-iR-cgP" firstAttribute="height" secondItem="NA2-bk-fUo" secondAttribute="height" id="khQ-BD-YZZ"/>
+                            <constraint firstItem="8eV-iR-cgP" firstAttribute="top" secondItem="NA2-bk-fUo" secondAttribute="top" id="ywR-sP-wKf"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="backgroundView" destination="8eV-iR-cgP" id="cLP-CX-UR0"/>
+                        <outlet property="datePicker" destination="9FE-78-ZNf" id="EhG-BD-7oT"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="O6N-hA-csp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1117" y="283"/>
+        </scene>
     </scenes>
+    <resources>
+        <image name="clock-bar-icon" width="20" height="20"/>
+    </resources>
 </document>

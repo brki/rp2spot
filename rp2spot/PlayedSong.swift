@@ -32,20 +32,33 @@ class PlayedSong: NSManagedObject {
 
 	/**
 	Insert or update songs with the provided PlayedSongData array.
+	
+	- Parameters:
+	  - songDataList: array of PlayedSongData to insert / update
+	  - context: NSManagedObjectContext
+	  - onlyInserts: if true, perform inserts directly without checking for any existing objects
 	*/
-	static func upsertSongs(songDataList: [PlayedSongData], context: NSManagedObjectContext) {
+	static func upsertSongs(songDataList: [PlayedSongData], context: NSManagedObjectContext, onlyInserts: Bool = false) {
 		context.performBlockAndWait {
-			let existingPlayTimes = playedDuring(
-				start: songDataList.last!.playedAt,
-				end: songDataList.first!.playedAt,
-				context: context)
+
+			guard onlyInserts else {
+				let existingPlayTimes = playedDuring(
+					start: songDataList.last!.playedAt,
+					end: songDataList.first!.playedAt,
+					context: context)
+
+				for songData in songDataList {
+					if let existingSong = existingPlayTimes[songData.playedAt] {
+						existingSong.updateWithData(songData)
+					} else {
+						let _ = PlayedSong(playedSongData: songData, context: context)
+					}
+				}
+				return
+			}
 
 			for songData in songDataList {
-				if let existingSong = existingPlayTimes[songData.playedAt] {
-					existingSong.updateWithData(songData)
-				} else {
-					let _ = PlayedSong(playedSongData: songData, context: context)
-				}
+				let _ = PlayedSong(playedSongData: songData, context: context)
 			}
 		}
 	}

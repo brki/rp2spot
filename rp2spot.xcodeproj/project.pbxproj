@@ -23,6 +23,8 @@
 		D3C0CA8A1C6248E10055B650 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */; };
 		D3C0CA951C6248E10055B650 /* rp2spotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA941C6248E10055B650 /* rp2spotTests.swift */; };
 		D3C0CAA01C6248E10055B650 /* rp2spotUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */; };
+		D3C98A061C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */; };
+		D3C98A091C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C98A081C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift */; };
 		D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E561C6F2E3A00443F68 /* Spotify.framework */; };
 		D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E581C6F2EB600443F68 /* Alamofire.framework */; };
 		D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */; };
@@ -78,6 +80,8 @@
 		D3C0CA9B1C6248E10055B650 /* rp2spotUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rp2spotUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA9F1C6248E10055B650 /* rp2spotUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = rp2spotUITests.swift; sourceTree = "<group>"; };
 		D3C0CAA11C6248E10055B650 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryDateSelectorViewController.swift; sourceTree = "<group>"; };
+		D3C98A081C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateSelectionAcceptingProtocol.swift; sourceTree = "<group>"; };
 		D3FC5E561C6F2E3A00443F68 /* Spotify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Spotify.framework; sourceTree = "<group>"; };
 		D3FC5E581C6F2EB600443F68 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
 		D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -157,6 +161,7 @@
 		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
 			isa = PBXGroup;
 			children = (
+				D3C98A071C86E56100C2C9E4 /* Protocols */,
 				D3992AAE1C7A0A590077DDA7 /* Views */,
 				D3FC5E721C70A52200443F68 /* CoreData Models */,
 				D3FC5E6B1C70A1B300443F68 /* Models */,
@@ -195,6 +200,14 @@
 			path = rp2spotUITests;
 			sourceTree = "<group>";
 		};
+		D3C98A071C86E56100C2C9E4 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				D3C98A081C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift */,
+			);
+			name = Protocols;
+			sourceTree = "<group>";
+		};
 		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -212,6 +225,7 @@
 			isa = PBXGroup;
 			children = (
 				D3C0CA7E1C6248E10055B650 /* HistoryViewController.swift */,
+				D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -404,8 +418,10 @@
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
+				D3C98A091C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift in Sources */,
 				D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */,
 				D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */,
+				D3C98A061C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift in Sources */,
 				D3FC5E671C6F5C0C00443F68 /* Constant.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

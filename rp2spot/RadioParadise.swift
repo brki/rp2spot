@@ -25,14 +25,23 @@ struct RadioParadise {
 	static let userSettings = UserSetting.sharedInstance
 
 	static func fetchNewer(region: String, newerThan: NSDate, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
-		return fetchPeriod(region, date: newerThan, vectorCount: count, handler: handler)
+		return fetchHistory(region, date: newerThan, vectorCount: count, handler: handler)
 	}
 
 	static func fetchOlder(region: String, olderThan: NSDate, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
-		return fetchPeriod(region, date: olderThan, vectorCount: -count, handler: handler)
+		return fetchHistory(region, date: olderThan, vectorCount: -count, handler: handler)
 	}
 
-	static func fetchPeriod(region: String, date: NSDate, vectorCount: Int, handler: RPFetchHandler? = nil) -> Request {
+	/**
+	Fetch history from the RP history web service.
+	
+	- Parameters:
+	  - region: two-letter region code
+	  - date: base date for history
+	  - vectorCount: Int - if positive, fetch this many songs after the base date; if negative fetch abs(vectorCount) songs before the base date
+	  - handler: completion handler
+	*/
+	static func fetchHistory(region: String, date: NSDate, vectorCount: Int, handler: RPFetchHandler? = nil) -> Request {
 
 		let params: [String: AnyObject] = [
 			"base_time": Date.sharedInstance.toUTCString(date),
