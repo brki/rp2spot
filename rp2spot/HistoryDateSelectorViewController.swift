@@ -52,4 +52,9 @@ class HistoryDateSelectorViewController: UIViewController {
 	@IBAction func cancel(sender: UIButton) {
 		dismissViewControllerAnimated(true, completion: nil)
 	}
+
+	@IBAction func OuterViewTapped(sender: UITapGestureRecognizer) {
+		dismissViewControllerAnimated(true, completion: nil)
+	}
+
 }

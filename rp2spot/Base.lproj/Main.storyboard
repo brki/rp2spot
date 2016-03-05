@@ -137,11 +137,11 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8eV-iR-cgP" userLabel="Background for stack view">
-                                <rect key="frame" x="260" y="50" width="320" height="276"/>
+                                <rect key="frame" x="140" y="50" width="320" height="276"/>
                                 <color key="backgroundColor" red="0.93333333330000001" green="1" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="NA2-bk-fUo" userLabel="Vertical Stack View">
-                                <rect key="frame" x="260" y="50" width="320" height="276"/>
+                                <rect key="frame" x="140" y="50" width="320" height="276"/>
                                 <subviews>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="2fC-Ov-q15" userLabel="Horizontal Top Stack View">
                                         <rect key="frame" x="0.0" y="0.0" width="320" height="30"/>
@@ -184,14 +184,18 @@
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                             </stackView>
                         </subviews>
+                        <gestureRecognizers/>
                         <constraints>
-                            <constraint firstItem="NA2-bk-fUo" firstAttribute="trailing" secondItem="I0G-1e-0oF" secondAttribute="trailingMargin" id="JcM-xH-tZZ"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="width" secondItem="NA2-bk-fUo" secondAttribute="width" id="O1J-Im-3cf"/>
-                            <constraint firstItem="NA2-bk-fUo" firstAttribute="top" secondItem="NqY-W0-zPP" secondAttribute="bottom" constant="30" id="YNp-iy-4p0"/>
+                            <constraint firstItem="NA2-bk-fUo" firstAttribute="centerX" secondItem="I0G-1e-0oF" secondAttribute="centerX" id="UcU-pY-y5q"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="trailing" secondItem="NA2-bk-fUo" secondAttribute="trailingMargin" id="gkD-5j-70u"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="height" secondItem="NA2-bk-fUo" secondAttribute="height" id="khQ-BD-YZZ"/>
+                            <constraint firstItem="NA2-bk-fUo" firstAttribute="top" secondItem="NqY-W0-zPP" secondAttribute="bottom" constant="30" id="uQt-2N-MGR"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="top" secondItem="NA2-bk-fUo" secondAttribute="top" id="ywR-sP-wKf"/>
                         </constraints>
+                        <connections>
+                            <outletCollection property="gestureRecognizers" destination="9vM-4w-KZf" appends="YES" id="QOR-nI-0US"/>
+                        </connections>
                     </view>
                     <connections>
                         <outlet property="backgroundView" destination="8eV-iR-cgP" id="cLP-CX-UR0"/>
@@ -199,11 +203,16 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="O6N-hA-csp" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="9vM-4w-KZf">
+                    <connections>
+                        <action selector="OuterViewTapped:" destination="2kz-67-UVE" id="oUz-m3-cdM"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="1117" y="283"/>
         </scene>
     </scenes>
     <resources>
-        <image name="clock-bar-icon" width="20" height="20"/>
+        <image name="clock-bar-icon" width="22" height="22"/>
     </resources>
 </document>
