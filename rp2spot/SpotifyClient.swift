@@ -16,7 +16,9 @@ class SpotifyClient {
 	let auth = SPTAuth.defaultInstance()
 
 	lazy var player: SPTAudioStreamingController = {
-		return SPTAudioStreamingController(clientId: self.auth.clientID)
+		let player = SPTAudioStreamingController(clientId: self.auth.clientID)
+		player.setTargetBitrate(UserSetting.sharedInstance.spotifyStreamingQuality, callback: nil)
+		return player
 	}()
 
 	init() {
