@@ -418,7 +418,29 @@ extension HistoryViewController {
 
 // MARK: UITableViewDelegate methods
 extension HistoryViewController {
+
 	override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
 		return tableView.rowHeight
+	}
+
+	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+		var trackId: String?
+		context.performBlockAndWait {
+			if let song = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
+				trackId = song.spotifyTrackId
+			}
+		}
+		guard let spotifyTrackId = trackId else {
+			print("Unable to get spotify track id for selected row")
+			return
+		}
+		SpotifyClient.sharedInstance.loginOrRenewSession() { willTriggerNotification, error in
+			guard error == nil else {
+				print("error while trying to renew session: \(error)")
+				return
+			}
+			// TODO: handle case where a session-update notification will be posted
+			SpotifyClient.sharedInstance.playTrack(spotifyTrackId)
+		}
 	}
 }

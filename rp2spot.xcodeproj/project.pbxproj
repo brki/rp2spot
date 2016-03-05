@@ -31,7 +31,7 @@
 		D3FC5E5E1C6F34CA00443F68 /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */; };
 		D3FC5E611C6F542F00443F68 /* CoreData.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E601C6F542F00443F68 /* CoreData.framework */; };
 		D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */; };
-		D3FC5E651C6F5AA100443F68 /* SpotifyAuth.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */; };
+		D3FC5E651C6F5AA100443F68 /* SpotifyClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */; };
 		D3FC5E671C6F5C0C00443F68 /* Constant.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E661C6F5C0C00443F68 /* Constant.swift */; };
 		D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E681C6FC2BF00443F68 /* Secrets.swift */; };
 		D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3FC5E6C1C70A1C500443F68 /* RadioParadise.swift */; };
@@ -89,7 +89,7 @@
 		D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Spotify-Bridging.h"; sourceTree = "<group>"; };
 		D3FC5E601C6F542F00443F68 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
-		D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuth.swift; sourceTree = "<group>"; };
+		D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyClient.swift; sourceTree = "<group>"; };
 		D3FC5E661C6F5C0C00443F68 /* Constant.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Constant.swift; sourceTree = "<group>"; };
 		D3FC5E681C6FC2BF00443F68 /* Secrets.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		D3FC5E6C1C70A1C500443F68 /* RadioParadise.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RadioParadise.swift; sourceTree = "<group>"; };
@@ -129,6 +129,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		D3409D9D1C89EB850089DEC1 /* Spotify */ = {
+			isa = PBXGroup;
+			children = (
+				D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */,
+			);
+			name = Spotify;
+			sourceTree = "<group>";
+		};
 		D3992AAE1C7A0A590077DDA7 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -161,6 +169,7 @@
 		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
 			isa = PBXGroup;
 			children = (
+				D3409D9D1C89EB850089DEC1 /* Spotify */,
 				D3C98A071C86E56100C2C9E4 /* Protocols */,
 				D3992AAE1C7A0A590077DDA7 /* Views */,
 				D3FC5E721C70A52200443F68 /* CoreData Models */,
@@ -169,7 +178,6 @@
 				D3FC5E681C6FC2BF00443F68 /* Secrets.swift */,
 				D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */,
 				D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */,
-				D3FC5E641C6F5AA100443F68 /* SpotifyAuth.swift */,
 				D3C0CA801C6248E10055B650 /* Main.storyboard */,
 				D3C0CA861C6248E10055B650 /* Assets.xcassets */,
 				D3C0CA881C6248E10055B650 /* LaunchScreen.storyboard */,
@@ -409,7 +417,7 @@
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
-				D3FC5E651C6F5AA100443F68 /* SpotifyAuth.swift in Sources */,
+				D3FC5E651C6F5AA100443F68 /* SpotifyClient.swift in Sources */,
 				D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */,
 				D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */,
 				D39992641C81E500008AECD4 /* UserSetting.swift in Sources */,

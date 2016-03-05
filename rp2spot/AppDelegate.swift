@@ -45,7 +45,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	}
 
 	func application(app: UIApplication, openURL url: NSURL, options: [String : AnyObject]) -> Bool {
-		let auth = SPTAuth.defaultInstance()
+		let auth = SpotifyClient.sharedInstance.auth
 
 		/*
 		Handle the callback from the authentication service. -[SPAuth -canHandleURL:]
@@ -56,11 +56,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 				guard error == nil else {
 					// TODO: revisit how to handle this in running app:
 					print("Auth error: \(error)")
+					SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
 					return
 				}
 
 				auth.session = session
-				NSNotificationCenter.defaultCenter().postNotificationName("sessionUpdated", object: self)
+				SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
 			}
 
 			return true
