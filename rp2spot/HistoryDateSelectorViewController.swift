@@ -24,9 +24,16 @@ class HistoryDateSelectorViewController: UIViewController {
 
 		// Make the control have rounded edges and a border:
 		let layer = backgroundView.layer
+		let black = UIColor.blackColor().CGColor
 		layer.cornerRadius = 30
-		layer.borderColor = UIColor.blackColor().CGColor
+		layer.borderColor = black
 		layer.borderWidth = 1.5
+
+		// Add a dropshadow:
+		layer.shadowColor = black
+		layer.shadowOpacity = 0.8
+		layer.shadowRadius = 3.0
+		layer.shadowOffset = CGSizeMake(2.0, 2.0)
 	}
 
 	override func viewDidAppear(animated: Bool) {
