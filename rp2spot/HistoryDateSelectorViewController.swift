@@ -40,21 +40,26 @@ class HistoryDateSelectorViewController: UIViewController {
 		super.viewDidAppear(animated)
 	}
 
-	@IBAction func dateSelected(sender: UIButton) {
-		delegate.dateSelected(datePicker.date)
-		dismissViewControllerAnimated(true, completion: nil)
-	}
-
 	@IBAction func setDateToToday(sender: UIButton) {
 		datePicker.date = NSDate()
 	}
 	
 	@IBAction func cancel(sender: UIButton) {
-		dismissViewControllerAnimated(true, completion: nil)
+		dismiss()
 	}
 
 	@IBAction func OuterViewTapped(sender: UITapGestureRecognizer) {
-		dismissViewControllerAnimated(true, completion: nil)
+		dismissNotifyingDelegateIfChanged()
 	}
 
+	func dismissNotifyingDelegateIfChanged() {
+		if startingDate.compare(datePicker.date) != NSComparisonResult.OrderedSame {
+			delegate.dateSelected(datePicker.date)
+		}
+		dismiss()
+	}
+
+	func dismiss() {
+		dismissViewControllerAnimated(true, completion: nil)
+	}
 }

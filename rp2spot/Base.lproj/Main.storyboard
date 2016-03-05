@@ -137,45 +137,33 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8eV-iR-cgP" userLabel="Background for stack view">
-                                <rect key="frame" x="140" y="50" width="320" height="276"/>
+                                <rect key="frame" x="140" y="50" width="320" height="246"/>
                                 <color key="backgroundColor" red="0.93333333330000001" green="1" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="NA2-bk-fUo" userLabel="Vertical Stack View">
-                                <rect key="frame" x="140" y="50" width="320" height="276"/>
+                                <rect key="frame" x="140" y="50" width="320" height="246"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" spacing="10" translatesAutoresizingMaskIntoConstraints="NO" id="2fC-Ov-q15" userLabel="Horizontal Top Stack View">
-                                        <rect key="frame" x="0.0" y="0.0" width="320" height="30"/>
+                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="10" translatesAutoresizingMaskIntoConstraints="NO" id="9FE-78-ZNf">
+                                        <rect key="frame" x="0.0" y="0.0" width="320" height="216"/>
+                                        <date key="date" timeIntervalSinceReferenceDate="478601173.116368">
+                                            <!--2016-03-02 08:46:13 +0000-->
+                                        </date>
+                                    </datePicker>
+                                    <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" alignment="center" spacing="3" translatesAutoresizingMaskIntoConstraints="NO" id="Vxf-uP-rGA" userLabel="Horizontal Bottom Stack View">
+                                        <rect key="frame" x="0.0" y="216" width="320" height="30"/>
                                         <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lny-dq-rc6" userLabel="Now">
-                                                <rect key="frame" x="0.0" y="0.0" width="155" height="30"/>
-                                                <state key="normal" title="Now"/>
-                                                <connections>
-                                                    <action selector="setDateToToday:" destination="2kz-67-UVE" eventType="touchUpInside" id="gzU-7V-rvC"/>
-                                                </connections>
-                                            </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i80-db-MZQ" userLabel="Cancel">
-                                                <rect key="frame" x="165" y="0.0" width="155" height="30"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="159" height="30"/>
                                                 <state key="normal" title="Cancel"/>
                                                 <connections>
                                                     <action selector="cancel:" destination="2kz-67-UVE" eventType="touchUpInside" id="0kK-39-ujW"/>
                                                 </connections>
                                             </button>
-                                        </subviews>
-                                    </stackView>
-                                    <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="10" translatesAutoresizingMaskIntoConstraints="NO" id="9FE-78-ZNf">
-                                        <rect key="frame" x="0.0" y="30" width="320" height="216"/>
-                                        <date key="date" timeIntervalSinceReferenceDate="478601173.116368">
-                                            <!--2016-03-02 08:46:13 +0000-->
-                                        </date>
-                                    </datePicker>
-                                    <stackView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="Vxf-uP-rGA" userLabel="Horizontal Bottom Stack View">
-                                        <rect key="frame" x="0.0" y="246" width="320" height="30"/>
-                                        <subviews>
-                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="v3F-xV-lTt" userLabel="Date select button">
-                                                <rect key="frame" x="0.0" y="0.0" width="320" height="30"/>
-                                                <state key="normal" title="Go"/>
+                                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lny-dq-rc6" userLabel="Now">
+                                                <rect key="frame" x="162" y="0.0" width="158" height="30"/>
+                                                <state key="normal" title="Now"/>
                                                 <connections>
-                                                    <action selector="dateSelected:" destination="2kz-67-UVE" eventType="touchUpInside" id="UP1-oY-0HG"/>
+                                                    <action selector="setDateToToday:" destination="2kz-67-UVE" eventType="touchUpInside" id="gzU-7V-rvC"/>
                                                 </connections>
                                             </button>
                                         </subviews>
