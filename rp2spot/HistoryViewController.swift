@@ -16,17 +16,16 @@ typealias RPFetchResultHandler = (success: Bool, fetchedCount: Int, error: NSErr
 
 class HistoryViewController: UITableViewController {
 
-	enum CurrentRefreshType {
-		case Newer, Older
-	}
-
 	let context = CoreDataStack.sharedInstance.managedObjectContext
 
 	let userSettings = UserSetting.sharedInstance
 
-	var currentRefresh = CurrentRefreshType.Newer
+	var isFetchingOlder = false
 
 	var isRefreshing = false
+
+	var insertIndexPaths = [NSIndexPath]()
+	var deleteIndexPaths = [NSIndexPath]()
 
 	lazy var fetchedResultsController: NSFetchedResultsController = {
 		var frc: NSFetchedResultsController!
@@ -95,7 +94,7 @@ class HistoryViewController: UITableViewController {
 		}
 		isRefreshing = true
 
-		currentRefresh = newerHistory ? .Newer : .Older
+		isFetchingOlder = !newerHistory
 		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
 			if fetchedCount > 0 {
 				self.removeExcessLocalHistory(fromBottom: newerHistory)
@@ -158,7 +157,7 @@ class HistoryViewController: UITableViewController {
 		}
 
 		isRefreshing = true
-		currentRefresh = .Newer
+		isFetchingOlder = false
 
 		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
 			if let err = error {
@@ -247,41 +246,24 @@ extension HistoryViewController: UIPopoverPresentationControllerDelegate {
 
 extension HistoryViewController: NSFetchedResultsControllerDelegate {
 
-	func controllerWillChangeContent(controller: NSFetchedResultsController) {
-		if currentRefresh != .Newer {
-			// Disable animations to avoid a disconcerting animation effect caused by addition + deletion of rows when at the bottome
-			// of the tableview.
-			UIView.setAnimationsEnabled(false)
-		}
-		tableView.beginUpdates()
-	}
+	/**
+	Collects the changes that have been made.
 
+	The changes are collected for later processing (instead of directly calling tableView.insertRowsAtIndexPaths()
+	and related methods in this function) so that all the code for the CATransaction is called in one method - see
+	controllerDidChangeContent() for more details on why a CATransaction is used.
+	*/
 	func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
 
-		guard let visiblePaths = tableView.indexPathsForVisibleRows else {
-			// No visible paths, no need to update the view.
-			return
-		}
-
 		switch type {
-		case .Update:
-			if let path = indexPath where visiblePaths.contains(path) {
-				tableView.reloadRowsAtIndexPaths([path], withRowAnimation: .Automatic)
-			}
-
 		case .Delete:
-			tableView.deleteRowsAtIndexPaths([indexPath!], withRowAnimation: .Automatic)
-			// Adjust position so that deletion of rows at top of tableview after fetching older history
-			// for the bottom of tableview does not result in scrolling down, which can trigger repeated fetching
-			// of older history when the bottommost row triggers another history fetch.
-			// tldr; scroll up when deleting rows:
-			tableView.contentOffset = CGPointMake(tableView.contentOffset.x, tableView.contentOffset.y - tableView.rowHeight)
+			deleteIndexPaths.append(indexPath!)
 
 		case .Insert:
-			tableView.insertRowsAtIndexPaths([newIndexPath!], withRowAnimation: .Automatic)
+			insertIndexPaths.append(newIndexPath!)
 
 		default:
-			print("Unexpected change type in controllerDidChangeContent: \(type.rawValue), indexPath: \(indexPath)")
+			print("Unexpected change type in controllerDidChangeContent: \(type.rawValue), indexPath: \(indexPath), newIndexPath: \(newIndexPath), object: \(anObject)")
 		}
 	}
 
@@ -289,13 +271,35 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 	Apply all changes that have been collected.
 	*/
 	func controllerDidChangeContent(controller: NSFetchedResultsController) {
+
+		let disableRowAnimations = isFetchingOlder
+
+		if disableRowAnimations {
+			// When adding items to the end of the table view, there is a noticeable flicker and small jump unless
+			// the table view insert / delete animations are suppressed.
+			CATransaction.begin()
+			CATransaction.setDisableActions(true)
+		}
+
+		tableView.beginUpdates()
+
+		let rowsToDelete = deleteIndexPaths.removeAllReturningValues()
+		tableView.insertRowsAtIndexPaths(insertIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
+		tableView.deleteRowsAtIndexPaths(rowsToDelete, withRowAnimation: .None)
+
+		if isFetchingOlder {
+			// If rows above have been deleted at the top of the table view, shift the current contenteOffset up an appropriate amount:
+			tableView.contentOffset = CGPointMake(tableView.contentOffset.x, tableView.contentOffset.y - tableView.rowHeight * CGFloat(rowsToDelete.count))
+		}
+
 		tableView.endUpdates()
+
+		if disableRowAnimations {
+			CATransaction.commit()
+		}
+
 		self.context.performBlock {
 			CoreDataStack.sharedInstance.saveContext()
-		}
-		if !(UIView.areAnimationsEnabled()) {
-			// Re-enable animation if it was disabled for a fetch of older items.
-			UIView.setAnimationsEnabled(true)
 		}
 	}
 
@@ -418,10 +422,6 @@ extension HistoryViewController {
 
 // MARK: UITableViewDelegate methods
 extension HistoryViewController {
-
-	override func tableView(tableView: UITableView, estimatedHeightForRowAtIndexPath indexPath: NSIndexPath) -> CGFloat {
-		return tableView.rowHeight
-	}
 
 	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		var trackIds = [String]()

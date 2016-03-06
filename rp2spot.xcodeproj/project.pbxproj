@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345FC461C8CDDA300F118B3 /* Array+extension.swift */; };
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
@@ -58,6 +59,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D345FC461C8CDDA300F118B3 /* Array+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+extension.swift"; sourceTree = "<group>"; };
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
@@ -137,6 +139,15 @@
 			name = Spotify;
 			sourceTree = "<group>";
 		};
+		D345FC451C8CDD7F00F118B3 /* Core Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */,
+				D345FC461C8CDDA300F118B3 /* Array+extension.swift */,
+			);
+			name = "Core Extensions";
+			sourceTree = "<group>";
+		};
 		D3992AAE1C7A0A590077DDA7 /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -169,6 +180,7 @@
 		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
 			isa = PBXGroup;
 			children = (
+				D345FC451C8CDD7F00F118B3 /* Core Extensions */,
 				D3409D9D1C89EB850089DEC1 /* Spotify */,
 				D3C98A071C86E56100C2C9E4 /* Protocols */,
 				D3992AAE1C7A0A590077DDA7 /* Views */,
@@ -184,7 +196,6 @@
 				D3C0CA8B1C6248E10055B650 /* Info.plist */,
 				D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */,
 				D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */,
-				D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */,
 				D3AD910F1C7E0CA80076FE76 /* Utilities.swift */,
 			);
 			path = rp2spot;
@@ -423,6 +434,7 @@
 				D39992641C81E500008AECD4 /* UserSetting.swift in Sources */,
 				D3C0CA7F1C6248E10055B650 /* HistoryViewController.swift in Sources */,
 				D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */,
+				D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
