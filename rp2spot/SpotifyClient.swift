@@ -10,6 +10,7 @@ import UIKit
 
 class SpotifyClient {
 	static let SESSION_UPDATE_NOTIFICATION = "sessionUpdated"
+	static let MAX_PLAYER_TRACK_COUNT = 100 // Spotify player accepts maximum 100 tracks
 
 	static let sharedInstance = SpotifyClient()
 
@@ -94,7 +95,7 @@ class SpotifyClient {
 		return NSURL(string: "spotify:track:\(trackId)")
 	}
 
-	func playTrack(trackId: String) {
+	func playTracks(trackIds: [String]) {
 		player.loginWithSession(auth.session) { error in
 			guard error == nil else {
 				print("playTrack: error while logging in: \(error!)")
@@ -102,12 +103,18 @@ class SpotifyClient {
 			}
 		}
 
-		guard let URI = trackURI(trackId) else {
-			print("Unable to generate URI from track id: \(trackId)")
+		var URIs = [NSURL]()
+		for id in trackIds {
+			if let URI = trackURI(id) {
+				URIs.append(URI)
+			}
+		}
+		guard URIs.count > 0 else {
+			print("No URIs could be generated from track id list: \(trackIds)")
 			return
 		}
 
-		player.playURIs([URI], fromIndex:0) { error in
+		player.playURIs(URIs, fromIndex:0) { error in
 			if error != nil {
 				print("Error while initiating playback")
 			}

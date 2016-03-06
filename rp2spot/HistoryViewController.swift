@@ -424,23 +424,38 @@ extension HistoryViewController {
 	}
 
 	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-		var trackId: String?
+		var trackIds = [String]()
 		context.performBlockAndWait {
-			if let song = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
-				trackId = song.spotifyTrackId
+			var lastRow = indexPath.row
+			let section = indexPath.section
+			if let sections = self.fetchedResultsController.sections {
+				lastRow = sections[section].numberOfObjects - 1
 			}
+
+			var trackCount = 0
+			var row = indexPath.row
+			repeat {
+				let path = NSIndexPath(forRow: row, inSection: section)
+				if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong, trackId = song.spotifyTrackId {
+					trackIds.append(trackId)
+					trackCount++
+				} else if row == indexPath.row {
+					// Special case for when the tapped on row has no track: do not start player.
+					break
+				}
+				row++
+			} while trackCount < SpotifyClient.MAX_PLAYER_TRACK_COUNT && row < lastRow
+
 		}
-		guard let spotifyTrackId = trackId else {
-			print("Unable to get spotify track id for selected row")
-			return
-		}
-		SpotifyClient.sharedInstance.loginOrRenewSession() { willTriggerNotification, error in
-			guard error == nil else {
-				print("error while trying to renew session: \(error)")
-				return
+		if trackIds.count > 0 {
+			SpotifyClient.sharedInstance.loginOrRenewSession() { willTriggerNotification, error in
+				guard error == nil else {
+					print("error while trying to renew session: \(error)")
+					return
+				}
+				// TODO: handle case where a session-update notification will be posted
+				SpotifyClient.sharedInstance.playTracks(trackIds)
 			}
-			// TODO: handle case where a session-update notification will be posted
-			SpotifyClient.sharedInstance.playTrack(spotifyTrackId)
 		}
 	}
 }
