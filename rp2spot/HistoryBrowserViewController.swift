@@ -1,8 +1,8 @@
 //
-//  HistoryController.swift
+//  HistoryBrowserViewController.swift
 //  rp2spot
 //
-//  Created by Brian on 03/02/16.
+//  Created by Brian King on 07/03/16.
 //  Copyright © 2016 truckin'. All rights reserved.
 //
 
@@ -12,9 +12,13 @@ import AlamofireImage
 
 typealias RPFetchResultHandler = (success: Bool, fetchedCount: Int, error: NSError?) -> Void
 
-// TODO: add concurrency control: only allow one history fetch at once; ignore new history fetch requests if one is already in progress.
+class HistoryBrowserViewController: UIViewController {
 
-class HistoryViewController: UITableViewController {
+	@IBOutlet weak var tableView: UITableView!
+	@IBOutlet weak var playerContainerViewHeightConstraint: NSLayoutConstraint!
+
+	let tableViewController = UITableViewController()
+	let refreshControl = UIRefreshControl()
 
 	let context = CoreDataStack.sharedInstance.managedObjectContext
 
@@ -41,7 +45,10 @@ class HistoryViewController: UITableViewController {
 		super.viewDidLoad()
 
 		tableView.rowHeight = 64
+		tableView.dataSource = self
+		tableView.delegate = self
 		refreshFetchRequest()
+		setupRefreshControl()
 
 		// If there is no song history yet, load the latest songs.
 		if (fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
@@ -52,12 +59,6 @@ class HistoryViewController: UITableViewController {
 	override func didReceiveMemoryWarning() {
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
-	}
-
-	@IBAction func refreshRequested(sender: UIRefreshControl) {
-		attemptHistoryFetch(newerHistory: true) { success in
-			sender.endRefreshing()
-		}
 	}
 
 	@IBAction func selectDate(sender: UIBarButtonItem) {
@@ -78,6 +79,24 @@ class HistoryViewController: UITableViewController {
 		popover.permittedArrowDirections = .Up
 		popover.barButtonItem = sender
 		popover.delegate = self
+
+	}
+
+	func setupRefreshControl() {
+		// Configure refresh control for the top of the table view.
+		// A tableViewController is required to use the UIRefreshControl.
+		refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+		refreshControl.addTarget(self, action: "refreshRequested:", forControlEvents: .ValueChanged)
+
+		addChildViewController(tableViewController)
+		tableViewController.tableView = tableView
+		tableViewController.refreshControl = refreshControl
+	}
+
+	func refreshRequested(sender: UIRefreshControl) {
+		attemptHistoryFetch(newerHistory: true) { success in
+			sender.endRefreshing()
+		}
 	}
 
 	/**
@@ -118,7 +137,9 @@ class HistoryViewController: UITableViewController {
 	Get newer (or older) song history.
 
 	- Parameters:
-	- newer: should songs
+	- newer: If true, fetch newer history, else fetch older history
+	- forDate: base date from which newer or older history will be fetched
+	- completionHandler: handler to call after history fetched (or in case of failure)
 	*/
 	func fetchMoreHistory(newer newer: Bool, forDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
 
@@ -142,7 +163,7 @@ class HistoryViewController: UITableViewController {
 		}
 		updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
 	}
-	
+
 	/**
 	Replace local history with the history from the given date, if the history fetch is successful.
 	*/
@@ -232,19 +253,19 @@ class HistoryViewController: UITableViewController {
 	}
 }
 
-extension HistoryViewController: DateSelectionAcceptingProtocol {
+extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 	func dateSelected(date: NSDate) {
 		replaceLocalHistory(date)
 	}
 }
 
-extension HistoryViewController: UIPopoverPresentationControllerDelegate {
+extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate {
 	func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {
 		return .None
 	}
 }
 
-extension HistoryViewController: NSFetchedResultsControllerDelegate {
+extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 
 	/**
 	Collects the changes that have been made.
@@ -395,11 +416,9 @@ extension HistoryViewController: NSFetchedResultsControllerDelegate {
 }
 
 
-// MARK: UITableViewDataSource methods
-
-extension HistoryViewController {
-	override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-		let cell = tableView.dequeueReusableCellWithIdentifier("PlainSongHistoryCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
+extension HistoryBrowserViewController: UITableViewDataSource {
+	func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+		let cell = tableView.dequeueReusableCellWithIdentifier("HistoryBrowserCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
 
 		if let song = fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
 			cell.configureForSong(song)
@@ -411,7 +430,7 @@ extension HistoryViewController {
 		return cell
 	}
 
-	override func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+	func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		if let sections = fetchedResultsController.sections {
 			return sections[section].numberOfObjects
 		} else {
@@ -421,9 +440,9 @@ extension HistoryViewController {
 }
 
 // MARK: UITableViewDelegate methods
-extension HistoryViewController {
+extension HistoryBrowserViewController: UITableViewDelegate {
 
-	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		var trackIds = [String]()
 		context.performBlockAndWait {
 			var lastRow = indexPath.row
@@ -454,8 +473,11 @@ extension HistoryViewController {
 					return
 				}
 				// TODO: handle case where a session-update notification will be posted
+				// TODO: show player
+				self.playerContainerViewHeightConstraint.constant = 100
 				SpotifyClient.sharedInstance.playTracks(trackIds)
 			}
 		}
 	}
 }
+
