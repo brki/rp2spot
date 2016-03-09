@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AVFoundation
 
 class AudioPlayerViewController: UIViewController {
 
@@ -54,6 +55,18 @@ class AudioPlayerViewController: UIViewController {
 		super.viewDidLoad()
 		spotify.player.delegate = self
 		spotify.player.playbackDelegate = self
+
+		// Listen for a notification so that we can tell when
+		// a user has unplugged their headphones.
+		NSNotificationCenter.defaultCenter().addObserver(
+			self,
+			selector: "audioRouteChanged:",
+			name: AVAudioSessionRouteChangeNotification,
+			object: nil)
+	}
+
+	deinit {
+		NSNotificationCenter.defaultCenter().removeObserver(self)
 	}
 
 	@IBAction func skipToNextTrack(sender: AnyObject) {
@@ -115,6 +128,23 @@ class AudioPlayerViewController: UIViewController {
 	func updateUI(isPlaying isPlaying: Bool) {
 		let imageName = isPlaying ? "Pause" : "Play"
 		playPauseButton.imageView!.image = UIImage(named: imageName)!
+	}
+
+	/**
+	Notification handler for audio route changes.
+
+	If the user has unplugged their headphones / disconnected from bluetooth speakers / something similar,
+	then pause the audio.
+	*/
+	func audioRouteChanged(notification: NSNotification) {
+		guard spotify.player.isPlaying else {
+			return
+		}
+		if let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? AVAudioSessionRouteChangeReason where reason == .OldDeviceUnavailable {
+			spotify.player.setIsPlaying(false) { error in
+				print("audioRouteChanged: error while trying to pause player: \(error)")
+			}
+		}
 	}
 }
 
