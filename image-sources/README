@@ -1,0 +1,7 @@
+Commands used to convert to pdf were in this form:
+rsvg-convert -z 0.03 -o caret-left.pdf -f pdf caret-left.svg
+
+Zoom factor used:
+caret-left, caret-right: 0.03
+
+play, pause: 0.04
