@@ -16,6 +16,7 @@ class HistoryBrowserViewController: UIViewController {
 
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var playerContainerViewHeightConstraint: NSLayoutConstraint!
+	@IBOutlet weak var playerContainerView: UIView!
 
 	let tableViewController = UITableViewController()
 	let refreshControl = UIRefreshControl()
@@ -41,9 +42,12 @@ class HistoryBrowserViewController: UIViewController {
 		return frc
 	}()
 
+	lazy var audioPlayerVC: AudioPlayerViewController = {
+		return self.childViewControllers.first as! AudioPlayerViewController
+	}()
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
-
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
@@ -413,6 +417,27 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		}
 		CoreDataStack.sharedInstance.saveContext()
 	}
+
+	/**
+	Get an array of track ids, starting with the given index path, and going towards more recent objects.
+	*/
+	func trackIdsStartingAtIndexPath(indexPath: NSIndexPath, maxCount: Int = SpotifyClient.MAX_PLAYER_TRACK_COUNT) -> [String] {
+		var trackIds = [String]()
+		let section = indexPath.section
+		var trackCount = 0
+		var row = indexPath.row
+		context.performBlockAndWait {
+			repeat {
+				let path = NSIndexPath(forRow: row, inSection: section)
+				if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong, trackId = song.spotifyTrackId {
+					trackIds.append(trackId)
+					trackCount++
+				}
+				row--
+			} while trackCount < maxCount && row >= 0
+		}
+		return trackIds
+	}
 }
 
 
@@ -443,41 +468,18 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 extension HistoryBrowserViewController: UITableViewDelegate {
 
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-		var trackIds = [String]()
+		// If selected row has no spotify track, do not start playing
+		var shouldPlay = false
 		context.performBlockAndWait {
-			var lastRow = indexPath.row
-			let section = indexPath.section
-			if let sections = self.fetchedResultsController.sections {
-				lastRow = sections[section].numberOfObjects - 1
-			}
-
-			var trackCount = 0
-			var row = indexPath.row
-			repeat {
-				let path = NSIndexPath(forRow: row, inSection: section)
-				if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong, trackId = song.spotifyTrackId {
-					trackIds.append(trackId)
-					trackCount++
-				} else if row == indexPath.row {
-					// Special case for when the tapped on row has no track: do not start player.
-					break
-				}
-				row++
-			} while trackCount < SpotifyClient.MAX_PLAYER_TRACK_COUNT && row < lastRow
-
+			shouldPlay = (self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong)?.spotifyTrackId != nil
 		}
-		if trackIds.count > 0 {
-			SpotifyClient.sharedInstance.loginOrRenewSession() { willTriggerNotification, error in
-				guard error == nil else {
-					print("error while trying to renew session: \(error)")
-					return
-				}
-				// TODO: handle case where a session-update notification will be posted
-				// TODO: show player
-				self.playerContainerViewHeightConstraint.constant = 100
-				SpotifyClient.sharedInstance.playTracks(trackIds)
-			}
+		guard shouldPlay else {
+			return
 		}
+
+		let trackIds = trackIdsStartingAtIndexPath(indexPath)
+		playerContainerViewHeightConstraint.constant = 100
+		audioPlayerVC.playTracks(trackIds)
 	}
 }
 

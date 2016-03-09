@@ -65,6 +65,23 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.largeImageURL = representation.valueForKeyPath("spotify_album_img_large_url") as? String ?? nil
 	}
 
+	/**
+	Create a PlayedSongData struct from a PlayedSong object.
+	*/
+	init(song: PlayedSong) {
+		song.managedObjectContext!.performBlockAndWait {
+			self.title = song.title
+			self.playedAt = song.playedAt
+			self.albumTitle = song.albumTitle
+			self.radioParadiseSongId = song.radioParadiseSongId
+			self.artistName = song.artistName
+			self.asin = song.asin
+			self.spotifyTrackId = song.spotifyTrackId
+			self.smallImageURL = song.smallImageURL
+			self.largeImageURL = song.largeImageURL
+		}
+	}
+
 	static func collection(response response: NSHTTPURLResponse, representation: AnyObject) -> [PlayedSongData] {
 		var objects = [PlayedSongData]()
 

@@ -64,4 +64,9 @@ struct RadioParadise {
 	static func imageURLText(asin: String, size: ImageSize) -> String {
 		return Constant.RADIO_PARADISE_IMAGE_URL_BASE + "\(size.rawValue)/\(asin).jpg"
 	}
+
+	static func songInfoURL(song: PlayedSong) -> NSURL? {
+		let URLString = Constant.RADIO_PARADISE_SONG_INFO_URL_TEMPLATE.stringByReplacingOccurrencesOfString("{songid}", withString: String(song.radioParadiseSongId))
+		return NSURL(string: URLString)
+	}
 }

@@ -95,29 +95,72 @@ class SpotifyClient {
 		return NSURL(string: "spotify:track:\(trackId)")
 	}
 
-	func playTracks(trackIds: [String]) {
-		player.loginWithSession(auth.session) { error in
-			guard error == nil else {
-				print("playTrack: error while logging in: \(error!)")
-				return
-			}
-		}
-
+	func URIsForTrackIds(trackIds: [String]) -> [NSURL] {
 		var URIs = [NSURL]()
 		for id in trackIds {
 			if let URI = trackURI(id) {
 				URIs.append(URI)
 			}
 		}
+		return URIs
+	}
+
+	func playTracks(URIs: [NSURL], handler: ((NSError?) -> Void)? = nil) {
+
+		func startPlaying() {
+			// Stop player and clear track list before starting playback of new track list.
+			self.player.stop() { error in
+				guard error == nil else {
+					print("playTracks: error while attempting to stop playing")
+					handler?(error)
+					return
+				}
+
+				self.player.playURIs(URIs, fromIndex:0) { error in
+					if error != nil {
+						print("playTracks: Error while initiating playback")
+					}
+					handler?(error)
+				}
+			}
+		}
+
 		guard URIs.count > 0 else {
-			print("No URIs could be generated from track id list: \(trackIds)")
+			print("playTracks: No spotify tracks URIs provided")
 			return
 		}
 
-		player.playURIs(URIs, fromIndex:0) { error in
-			if error != nil {
-				print("Error while initiating playback")
+		if player.loggedIn {
+			startPlaying()
+		} else {
+			player.loginWithSession(auth.session) { error in
+				guard error == nil else {
+					print("playTracks: error while logging in: \(error!)")
+					handler?(error)
+					return
+				}
+				startPlaying()
 			}
+		}
+	}
+
+	func trackInfo(trackId: String, handler: (trackMetadata: [NSObject: AnyObject]?, error: NSError?) -> Void) {
+		guard let URI = trackURI(trackId) else {
+			handler(trackMetadata: nil, error: NSError(domain: "SpotifyClient", code: 1,
+				userInfo: [NSLocalizedDescriptionKey: "Unable to generate spotify URL from provided trackId (\(trackId))"]))
+			return
+		}
+		SPTTrack.trackWithURI(URI, session: auth.session) { error, trackMetadata in
+			guard error == nil else {
+				handler(trackMetadata: nil, error:  error)
+				return
+			}
+			guard let metadata = trackMetadata as? [NSObject: AnyObject] else {
+				handler(trackMetadata: nil, error: NSError(domain: "SpotifyClient", code: 2,
+					userInfo: [NSLocalizedDescriptionKey: "Unexpected track metadata format"]))
+				return
+			}
+			handler(trackMetadata: metadata, error: nil)
 		}
 	}
 }

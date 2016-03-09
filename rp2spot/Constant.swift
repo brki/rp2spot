@@ -18,6 +18,7 @@ struct Constant {
 	static let RADIO_PARADISE_HISTORY_URL_BASE = Secrets.RADIO_PARADISE_HISTORY_URL_BASE
 	static let RADIO_PARADISE_IMAGE_URL_BASE = "https://www.radioparadise.com/graphics/covers/"
 	static let RADIO_PARADISE_MINIMUM_HISTORY_DATE = Date.sharedInstance.dateFromRPDateString("2015-02-24T16:45:00+00:00")!
+	static let RADIO_PARADISE_SONG_INFO_URL_TEMPLATE="https://www.radioparadise.com/rp_2.php?#name=songinfo&song_id={songid}"
 
 
 	enum Color: UInt {

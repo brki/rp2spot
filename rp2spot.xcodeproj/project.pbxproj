@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345FC461C8CDDA300F118B3 /* Array+extension.swift */; };
+		D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D361C7271C90C1B9000B803E /* SongInfoViewController.swift */; };
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
@@ -61,6 +62,7 @@
 
 /* Begin PBXFileReference section */
 		D345FC461C8CDDA300F118B3 /* Array+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+extension.swift"; sourceTree = "<group>"; };
+		D361C7271C90C1B9000B803E /* SongInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongInfoViewController.swift; sourceTree = "<group>"; };
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 				D3C96A571C8E291A00CABFE1 /* HistoryBrowserViewController.swift */,
 				D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */,
 				D3D6FF441C8DD65100B7E8A6 /* AudioPlayerViewController.swift */,
+				D361C7271C90C1B9000B803E /* SongInfoViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -448,6 +451,7 @@
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
 				D3C98A091C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift in Sources */,
 				D3C96A581C8E291A00CABFE1 /* HistoryBrowserViewController.swift in Sources */,
+				D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */,
 				D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */,
 				D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */,
 				D3C98A061C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift in Sources */,
