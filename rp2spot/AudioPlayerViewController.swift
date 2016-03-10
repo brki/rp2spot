@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import MediaPlayer
 
 class AudioPlayerViewController: UIViewController {
 
@@ -32,24 +33,6 @@ class AudioPlayerViewController: UIViewController {
 
 	var spotify = SpotifyClient.sharedInstance
 
-	@IBAction func togglePlayback(sender: AnyObject) {
-		if spotify.player.isPlaying {
-			spotify.player.setIsPlaying(false) { error in
-				if let err = error {
-					// TODO: notify delegate of error
-					return
-				}
-			}
-		} else {
-			// TODO: check if there is something to play.
-			spotify.player.setIsPlaying(true) { error in
-				if let err = error {
-					// TODO: notify delegate of error
-					return
-				}
-			}
-		}
-	}
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -63,10 +46,69 @@ class AudioPlayerViewController: UIViewController {
 			selector: "audioRouteChanged:",
 			name: AVAudioSessionRouteChangeNotification,
 			object: nil)
+
+		registerForRemoteEvents()
+	}
+
+	override func viewWillAppear(animated: Bool) {
+		super.viewWillAppear(animated)
 	}
 
 	deinit {
 		NSNotificationCenter.defaultCenter().removeObserver(self)
+	}
+
+	@IBAction func togglePlayback(sender: AnyObject) {
+		if spotify.player.isPlaying {
+			pausePlaying()
+		} else {
+			startPlaying()
+		}
+	}
+
+	func startPlaying(sender: AnyObject? = nil) {
+		// TODO: check if there is something to play.
+		spotify.player.setIsPlaying(true) { error in
+			if let err = error {
+				// TODO: notify delegate of error
+				return
+			}
+		}
+	}
+
+	func pausePlaying(sender: AnyObject? = nil) {
+		spotify.player.setIsPlaying(false) { error in
+			if let err = error {
+				// TODO: notify delegate of error
+				return
+			}
+		}
+	}
+
+	/**
+	Handle events triggered by remote hardware (e.g. headphones, bluetooth speakers, etc.),
+	and allow
+	*/
+	func registerForRemoteEvents() {
+		let remote = MPRemoteCommandCenter.sharedCommandCenter()
+
+		remote.nextTrackCommand.enabled = true
+		remote.nextTrackCommand.addTarget(self, action: "skipToNextTrack:")
+
+		remote.previousTrackCommand.enabled = true
+		remote.previousTrackCommand.addTarget(self, action: "skipToPreviousTrack:")
+
+		remote.togglePlayPauseCommand.enabled = true
+		remote.togglePlayPauseCommand.addTarget(self, action: "togglePlayback:")
+
+		remote.pauseCommand.enabled = true
+		remote.pauseCommand.addTarget(self, action: "pausePlaying:")
+
+		remote.playCommand.enabled = true
+		remote.playCommand.addTarget(self, action: "startPlaying:")
+
+		remote.stopCommand.enabled = true
+		remote.stopCommand.addTarget(self, action: "stopPlaying:")
 	}
 
 	@IBAction func skipToNextTrack(sender: AnyObject) {
@@ -95,6 +137,7 @@ class AudioPlayerViewController: UIViewController {
 					// TODO: notify delegate of error
 					return
 				}
+
 				// TODO: notify delegate that stop button was pressed.
 				(self.parentViewController! as! HistoryBrowserViewController).playerContainerViewHeightConstraint.constant = 0
 			}
@@ -136,16 +179,23 @@ class AudioPlayerViewController: UIViewController {
 	If the user has unplugged their headphones / disconnected from bluetooth speakers / something similar,
 	then pause the audio.
 	*/
-	func audioRouteChanged(notification: NSNotification) {
+	dynamic func audioRouteChanged(notification: NSNotification) {
 		guard spotify.player.isPlaying else {
 			return
 		}
-		if let reason = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? AVAudioSessionRouteChangeReason where reason == .OldDeviceUnavailable {
+
+		guard let reasonCode = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
+			print("audioRouteChanged: unable to get int value for key AVAudioSessionRouteChangeReasonKey")
+			return
+		}
+
+		if AVAudioSessionRouteChangeReason(rawValue: reasonCode) == .OldDeviceUnavailable {
 			spotify.player.setIsPlaying(false) { error in
 				print("audioRouteChanged: error while trying to pause player: \(error)")
 			}
 		}
 	}
+
 }
 
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
@@ -159,13 +209,16 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	}
 
 	/**
-
+	Somtimes this is called a long while before audioStreaming(_:didChangePlaybackStatus); it is being
+	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: NSURL!) {
 		if let lastTrackURI = trackURIs.last where lastTrackURI == trackUri {
 			updateUI(isPlaying: false)
 		}
 	}
+
+
 	/** Called before the streaming controller begins playing another track.
 
  @param audioStreaming The object that sent the message.
