@@ -21,26 +21,13 @@ class HistoryBrowserViewController: UIViewController {
 	let tableViewController = UITableViewController()
 	let refreshControl = UIRefreshControl()
 
-	let context = CoreDataStack.sharedInstance.managedObjectContext
-
-	let userSettings = UserSetting.sharedInstance
-
-	var isFetchingOlder = false
-
-	var isRefreshing = false
+	lazy var historyData: PlayedSongDataManager = {
+		return PlayedSongDataManager(fetchedResultsControllerDelegate:self,
+			context: CoreDataStack.sharedInstance.managedObjectContext)
+	}()
 
 	var insertIndexPaths = [NSIndexPath]()
 	var deleteIndexPaths = [NSIndexPath]()
-
-	lazy var fetchedResultsController: NSFetchedResultsController = {
-		var frc: NSFetchedResultsController!
-		self.context.performBlockAndWait {
-			let fetchRequest = NSFetchRequest(entityName: "PlayedSong")
-			fetchRequest.sortDescriptors = [NSSortDescriptor(key: "playedAt", ascending: false)]
-			frc = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.context, sectionNameKeyPath: nil, cacheName: nil)
-		}
-		return frc
-	}()
 
 	lazy var audioPlayerVC: AudioPlayerViewController = {
 		return self.childViewControllers.first as! AudioPlayerViewController
@@ -51,13 +38,11 @@ class HistoryBrowserViewController: UIViewController {
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
-		refreshFetchRequest()
+		historyData.refresh()
 		setupRefreshControl()
 
 		// If there is no song history yet, load the latest songs.
-		if (fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
-			attemptHistoryFetch(newerHistory: false)
-		}
+		historyData.loadLatestIfEmpty()
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -71,7 +56,7 @@ class HistoryBrowserViewController: UIViewController {
 		}
 
 		datePickerVC.modalPresentationStyle = .OverCurrentContext
-		let displayDate = extremitySong(true)?.playedAt ?? NSDate()
+		let displayDate = historyData.extremitySong(true)?.playedAt ?? NSDate()
 		datePickerVC.startingDate = displayDate
 		datePickerVC.delegate = self
 
@@ -98,168 +83,23 @@ class HistoryBrowserViewController: UIViewController {
 	}
 
 	func refreshRequested(sender: UIRefreshControl) {
-		attemptHistoryFetch(newerHistory: true) { success in
+		historyData.attemptHistoryFetch(newerHistory: true) { success in
 			sender.endRefreshing()
-		}
-	}
-
-	/**
-	Get more history, if no other history request is already running.
-	*/
-	func attemptHistoryFetch(newerHistory newerHistory: Bool, afterFetch: ((success: Bool) -> Void)? = nil) {
-		defer {
-			objc_sync_exit(self)
-		}
-		objc_sync_enter(self)
-		guard !isRefreshing else {
-			afterFetch?(success: false)
-			return
-		}
-		isRefreshing = true
-
-		isFetchingOlder = !newerHistory
-		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
-			if fetchedCount > 0 {
-				self.removeExcessLocalHistory(fromBottom: newerHistory)
-			}
-			afterFetch?(success: success)
-			if let err = error {
-				let title = "Unable to get \(newerHistory ? "newer" : "older") song history"
-				var message: String?
-				if ErrorInfo.isRequestTimedOut(err) {
-					message = "The request timed out - check your network connection"
-				}
-				Utility.presentAlert(title, message: message)
-			}
-			objc_sync_enter(self)
-			self.isRefreshing = false
-			objc_sync_exit(self)
-		}
-	}
-
-	/**
-	Get newer (or older) song history.
-
-	- Parameters:
-	- newer: If true, fetch newer history, else fetch older history
-	- forDate: base date from which newer or older history will be fetched
-	- completionHandler: handler to call after history fetched (or in case of failure)
-	*/
-	func fetchMoreHistory(newer newer: Bool, forDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
-
-		var baseDate: NSDate
-		let limitSong = extremitySong(newer)
-		if let song = limitSong {
-			baseDate = song.playedAt
-		} else {
-			baseDate = NSDate()
-		}
-
-		// Avoid trying to fetch history earlier than the known limit:
-		guard baseDate.earlierDate(Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE) != baseDate else {
-			completionHandler?(success: true, fetchedCount: 0, error: nil)
-			return
-		}
-
-		var vectorCount = userSettings.historyFetchSongCount
-		if !newer || limitSong == nil {
-			vectorCount = -vectorCount
-		}
-		updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
-	}
-
-	/**
-	Replace local history with the history from the given date, if the history fetch is successful.
-	*/
-	func replaceLocalHistory(newDate: NSDate) {
-		defer {
-			objc_sync_exit(self)
-		}
-		objc_sync_enter(self)
-		guard !isRefreshing else {
-			print("replaceHistory: abandoning refresh because a refresh is already running")
-			return
-		}
-
-		isRefreshing = true
-		isFetchingOlder = false
-
-		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
-			if let err = error {
-				let title = "Unable to get song history for selected data"
-				var message: String?
-				if ErrorInfo.isRequestTimedOut(err) {
-					message = "The request timed out - check your network connection"
-				}
-				Utility.presentAlert(title, message: message)
-			} else {
-				self.refreshFetchRequest()
-				async_main {
-					self.tableView.reloadData()
-					self.tableView.contentOffset = CGPointMake(0, 0 - self.tableView.contentInset.top)
-				}
-			}
-			objc_sync_enter(self)
-			self.isRefreshing = false
-			objc_sync_exit(self)
-		}
-	}
-
-	/**
-	Fetches song history and inserts the fetched data into the local store.
-	*/
-	func updateWithHistoryFromDate(date: NSDate, vectorCount: Int, purgeBeforeUpdating: Bool = false, completionHandler: RPFetchResultHandler? = nil ) {
-		/**
-		This method handles the data returned from the fetchNewer() or fetchOlder() calls.
-
-		If a song list is returned, it triggers the saving of those songs.
-
-		It calls the RPFetchResultsHandler completionHandler, if present.
-		*/
-		func songProcessingHandler(playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) {
-			guard error == nil else {
-				completionHandler?(success: false, fetchedCount: 0,	error: error)
-				return
-			}
-
-			guard let songHistory = playedSongs else {
-				let status = "playedSong list is unexpectedly nil"
-				print(status)
-
-				completionHandler?(
-					success: false,
-					fetchedCount: 0,
-					error: NSError(domain: "HistoryViewController", code: 1, userInfo: [NSLocalizedDescriptionKey: status])
-				)
-				return
-			}
-
-			guard songHistory.count > 0 else {
-				completionHandler?(success: true, fetchedCount: 0, error: nil)
-				return
-			}
-
-			if purgeBeforeUpdating {
-				removeAllHistory()
-			}
-
-			PlayedSong.upsertSongs(songHistory, context: self.context, onlyInserts: purgeBeforeUpdating)
-			completionHandler?(success: true, fetchedCount: songHistory.count, error: nil)
-		}
-
-		RadioParadise.fetchHistory(userSettings.spotifyRegion, date: date, vectorCount: vectorCount, handler: songProcessingHandler)
-	}
-
-	func loadMoreIfNearLastRow(row: Int) {
-		if !isRefreshing && isNearlyLastRow(row) {
-			attemptHistoryFetch(newerHistory: false)
 		}
 	}
 }
 
 extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 	func dateSelected(date: NSDate) {
-		replaceLocalHistory(date)
+		historyData.replaceLocalHistory(date) { success in
+			if success {
+				async_main {
+					self.tableView.reloadData()
+					self.tableView.contentOffset = CGPointMake(0, 0 - self.tableView.contentInset.top)
+				}
+
+			}
+		}
 	}
 }
 
@@ -297,7 +137,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 	*/
 	func controllerDidChangeContent(controller: NSFetchedResultsController) {
 
-		let disableRowAnimations = isFetchingOlder
+		let disableRowAnimations = historyData.isFetchingOlder
 
 		if disableRowAnimations {
 			// When adding items to the end of the table view, there is a noticeable flicker and small jump unless
@@ -312,7 +152,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		tableView.insertRowsAtIndexPaths(insertIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
 		tableView.deleteRowsAtIndexPaths(rowsToDelete, withRowAnimation: .None)
 
-		if isFetchingOlder {
+		if historyData.isFetchingOlder {
 			// If rows above have been deleted at the top of the table view, shift the current contenteOffset up an appropriate amount:
 			tableView.contentOffset = CGPointMake(tableView.contentOffset.x, tableView.contentOffset.y - tableView.rowHeight * CGFloat(rowsToDelete.count))
 		}
@@ -323,120 +163,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 			CATransaction.commit()
 		}
 
-		self.context.performBlock {
-			CoreDataStack.sharedInstance.saveContext()
-		}
-	}
-
-	/**
-	(Re)fetch the data for the fetchedResultsController.
-	*/
-	func refreshFetchRequest() {
-		context.performBlockAndWait {
-			do {
-				try self.fetchedResultsController.performFetch()
-				self.fetchedResultsController.delegate = self
-			} catch {
-				print("HistoryViewController: error on fetchedResultsController.performFetch: \(error)")
-			}
-		}
-	}
-
-	func isNearlyLastRow(row: Int) -> Bool {
-		if let fetchedObjects = fetchedResultsController.fetchedObjects {
-			return row == fetchedObjects.count - 10
-		}
-		return false
-	}
-
-	/**
-	Get the newest (or oldest) song.
-	*/
-	func extremitySong(newest: Bool) -> PlayedSong? {
-		var song: PlayedSong?
-		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
-			context.performBlockAndWait {
-				if newest {
-					song = fetchedObjects[0] as? PlayedSong
-				} else {
-					song = fetchedObjects[fetchedObjects.count - 1] as? PlayedSong
-				}
-			}
-		}
-		return song
-	}
-
-	/**
-	If, after a fetch, there are too many songs in local storage, remove the excess from
-	the other side (e.g. if refresh was done at the top, remove songs from the bottom of
-	the tableview).
-	*/
-	func removeExcessLocalHistory(fromBottom fromBottom: Bool) {
-
-		// TODO possibly: optimization: use a bulk delete action for this (bulk delete actions do not fire notifications
-		//                though, so it might require refreshing the tableview / fetchedResultsController.
-
-		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
-
-		context.performBlock {
-			guard let songCount = self.fetchedResultsController.fetchedObjects?.count where songCount > maxHistoryCount else {
-				// No need to do anything.
-				return
-			}
-			guard let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] else {
-				print("removeExcessLocalHistory: unable to get PlayedSong objects")
-				return
-			}
-
-			let toBeDeleted: Range<Int>
-
-			if fromBottom {
-				toBeDeleted = (maxHistoryCount - 1)...(songCount - 1)
-			} else {
-				toBeDeleted = 0...(songCount - maxHistoryCount)
-			}
-
-			for index in toBeDeleted {
-				let song = songs[index]
-				self.context.deleteObject(song)
-			}
-		}
-	}
-
-	func removeAllHistory() {
-		let fetchRequest = NSFetchRequest(entityName: "PlayedSong")
-		let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-
-		context.performBlockAndWait {
-			do {
-				try self.context.executeRequest(deleteRequest)
-			} catch {
-				print("Unable to bulk delete all PlayedSong history: \(error)")
-				return
-			}
-		}
-		CoreDataStack.sharedInstance.saveContext()
-	}
-
-	/**
-	Get an array of track ids, starting with the given index path, and going towards more recent objects.
-	*/
-	func trackIdsStartingAtIndexPath(indexPath: NSIndexPath, maxCount: Int = SpotifyClient.MAX_PLAYER_TRACK_COUNT) -> [String] {
-		var trackIds = [String]()
-		let section = indexPath.section
-		var trackCount = 0
-		var row = indexPath.row
-		context.performBlockAndWait {
-			repeat {
-				let path = NSIndexPath(forRow: row, inSection: section)
-				if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong, trackId = song.spotifyTrackId {
-					trackIds.append(trackId)
-					trackCount++
-				}
-				row--
-			} while trackCount < maxCount && row >= 0
-		}
-		return trackIds
+		historyData.saveContext()
 	}
 }
 
@@ -445,22 +172,18 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 	func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCellWithIdentifier("HistoryBrowserCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
 
-		if let song = fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong {
+		if let song = historyData.objectAtIndexPath(indexPath) {
 			cell.configureForSong(song)
 		}
 
 		// If user has scrolled almost all the way down to the last row, try to fetch some older song history.
-		loadMoreIfNearLastRow(indexPath.row)
+		historyData.loadMoreIfNearLastRow(indexPath.row)
 
 		return cell
 	}
 
 	func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-		if let sections = fetchedResultsController.sections {
-			return sections[section].numberOfObjects
-		} else {
-			return 0
-		}
+		return historyData.numberOfRowsInSection(section)
 	}
 }
 
@@ -469,17 +192,11 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		// If selected row has no spotify track, do not start playing
-		var shouldPlay = false
-		context.performBlockAndWait {
-			shouldPlay = (self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong)?.spotifyTrackId != nil
-		}
-		guard shouldPlay else {
+		guard historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
 			return
 		}
-
-		let trackIds = trackIdsStartingAtIndexPath(indexPath)
+		let trackIds = historyData.trackIdsStartingAtIndexPath(indexPath)
 		playerContainerViewHeightConstraint.constant = 100
 		audioPlayerVC.playTracks(trackIds)
 	}
 }
-
