@@ -38,11 +38,15 @@ class HistoryBrowserViewController: UIViewController {
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
-		historyData.refresh()
-		setupRefreshControl()
-
-		// If there is no song history yet, load the latest songs.
-		historyData.loadLatestIfEmpty()
+		historyData.refresh() { error in
+			// If there is no song history yet, load the latest songs.
+			self.historyData.loadLatestIfEmpty() { success in
+				async_main {
+					self.setupRefreshControl()
+					self.tableView.reloadData()
+				}
+			}
+		}
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -56,19 +60,23 @@ class HistoryBrowserViewController: UIViewController {
 		}
 
 		datePickerVC.modalPresentationStyle = .OverCurrentContext
-		let displayDate = historyData.extremitySong(true)?.playedAt ?? NSDate()
-		datePickerVC.startingDate = displayDate
-		datePickerVC.delegate = self
 
-		presentViewController(datePickerVC, animated: true, completion: nil)
+		historyData.extremitySong(newest: true) { newestSong in
+			let displayDate = newestSong?.playedAt ?? NSDate()
+			datePickerVC.startingDate = displayDate
+			datePickerVC.delegate = self
 
-		guard let popover = datePickerVC.popoverPresentationController else {
-			return
+			async_main {
+				self.presentViewController(datePickerVC, animated: true, completion: nil)
+
+				guard let popover = datePickerVC.popoverPresentationController else {
+					return
+				}
+				popover.permittedArrowDirections = .Up
+				popover.barButtonItem = sender
+				popover.delegate = self
+			}
 		}
-		popover.permittedArrowDirections = .Up
-		popover.barButtonItem = sender
-		popover.delegate = self
-
 	}
 
 	func setupRefreshControl() {
@@ -84,7 +92,9 @@ class HistoryBrowserViewController: UIViewController {
 
 	func refreshRequested(sender: UIRefreshControl) {
 		historyData.attemptHistoryFetch(newerHistory: true) { success in
-			sender.endRefreshing()
+			async_main {
+				sender.endRefreshing()
+			}
 		}
 	}
 }
@@ -108,6 +118,9 @@ extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate 
 		return .None
 	}
 }
+
+
+// MARK: NSFetchedResultsControllerDelegate
 
 extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 
@@ -168,6 +181,8 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 }
 
 
+// MARK: UITableViewDataSource methods
+
 extension HistoryBrowserViewController: UITableViewDataSource {
 	func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
 		let cell = tableView.dequeueReusableCellWithIdentifier("HistoryBrowserCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
@@ -187,7 +202,9 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 	}
 }
 
+
 // MARK: UITableViewDelegate methods
+
 extension HistoryBrowserViewController: UITableViewDelegate {
 
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -195,8 +212,20 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 		guard historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
 			return
 		}
-		let trackIds = historyData.trackIdsStartingAtIndexPath(indexPath)
-		playerContainerViewHeightConstraint.constant = 100
-		audioPlayerVC.playTracks(trackIds)
+
+		historyData.trackListCenteredAtIndexPath(indexPath, maxElements: Constant.AUDIO_PLAYER_MAX_TRACK_LIST_SIZE) { playList in
+
+			guard playList.list.count > 0 else {
+				print("Empty playlist: nothing to play")
+				return
+			}
+
+			// TODO: handle the container view resizing better:
+			async_main {
+				self.playerContainerViewHeightConstraint.constant = 100
+			}
+
+			self.audioPlayerVC.playTracks(playList)
+		}
 	}
 }

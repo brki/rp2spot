@@ -15,7 +15,17 @@ class PlayedSongDataManager {
 	var context: NSManagedObjectContext
 	let userSettings = UserSetting.sharedInstance
 	var isFetchingOlder = false
-	var isRefreshing = false
+	var _isRefreshing = false
+	var isRefreshing: Bool {
+		get {
+			return _isRefreshing
+		}
+		set {
+			objc_sync_enter(self)
+			_isRefreshing = newValue
+			objc_sync_exit(self)
+		}
+	}
 
 	init(fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate, context: NSManagedObjectContext) {
 		self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
@@ -37,12 +47,13 @@ class PlayedSongDataManager {
 	/**
 	(Re)fetch the data for the fetchedResultsController.
 	*/
-	func refresh() {
-		context.performBlockAndWait {
+	func refresh(handler: (NSError?) -> Void) {
+		context.performBlock {
 			do {
 				try self.fetchedResultsController.performFetch()
+				handler(nil)
 			} catch {
-				print("HistoryViewController: error on fetchedResultsController.performFetch: \(error)")
+				handler(error as NSError)
 			}
 		}
 	}
@@ -53,9 +64,15 @@ class PlayedSongDataManager {
 		}
 	}
 
-	func loadLatestIfEmpty() {
-		if (fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
-			attemptHistoryFetch(newerHistory: false)
+	func loadLatestIfEmpty(handler: ((success: Bool) -> Void)? = nil) {
+		context.performBlock {
+			if (self.fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
+				self.attemptHistoryFetch(newerHistory: false) { success in
+					handler?(success: success)
+				}
+			} else {
+				handler?(success: true)
+			}
 		}
 	}
 
@@ -63,10 +80,6 @@ class PlayedSongDataManager {
 	Get more history, if no other history request is already running.
 	*/
 	func attemptHistoryFetch(newerHistory newerHistory: Bool, afterFetch: ((success: Bool) -> Void)? = nil) {
-		defer {
-			objc_sync_exit(self)
-		}
-		objc_sync_enter(self)
 		guard !isRefreshing else {
 			afterFetch?(success: false)
 			return
@@ -87,9 +100,7 @@ class PlayedSongDataManager {
 				}
 				Utility.presentAlert(title, message: message)
 			}
-			objc_sync_enter(self)
 			self.isRefreshing = false
-			objc_sync_exit(self)
 		}
 	}
 
@@ -103,25 +114,26 @@ class PlayedSongDataManager {
 	*/
 	func fetchMoreHistory(newer newer: Bool, forDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
 
-		var baseDate: NSDate
-		let limitSong = extremitySong(newer)
-		if let song = limitSong {
-			baseDate = song.playedAt
-		} else {
-			baseDate = NSDate()
-		}
+		extremitySong(newest: newer) { limitSong in
+			var baseDate: NSDate
+			if let song = limitSong {
+				baseDate = song.playedAt
+			} else {
+				baseDate = NSDate()
+			}
 
-		// Avoid trying to fetch history earlier than the known limit:
-		guard baseDate.earlierDate(Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE) != baseDate else {
-			completionHandler?(success: true, fetchedCount: 0, error: nil)
-			return
-		}
+			// Avoid trying to fetch history earlier than the known limit:
+			guard baseDate.earlierDate(Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE) != baseDate else {
+				completionHandler?(success: true, fetchedCount: 0, error: nil)
+				return
+			}
 
-		var vectorCount = userSettings.historyFetchSongCount
-		if !newer || limitSong == nil {
-			vectorCount = -vectorCount
+			var vectorCount = self.userSettings.historyFetchSongCount
+			if !newer || limitSong == nil {
+				vectorCount = -vectorCount
+			}
+			self.updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
 		}
-		updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
 	}
 
 	/**
@@ -148,7 +160,7 @@ class PlayedSongDataManager {
 				completionHandler?(
 					success: false,
 					fetchedCount: 0,
-					error: NSError(domain: "HistoryViewController", code: 1, userInfo: [NSLocalizedDescriptionKey: status])
+					error: NSError(domain: "PlayedSongDataManager", code: 1, userInfo: [NSLocalizedDescriptionKey: status])
 				)
 				return
 			}
@@ -173,10 +185,6 @@ class PlayedSongDataManager {
 	Replace local history with the history from the given date, if the history fetch is successful.
 	*/
 	func replaceLocalHistory(newDate: NSDate, handler:(success: Bool) -> Void) {
-		defer {
-			objc_sync_exit(self)
-		}
-		objc_sync_enter(self)
 		guard !isRefreshing else {
 			print("replaceHistory: abandoning refresh because a refresh is already running")
 			handler(success: false)
@@ -187,20 +195,25 @@ class PlayedSongDataManager {
 		isFetchingOlder = false
 
 		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
-			if let err = error {
+			self.isRefreshing = false
+			guard error == nil else {
 				let title = "Unable to get song history for selected data"
 				var message: String?
-				if ErrorInfo.isRequestTimedOut(err) {
+				if ErrorInfo.isRequestTimedOut(error!) {
 					message = "The request timed out - check your network connection"
 				}
 				Utility.presentAlert(title, message: message)
-			} else {
-				self.refresh()
+				handler(success: false)
+				return
 			}
-			handler(success: success)
-			objc_sync_enter(self)
-			self.isRefreshing = false
-			objc_sync_exit(self)
+			self.refresh() { error in
+				guard error == nil else {
+					print("replaceLocalHistory: error refreshing fetch request: \(error)")
+					handler(success: false)
+					return
+				}
+				handler(success: success)
+			}
 		}
 	}
 
@@ -277,6 +290,79 @@ class PlayedSongDataManager {
 		CoreDataStack.sharedInstance.saveContext()
 	}
 
+
+	/**
+	Calls handler with a AudioPlayerPlaylist of songs that have associated Spotify tracks, centered around the given indexPath.
+	
+	If the song at indexPath does not have a Spotify track, an empty AudioPlayerPlaylist will be returned.
+	*/
+	func trackListCenteredAtIndexPath(indexPath: NSIndexPath, maxElements: Int, handler: (list: AudioPlayerPlaylist) -> Void) {
+
+		var laterList = [PlayedSongData]()  // for songs with a playedAt date after the center song
+		var earlierList = [PlayedSongData]() // for songs with a playedAt date before the center song
+
+		context.performBlock {
+			guard let fetchedObjects = self.fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 else {
+				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
+				return
+			}
+
+			guard let centerSong = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong where centerSong.spotifyTrackId != nil else {
+				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
+				return
+			}
+
+			var desiredElements = maxElements - 1
+			let maxRow = fetchedObjects.count - 1
+			var laterRow = indexPath.row - 1
+			var earlierRow = indexPath.row + 1
+			var hasEarlier = earlierRow <= maxRow
+			var hasLater = laterRow >= 0
+
+			// Because of the FRC's sort order, songs played at a later date come earlier in the list of objects.
+			// Not all songs have an associated Spotify track.
+			// Starting from the center song, fetch a pair of (earlier, later) songs with a Spotify track,
+			// as far as possible.  If the earliest or latest available song is reached, but there are still
+			// more songs available on the other side (earlier or later), continue fetching those songs (this
+			// may result in the "centerSong" not really being in the center).
+			while desiredElements > 0 && (hasEarlier || hasLater) {
+				var laterAdded = false
+
+				while hasLater && !laterAdded {
+					let path = NSIndexPath(forRow: laterRow, inSection: indexPath.section)
+					if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong where song.spotifyTrackId != nil {
+						laterList.append(PlayedSongData(song: song))
+						laterAdded = true
+						desiredElements--
+					}
+					laterRow--
+					hasLater = laterRow >= 0
+				}
+				if desiredElements == 0 {
+					continue
+				}
+
+				var earlierAdded = false
+				while hasEarlier && !earlierAdded {
+					let path = NSIndexPath(forRow: earlierRow, inSection: indexPath.section)
+					if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong where song.spotifyTrackId != nil {
+						earlierList.append(PlayedSongData(song: song))
+						earlierAdded = true
+						desiredElements--
+					}
+					earlierRow++
+					hasEarlier = earlierRow <= maxRow
+				}
+			}
+			var playList = Array(earlierList.reverse())
+			playList.append(PlayedSongData(song: centerSong))
+			let songIndex = playList.count - 1
+			playList += laterList
+			handler(list: AudioPlayerPlaylist(list: playList, currentIndex: songIndex))
+		}
+
+	}
+
 	/**
 	Get an array of track ids, starting with the given index path, and going towards more recent objects.
 	*/
@@ -301,18 +387,18 @@ class PlayedSongDataManager {
 	/**
 	Get the newest (or oldest) song.
 	*/
-	func extremitySong(newest: Bool) -> PlayedSong? {
-		var song: PlayedSong?
-		if let fetchedObjects = fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
-			context.performBlockAndWait {
+	func extremitySong(newest newest: Bool, handler: (PlayedSong?) -> Void) {
+		context.performBlock {
+			if let fetchedObjects = self.fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
 				if newest {
-					song = fetchedObjects[0] as? PlayedSong
+					handler(fetchedObjects[0] as? PlayedSong)
 				} else {
-					song = fetchedObjects[fetchedObjects.count - 1] as? PlayedSong
+					handler(fetchedObjects[fetchedObjects.count - 1] as? PlayedSong)
 				}
+			} else {
+				handler(nil)
 			}
 		}
-		return song
 	}
 }
 

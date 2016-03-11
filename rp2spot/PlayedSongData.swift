@@ -67,19 +67,20 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 
 	/**
 	Create a PlayedSongData struct from a PlayedSong object.
+	
+	Note that it's the caller's responsibility to ensure that this is done in a thread-safe manner
+	for the song's managedObjectContext.
 	*/
 	init(song: PlayedSong) {
-		song.managedObjectContext!.performBlockAndWait {
-			self.title = song.title
-			self.playedAt = song.playedAt
-			self.albumTitle = song.albumTitle
-			self.radioParadiseSongId = song.radioParadiseSongId
-			self.artistName = song.artistName
-			self.asin = song.asin
-			self.spotifyTrackId = song.spotifyTrackId
-			self.smallImageURL = song.smallImageURL
-			self.largeImageURL = song.largeImageURL
-		}
+		self.title = song.title
+		self.playedAt = song.playedAt
+		self.albumTitle = song.albumTitle
+		self.radioParadiseSongId = song.radioParadiseSongId
+		self.artistName = song.artistName
+		self.asin = song.asin
+		self.spotifyTrackId = song.spotifyTrackId
+		self.smallImageURL = song.smallImageURL
+		self.largeImageURL = song.largeImageURL
 	}
 
 	static func collection(response response: NSHTTPURLResponse, representation: AnyObject) -> [PlayedSongData] {

@@ -21,6 +21,9 @@ struct Constant {
 	static let RADIO_PARADISE_SONG_INFO_URL_TEMPLATE="https://www.radioparadise.com/rp_2.php?#name=songinfo&song_id={songid}"
 
 
+	// The Spotify web service limits to a maximum of 50 URIs when fetching track information.
+	static let AUDIO_PLAYER_MAX_TRACK_LIST_SIZE = 50
+
 	enum Color: UInt {
 		case SageGreen = 0xEEFFEC
 		case LightGrey = 0xD8DBE0

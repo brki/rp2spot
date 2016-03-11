@@ -16,28 +16,19 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var nextTrackButton: UIButton!
 	@IBOutlet weak var previousTrackButton: UIButton!
 
-	/*
-	Metadata is under the following keys:
-
-	- `SPTAudioStreamingMetadataTrackName`: The track's name.
-	- `SPTAudioStreamingMetadataTrackURI`: The track's Spotify URI.
-	- `SPTAudioStreamingMetadataArtistName`: The track's artist's name.
-	- `SPTAudioStreamingMetadataArtistURI`: The track's artist's Spotify URI.
-	- `SPTAudioStreamingMetadataAlbumName`: The track's album's name.
-	- `SPTAudioStreamingMetadataAlbumURI`: The track's album's URI.
-	- `SPTAudioStreamingMetadataTrackDuration`: The track's duration as an `NSTimeInterval` boxed in an `NSNumber`.
-	*/
-	var trackMetadata: [NSObject: AnyObject]?
-
-	var trackURIs = [NSURL]()
+	var playlist = AudioPlayerPlaylist(list:[], currentIndex: 0)
 
 	var spotify = SpotifyClient.sharedInstance
 
+	// ``nowPlayingCenter`` is used to set current song information, this will
+	// be displayed in the control center.
+	var nowPlayingCenter = MPNowPlayingInfoCenter.defaultCenter()
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		spotify.player.delegate = self
 		spotify.player.playbackDelegate = self
+		spotify.player.`repeat` = false
 
 		// Listen for a notification so that we can tell when
 		// a user has unplugged their headphones.
@@ -56,6 +47,7 @@ class AudioPlayerViewController: UIViewController {
 
 	deinit {
 		NSNotificationCenter.defaultCenter().removeObserver(self)
+		removeMPRemoteCommandCenterEventListeners()
 	}
 
 	@IBAction func togglePlayback(sender: AnyObject) {
@@ -83,32 +75,6 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 		}
-	}
-
-	/**
-	Handle events triggered by remote hardware (e.g. headphones, bluetooth speakers, etc.),
-	and allow
-	*/
-	func registerForRemoteEvents() {
-		let remote = MPRemoteCommandCenter.sharedCommandCenter()
-
-		remote.nextTrackCommand.enabled = true
-		remote.nextTrackCommand.addTarget(self, action: "skipToNextTrack:")
-
-		remote.previousTrackCommand.enabled = true
-		remote.previousTrackCommand.addTarget(self, action: "skipToPreviousTrack:")
-
-		remote.togglePlayPauseCommand.enabled = true
-		remote.togglePlayPauseCommand.addTarget(self, action: "togglePlayback:")
-
-		remote.pauseCommand.enabled = true
-		remote.pauseCommand.addTarget(self, action: "pausePlaying:")
-
-		remote.playCommand.enabled = true
-		remote.playCommand.addTarget(self, action: "startPlaying:")
-
-		remote.stopCommand.enabled = true
-		remote.stopCommand.addTarget(self, action: "stopPlaying:")
 	}
 
 	@IBAction func skipToNextTrack(sender: AnyObject) {
@@ -144,8 +110,9 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	func playTracks(trackList:[String]) {
-		trackURIs = spotify.URIsForTrackIds(trackList)
+	func playTracks(playList: AudioPlayerPlaylist) {
+		self.playlist = playList
+		let trackURIs = spotify.URIsForTrackIds(playList.list.map({ $0.spotifyTrackId! }))
 		guard trackURIs.count > 0 else {
 			print("playTracks: no tracks to play!")
 			return
@@ -157,12 +124,26 @@ class AudioPlayerViewController: UIViewController {
 				// TODO: notify delegate of error
 				return
 			}
-			// TODO: handle case where a session-update notification will be posted
+			// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
 
-			self.spotify.playTracks(self.trackURIs) { error in
+			self.spotify.playTracks(trackURIs, fromIndex:self.playlist.currentIndex) { error in
 				guard error == nil else {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					return
+				}
+				// TODO: get track metadata to display, using:
+				SPTTrack.tracksWithURIs(trackURIs, accessToken: nil, market: nil) { error, trackInfoList in
+					guard error == nil else {
+						print("Error fetching track infos: \(error!)")
+						// TODO: notify of error
+						return
+					}
+					guard let infos = trackInfoList as? [SPTTrack] else {
+						print("trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
+						return
+					}
+					self.playlist.setTrackMetadata(infos)
+					self.updateNowPlayingInfo()
 				}
 			}
 		}
@@ -172,6 +153,31 @@ class AudioPlayerViewController: UIViewController {
 		let imageName = isPlaying ? "Pause" : "Play"
 		playPauseButton.imageView!.image = UIImage(named: imageName)!
 	}
+
+	func updateNowPlayingInfo() {
+		guard let track = playlist.trackMetadata[SPTTrack.identifierFromURI(spotify.player.currentTrackURI)] else {
+			print("Unable to get current track metadata")
+			nowPlayingCenter.nowPlayingInfo = nil
+			return
+		}
+
+		let artistNames = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joinWithSeparator(", ")
+		var nowPlayingInfo: [String: AnyObject] = [
+			MPMediaItemPropertyTitle: track.name,
+			MPMediaItemPropertyAlbumTitle: track.album.name,
+			MPMediaItemPropertyPlaybackDuration: track.duration
+		]
+		if artistNames.characters.count > 0 {
+			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames
+		}
+		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
+	}
+}
+
+
+// MARK: System notification handlers
+
+extension AudioPlayerViewController {
 
 	/**
 	Notification handler for audio route changes.
@@ -191,17 +197,57 @@ class AudioPlayerViewController: UIViewController {
 
 		if AVAudioSessionRouteChangeReason(rawValue: reasonCode) == .OldDeviceUnavailable {
 			spotify.player.setIsPlaying(false) { error in
-				print("audioRouteChanged: error while trying to pause player: \(error)")
+				guard error == nil else {
+					print("audioRouteChanged: error while trying to pause player: \(error)")
+					return
+				}
 			}
 		}
 	}
 
+	/**
+	Configure handling for events triggered by remote hardware (e.g. headphones, bluetooth speakers, etc.).
+	*/
+	func registerForRemoteEvents() {
+		let remote = MPRemoteCommandCenter.sharedCommandCenter()
+
+		remote.nextTrackCommand.enabled = true
+		remote.nextTrackCommand.addTarget(self, action: "skipToNextTrack:")
+
+		remote.previousTrackCommand.enabled = true
+		remote.previousTrackCommand.addTarget(self, action: "skipToPreviousTrack:")
+
+		remote.togglePlayPauseCommand.enabled = true
+		remote.togglePlayPauseCommand.addTarget(self, action: "togglePlayback:")
+
+		remote.pauseCommand.enabled = true
+		remote.pauseCommand.addTarget(self, action: "pausePlaying:")
+
+		remote.playCommand.enabled = true
+		remote.playCommand.addTarget(self, action: "startPlaying:")
+
+		remote.stopCommand.enabled = true
+		remote.stopCommand.addTarget(self, action: "stopPlaying:")
+	}
+
+	func removeMPRemoteCommandCenterEventListeners() {
+		let remote = MPRemoteCommandCenter.sharedCommandCenter()
+		remote.nextTrackCommand.removeTarget(self)
+		remote.previousTrackCommand.removeTarget(self)
+		remote.togglePlayPauseCommand.removeTarget(self)
+		remote.pauseCommand.removeTarget(self)
+		remote.playCommand.removeTarget(self)
+		remote.stopCommand.removeTarget(self)
+	}
 }
+
+
+// MARK: SPTAudioStreamingPlaybackDelegate
 
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangeToTrack trackMetadata: [NSObject : AnyObject]!) {
-		self.trackMetadata = trackMetadata
+		updateNowPlayingInfo()
 	}
 
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
@@ -213,7 +259,8 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: NSURL!) {
-		if let lastTrackURI = trackURIs.last where lastTrackURI == trackUri {
+		let trackId = SPTTrack.identifierFromURI(trackUri)
+		if playlist.isLastTrack(trackId) {
 			updateUI(isPlaying: false)
 		}
 	}
@@ -275,6 +322,10 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
  */
 //	-(void)audioStreamingDidPopQueue:(SPTAudioStreamingController *)audioStreaming;
 }
+
+
+// MARK: SPTAudioStreamingDelegate
+// TODO: implement these:
 
 extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 /** Called when the streaming controller encounters a fatal error.

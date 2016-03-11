@@ -38,6 +38,10 @@ class SpotifyClient {
 		]
 	}
 
+	static func fullSpotifyTrackId(shortId: String) -> String {
+		return "spotify:track:\(shortId)"
+	}
+
 	/**
 	Post a session-updated notification to the default notification center.
 
@@ -92,7 +96,7 @@ class SpotifyClient {
 	}
 
 	func trackURI(trackId: String) -> NSURL? {
-		return NSURL(string: "spotify:track:\(trackId)")
+		return NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId))
 	}
 
 	func URIsForTrackIds(trackIds: [String]) -> [NSURL] {
@@ -105,7 +109,7 @@ class SpotifyClient {
 		return URIs
 	}
 
-	func playTracks(URIs: [NSURL], handler: ((NSError?) -> Void)? = nil) {
+	func playTracks(URIs: [NSURL], fromIndex: Int = 0, handler: ((NSError?) -> Void)? = nil) {
 
 		func startPlaying() {
 			// Stop player and clear track list before starting playback of new track list.
@@ -116,7 +120,7 @@ class SpotifyClient {
 					return
 				}
 
-				self.player.playURIs(URIs, fromIndex:0) { error in
+				self.player.playURIs(URIs, fromIndex:Int32(fromIndex)) { error in
 					if error != nil {
 						print("playTracks: Error while initiating playback")
 					}
