@@ -14,10 +14,12 @@ func async_main(block: () -> Void) {
 
 class Utility {
 
-	static func presentAlert(title: String?, message: String?) {
+	static func presentAlert(title: String?, message: String?, ommitOKButton: Bool = false) {
 
 		let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
-		alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+		if !ommitOKButton {
+			alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+		}
 
 		presentAlertControllerOnFrontController(alertController)
 	}

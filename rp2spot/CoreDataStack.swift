@@ -89,13 +89,10 @@ class CoreDataStack {
 
 			dict[NSUnderlyingErrorKey] = error as NSError
 			let wrappedError = NSError(domain: "rp2spot-CoreData", code: 9999, userInfo: dict)
-
-			// TODO: handle this without abort():
-
-			// Replace this with code to handle the error appropriately.
-			// abort() causes the application to generate a crash log and terminate. You should not use this function in a shipping application, although it may be useful during development.
 			NSLog("Unresolved error \(wrappedError), \(wrappedError.userInfo)")
-			abort()
+
+			Utility.presentAlert("Error accessing data store",
+				message: "This is a serious error.  Try completely quitting the app before opening it again.")
 		}
 
 		return coordinator
@@ -108,5 +105,4 @@ class CoreDataStack {
 		managedObjectContext.persistentStoreCoordinator = coordinator
 		return managedObjectContext
 	}()
-
 }
