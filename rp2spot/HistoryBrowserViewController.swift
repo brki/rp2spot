@@ -29,9 +29,7 @@ class HistoryBrowserViewController: UIViewController {
 	var insertIndexPaths = [NSIndexPath]()
 	var deleteIndexPaths = [NSIndexPath]()
 
-	lazy var audioPlayerVC: AudioPlayerViewController = {
-		return self.childViewControllers.first as! AudioPlayerViewController
-	}()
+	var audioPlayerVC: AudioPlayerViewController!
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -52,6 +50,12 @@ class HistoryBrowserViewController: UIViewController {
 	override func didReceiveMemoryWarning() {
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
+	}
+
+	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+		if let vc = segue.destinationViewController as? AudioPlayerViewController {
+			audioPlayerVC = vc
+		}
 	}
 
 	@IBAction func selectDate(sender: UIBarButtonItem) {
