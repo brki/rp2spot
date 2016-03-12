@@ -23,7 +23,7 @@ class HistoryBrowserViewController: UIViewController {
 
 	lazy var historyData: PlayedSongDataManager = {
 		return PlayedSongDataManager(fetchedResultsControllerDelegate:self,
-			context: CoreDataStack.sharedInstance.managedObjectContext)
+			context: CoreDataStack.childContextForContext(CoreDataStack.sharedInstance.managedObjectContext))
 	}()
 
 	var insertIndexPaths = [NSIndexPath]()
@@ -184,7 +184,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 			CATransaction.commit()
 		}
 
-		historyData.saveContext()
+		self.historyData.saveContext()
 	}
 }
 

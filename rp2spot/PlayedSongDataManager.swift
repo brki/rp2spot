@@ -64,9 +64,7 @@ class PlayedSongDataManager {
 	}
 
 	func saveContext() {
-		self.context.performBlock {
-			CoreDataStack.sharedInstance.saveContext()
-		}
+		CoreDataStack.saveContext(self.context)
 	}
 
 	func loadLatestIfEmpty(handler: ((success: Bool) -> Void)? = nil) {
@@ -222,18 +220,25 @@ class PlayedSongDataManager {
 		}
 	}
 
-	func loadMoreIfNearLastRow(row: Int) {
+	/**
+	If almost at the last row, trigger pulling more data.
+	
+	The function returns true if refresh was triggered, false otherwise
+	*/
+	func loadMoreIfNearLastRow(row: Int) -> Bool {
 		guard !isRefreshing else {
 			// Only one refresh at a time.
-			return
+			return false
 		}
 		if isNearlyLastRow(row) {
 			self.attemptHistoryFetch(newerHistory: false)
+			return true
 		}
+		return false
 	}
 
 	func isNearlyLastRow(row: Int) -> Bool {
-		return row == songCount - 10
+		return row == songCount - 8
 	}
 
 	/**
@@ -287,7 +292,7 @@ class PlayedSongDataManager {
 				return
 			}
 		}
-		CoreDataStack.sharedInstance.saveContext()
+		CoreDataStack.saveContext(context)
 	}
 
 
