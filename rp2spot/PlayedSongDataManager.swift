@@ -27,6 +27,11 @@ class PlayedSongDataManager {
 		}
 	}
 
+	var songCount: Int {
+		// It is safe to access the fetchedObjects count without using the context's queue
+		return self.fetchedResultsController.fetchedObjects?.count ?? 0
+	}
+
 	init(fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate, context: NSManagedObjectContext) {
 		self.fetchedResultsControllerDelegate = fetchedResultsControllerDelegate
 		self.context = context
@@ -65,13 +70,13 @@ class PlayedSongDataManager {
 	}
 
 	func loadLatestIfEmpty(handler: ((success: Bool) -> Void)? = nil) {
+		guard songCount == 0 else {
+			handler?(success: true)
+			return
+		}
 		context.performBlock {
-			if (self.fetchedResultsController.fetchedObjects?.count ?? 0) == 0 {
-				self.attemptHistoryFetch(newerHistory: false) { success in
-					handler?(success: success)
-				}
-			} else {
-				handler?(success: true)
+			self.attemptHistoryFetch(newerHistory: false) { success in
+				handler?(success: success)
 			}
 		}
 	}
@@ -222,20 +227,13 @@ class PlayedSongDataManager {
 			// Only one refresh at a time.
 			return
 		}
-		isNearlyLastRow(row) { isNearlyLast in
-			if isNearlyLast {
-				self.attemptHistoryFetch(newerHistory: false)
-			}
+		if isNearlyLastRow(row) {
+			self.attemptHistoryFetch(newerHistory: false)
 		}
 	}
 
-	func isNearlyLastRow(row: Int, handler:(Bool) -> Void) {
-		context.performBlock {
-			if let fetchedObjects = self.fetchedResultsController.fetchedObjects {
-				handler(row == fetchedObjects.count - 10)
-			}
-			handler(false)
-		}
+	func isNearlyLastRow(row: Int) -> Bool {
+		return row == songCount - 10
 	}
 
 	/**
@@ -250,11 +248,13 @@ class PlayedSongDataManager {
 
 		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
 
+		let currentSongCount = songCount
+		guard currentSongCount > maxHistoryCount else {
+			// No need to do anything.
+			return
+		}
+
 		context.performBlock {
-			guard let songCount = self.fetchedResultsController.fetchedObjects?.count where songCount > maxHistoryCount else {
-				// No need to do anything.
-				return
-			}
 			guard let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] else {
 				print("removeExcessLocalHistory: unable to get PlayedSong objects")
 				return
@@ -263,9 +263,9 @@ class PlayedSongDataManager {
 			let toBeDeleted: Range<Int>
 
 			if fromBottom {
-				toBeDeleted = (maxHistoryCount - 1)...(songCount - 1)
+				toBeDeleted = (maxHistoryCount - 1)...(currentSongCount - 1)
 			} else {
-				toBeDeleted = 0...(songCount - maxHistoryCount)
+				toBeDeleted = 0...(currentSongCount - maxHistoryCount)
 			}
 
 			for index in toBeDeleted {
@@ -298,22 +298,22 @@ class PlayedSongDataManager {
 	*/
 	func trackListCenteredAtIndexPath(indexPath: NSIndexPath, maxElements: Int, handler: (list: AudioPlayerPlaylist) -> Void) {
 
+		guard songCount > 0 else {
+			handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
+			return
+		}
+
 		var laterList = [PlayedSongData]()  // for songs with a playedAt date after the center song
 		var earlierList = [PlayedSongData]() // for songs with a playedAt date before the center song
 
 		context.performBlock {
-			guard let fetchedObjects = self.fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 else {
-				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
-				return
-			}
-
 			guard let centerSong = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong where centerSong.spotifyTrackId != nil else {
 				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
 				return
 			}
 
 			var desiredElements = maxElements - 1
-			let maxRow = fetchedObjects.count - 1
+			let maxRow = self.songCount - 1
 			var laterRow = indexPath.row - 1
 			var earlierRow = indexPath.row + 1
 			var hasEarlier = earlierRow <= maxRow
@@ -388,15 +388,15 @@ class PlayedSongDataManager {
 	Get the newest (or oldest) song.
 	*/
 	func extremitySong(newest newest: Bool, handler: (PlayedSong?) -> Void) {
+		guard let fetchedObjects = self.fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 else {
+			handler(nil)
+			return
+		}
 		context.performBlock {
-			if let fetchedObjects = self.fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 {
-				if newest {
-					handler(fetchedObjects[0] as? PlayedSong)
-				} else {
-					handler(fetchedObjects[fetchedObjects.count - 1] as? PlayedSong)
-				}
+			if newest {
+				handler(fetchedObjects[0] as? PlayedSong)
 			} else {
-				handler(nil)
+				handler(fetchedObjects[fetchedObjects.count - 1] as? PlayedSong)
 			}
 		}
 	}
@@ -407,20 +407,32 @@ class PlayedSongDataManager {
 extension PlayedSongDataManager {
 
 	func numberOfRowsInSection(section: Int) -> Int {
-		var numRows = 0
-		context.performBlockAndWait {
-			if let sections = self.fetchedResultsController.sections {
-				numRows = sections[section].numberOfObjects
-			}
-		}
-		return numRows
+		// From what I've read, it is safe to access fetched result controller sections
+		// without using the context's thread.
+		return self.fetchedResultsController.sections?[section].numberOfObjects ?? 0
 	}
 
+	/**
+	Gets the object at the index path.
+	
+	Note that this should only be called from withing the context's performBlock(AndWait) closure.
+	*/
 	func objectAtIndexPath(indexPath: NSIndexPath) -> PlayedSong? {
-		var song: PlayedSong? = nil
+		return self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong
+	}
+
+	/**
+	Gets a PlayedSongData object for the given index path.
+	
+	This method uses the context's performBlockAndWait method.
+	*/
+	func songDataForObjectAtIndexPath(indexPath: NSIndexPath) -> PlayedSongData? {
+		var songData: PlayedSongData? = nil
 		context.performBlockAndWait {
-			song = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong
+			if let song = self.objectAtIndexPath(indexPath) {
+				songData = PlayedSongData(song: song)
+			}
 		}
-		return song
+		return songData
 	}
 }

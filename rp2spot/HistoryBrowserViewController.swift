@@ -189,12 +189,13 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 
 extension HistoryBrowserViewController: UITableViewDataSource {
 	func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+
 		let cell = tableView.dequeueReusableCellWithIdentifier("HistoryBrowserCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
 
-		if let song = historyData.objectAtIndexPath(indexPath) {
-			cell.configureForSong(song)
+		if let songData = historyData.songDataForObjectAtIndexPath(indexPath) {
+			cell.configureForSong(songData)
 		}
-
+		
 		// If user has scrolled almost all the way down to the last row, try to fetch some older song history.
 		historyData.loadMoreIfNearLastRow(indexPath.row)
 
@@ -213,23 +214,26 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		// If selected row has no spotify track, do not start playing
-		guard historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
-			return
-		}
-
-		historyData.trackListCenteredAtIndexPath(indexPath, maxElements: Constant.AUDIO_PLAYER_MAX_TRACK_LIST_SIZE) { playList in
-
-			guard playList.list.count > 0 else {
-				print("Empty playlist: nothing to play")
+		historyData.context.performBlock {
+			guard self.historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
 				return
 			}
 
-			// TODO: handle the container view resizing better:
-			async_main {
-				self.playerContainerViewHeightConstraint.constant = 100
-			}
+			self.historyData.trackListCenteredAtIndexPath(indexPath, maxElements: Constant.AUDIO_PLAYER_MAX_TRACK_LIST_SIZE) { playList in
 
-			self.audioPlayerVC.playTracks(playList)
+				guard playList.list.count > 0 else {
+					print("Empty playlist: nothing to play")
+					return
+				}
+
+				// TODO: handle the container view resizing better:
+				async_main {
+					self.playerContainerViewHeightConstraint.constant = 100
+				}
+
+				self.audioPlayerVC.playTracks(playList)
+			}
 		}
+
 	}
 }

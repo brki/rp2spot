@@ -22,21 +22,19 @@ class PlainHistoryTableViewCell: UITableViewCell {
 	@IBOutlet weak var artist: UILabel!
 	@IBOutlet weak var songTitle: UILabel!
 
-	func configureForSong(song: PlayedSong) {
+	func configureForSong(song: PlayedSongData) {
 		let placeHolderImage = PlainHistoryTableViewCell.albumThumbnailPlaceholder
 		var imageURL: NSURL?
 		var spotifyTrackAvailable = false
-		song.managedObjectContext!.performBlockAndWait {
-			self.songTitle.text = song.title
-			self.artist.text = song.artistName
-			self.date.text = Date.sharedInstance.shortLocalizedString(song.playedAt)
-			if let imageURLText = song.smallImageURL, spotifyImageURL = NSURL(string: imageURLText) {
-				imageURL = spotifyImageURL
-			} else if let asin = song.asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(asin, size: .Medium)) {
-				imageURL = radioParadiseImageURL
-			}
-			spotifyTrackAvailable = song.spotifyTrackId != nil
+		self.songTitle.text = song.title
+		self.artist.text = song.artistName
+		self.date.text = Date.sharedInstance.shortLocalizedString(song.playedAt)
+		if let imageURLText = song.smallImageURL, spotifyImageURL = NSURL(string: imageURLText) {
+			imageURL = spotifyImageURL
+		} else if let asin = song.asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(asin, size: .Medium)) {
+			imageURL = radioParadiseImageURL
 		}
+		spotifyTrackAvailable = song.spotifyTrackId != nil
 
 		if let url = imageURL {
 			self.albumImageView.af_setImageWithURL(url, placeholderImage: placeHolderImage, filter: PlainHistoryTableViewCell.albumThumbnailFilter)
