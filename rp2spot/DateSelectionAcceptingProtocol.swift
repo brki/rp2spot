@@ -6,8 +6,6 @@
 //  Copyright © 2016 truckin'. All rights reserved.
 //
 
-import Foundation
-
 protocol DateSelectionAcceptingProtocol {
 	func dateSelected(date: NSDate)
 }

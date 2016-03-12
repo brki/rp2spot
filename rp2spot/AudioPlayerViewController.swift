@@ -24,6 +24,8 @@ class AudioPlayerViewController: UIViewController {
 	// be displayed in the control center.
 	var nowPlayingCenter = MPNowPlayingInfoCenter.defaultCenter()
 
+	var delegate: AudioStatusObserver?
+
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		spotify.player.delegate = self
@@ -263,8 +265,16 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if playlist.isLastTrack(trackId) {
 			updateUI(isPlaying: false)
 		}
+		delegate?.trackStoppedPlaying(trackId)
 	}
 
+	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: NSURL!) {
+		if let interested = delegate {
+			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
+		}
+	}
+
+	
 
 	/** Called before the streaming controller begins playing another track.
 
@@ -282,14 +292,6 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
  @param trackUri The URI of the track that failed to play.
  */
 //	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didFailToPlayTrack:(NSURL *)trackUri;
-
-
-/** Called when the streaming controller begins playing a new track.
-
- @param audioStreaming The object that sent the message.
- @param trackUri The URI of the track that started to play.
- */
-//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didStartPlayingTrack:(NSURL *)trackUri;
 
 
 

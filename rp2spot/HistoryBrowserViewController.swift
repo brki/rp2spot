@@ -30,6 +30,8 @@ class HistoryBrowserViewController: UIViewController {
 	var deleteIndexPaths = [NSIndexPath]()
 	var updateIndexPaths = [NSIndexPath]()
 
+	var currentlyPlayingTrackId: String?
+
 	var audioPlayerVC: AudioPlayerViewController!
 
 	override func viewDidLoad() {
@@ -56,6 +58,7 @@ class HistoryBrowserViewController: UIViewController {
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 		if let vc = segue.destinationViewController as? AudioPlayerViewController {
 			audioPlayerVC = vc
+			audioPlayerVC.delegate = self
 		}
 	}
 
@@ -124,6 +127,36 @@ extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate 
 	}
 }
 
+extension HistoryBrowserViewController: AudioStatusObserver {
+	func trackStartedPlaying(spotifyShortTrackId: String) {
+		currentlyPlayingTrackId = spotifyShortTrackId
+		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: true)
+	}
+
+	func trackStoppedPlaying(spotifyShortTrackId: String) {
+		currentlyPlayingTrackId = nil
+		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: false)
+	}
+
+	/**
+	Inspect the currently visisble cells.  If one of them has a matching track id,
+	trigger a reload, so that it's playing status will be updated.
+	*/
+	func updatePlayingStatusOfVisibleCell(trackId: String, isPlaying: Bool) {
+		async_main {
+			guard let indexPaths = self.tableView.indexPathsForVisibleRows else {
+				return
+			}
+
+			for path in indexPaths {
+				if let cell = self.tableView.cellForRowAtIndexPath(path) as? PlainHistoryTableViewCell where cell.spotifyTrackId == trackId {
+					self.tableView.reloadRowsAtIndexPaths([path], withRowAnimation: .Fade)
+					return
+				}
+			}
+		}
+	}
+}
 
 // MARK: NSFetchedResultsControllerDelegate
 
@@ -197,7 +230,7 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 		let cell = tableView.dequeueReusableCellWithIdentifier("HistoryBrowserCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
 
 		if let songData = historyData.songDataForObjectAtIndexPath(indexPath) {
-			cell.configureForSong(songData)
+			cell.configureForSong(songData, currentlyPlayingTrackId: currentlyPlayingTrackId)
 		}
 		
 		// If user has scrolled almost all the way down to the last row, try to fetch some older song history.

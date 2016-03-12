@@ -17,6 +17,7 @@
 		D39992641C81E500008AECD4 /* UserSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39992631C81E4FF008AECD4 /* UserSetting.swift */; };
 		D39DA47E1C91F29500FC12F8 /* AudioPlayerPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39DA47D1C91F29500FC12F8 /* AudioPlayerPlaylist.swift */; };
 		D39DA4801C91FD9D00FC12F8 /* PlayedSongDataManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39DA47F1C91FD9D00FC12F8 /* PlayedSongDataManager.swift */; };
+		D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */; };
 		D3AD910E1C7E0AEA0076FE76 /* ErrorInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */; };
 		D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910F1C7E0CA80076FE76 /* Utilities.swift */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
@@ -73,6 +74,7 @@
 		D39992631C81E4FF008AECD4 /* UserSetting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSetting.swift; sourceTree = "<group>"; };
 		D39DA47D1C91F29500FC12F8 /* AudioPlayerPlaylist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayerPlaylist.swift; sourceTree = "<group>"; };
 		D39DA47F1C91FD9D00FC12F8 /* PlayedSongDataManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongDataManager.swift; sourceTree = "<group>"; };
+		D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioStatusObserver.swift; sourceTree = "<group>"; };
 		D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorInfo.swift; sourceTree = "<group>"; };
 		D3AD910F1C7E0CA80076FE76 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -231,6 +233,7 @@
 			isa = PBXGroup;
 			children = (
 				D3C98A081C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift */,
+				D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */,
 			);
 			name = Protocols;
 			sourceTree = "<group>";
@@ -444,6 +447,7 @@
 				D3FC5E701C70A51000443F68 /* PlayedSong+CoreDataProperties.swift in Sources */,
 				D3D6FF451C8DD65100B7E8A6 /* AudioPlayerViewController.swift in Sources */,
 				D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */,
+				D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */,
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
