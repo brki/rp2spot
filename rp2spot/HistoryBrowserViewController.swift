@@ -28,6 +28,7 @@ class HistoryBrowserViewController: UIViewController {
 
 	var insertIndexPaths = [NSIndexPath]()
 	var deleteIndexPaths = [NSIndexPath]()
+	var updateIndexPaths = [NSIndexPath]()
 
 	var audioPlayerVC: AudioPlayerViewController!
 
@@ -144,6 +145,9 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		case .Insert:
 			insertIndexPaths.append(newIndexPath!)
 
+		case .Update:
+			updateIndexPaths.append(indexPath!)
+
 		default:
 			print("Unexpected change type in controllerDidChangeContent: \(type.rawValue), indexPath: \(indexPath), newIndexPath: \(newIndexPath), object: \(anObject)")
 		}
@@ -153,7 +157,6 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 	Apply all changes that have been collected.
 	*/
 	func controllerDidChangeContent(controller: NSFetchedResultsController) {
-
 		let disableRowAnimations = historyData.isFetchingOlder
 
 		if disableRowAnimations {
@@ -168,6 +171,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		let rowsToDelete = deleteIndexPaths.removeAllReturningValues()
 		tableView.insertRowsAtIndexPaths(insertIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
 		tableView.deleteRowsAtIndexPaths(rowsToDelete, withRowAnimation: .None)
+		tableView.reloadRowsAtIndexPaths(updateIndexPaths, withRowAnimation: .None)
 
 		if historyData.isFetchingOlder {
 			// If rows above have been deleted at the top of the table view, shift the current contenteOffset up an appropriate amount:
