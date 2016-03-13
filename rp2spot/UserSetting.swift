@@ -24,4 +24,6 @@ class UserSetting {
 	var spotifyRegion = "CH"
 
 	var spotifyStreamingQuality = SPTBitrate.High
+
+	var useSpotify = true
 }

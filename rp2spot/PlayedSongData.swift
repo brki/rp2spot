@@ -12,6 +12,10 @@ import Alamofire
 
 final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerializable {
 
+	enum ImageSize {
+		case Small, Large
+	}
+	
 	// Note, there is a bug in Swift versions < 2.2 that prohibits returning nil in a failable initializer
 	// before all non-optional properties have been initialized.  For this reason, these properties are declared
 	// as vars, and the non-optionals as implicitly unwrapped optionals:
@@ -81,6 +85,26 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.spotifyTrackId = song.spotifyTrackId
 		self.smallImageURL = song.smallImageURL
 		self.largeImageURL = song.largeImageURL
+	}
+
+	func imageURL(preferredSize: ImageSize = .Small) -> NSURL? {
+		var urlText: String?
+		var imageURL: NSURL?
+		if preferredSize == .Small {
+			urlText = smallImageURL
+		} else {
+			urlText = largeImageURL
+		}
+
+		if let imageURLText = urlText, spotifyImageURL = NSURL(string: imageURLText) {
+			imageURL = spotifyImageURL
+		} else {
+			let radioParadiseImageSize: RadioParadise.ImageSize = preferredSize == .Small ? .Medium : .Large
+			if let albumAsin = asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(albumAsin, size: radioParadiseImageSize)) {
+				imageURL = radioParadiseImageURL
+			}
+		}
+		return imageURL
 	}
 
 	static func collection(response response: NSHTTPURLResponse, representation: AnyObject) -> [PlayedSongData] {

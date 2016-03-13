@@ -56,9 +56,18 @@ class HistoryBrowserViewController: UIViewController {
 	}
 
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-		if let vc = segue.destinationViewController as? AudioPlayerViewController {
+		let destinationVC = segue.destinationViewController
+		if let vc = destinationVC as? AudioPlayerViewController {
 			audioPlayerVC = vc
 			audioPlayerVC.delegate = self
+		} else if let vc = destinationVC as? SongInfoViewController {
+			guard let cell = sender as? UITableViewCell,
+				indexPath = tableView.indexPathForCell(cell),
+				songData = historyData.songDataForObjectAtIndexPath(indexPath) else {
+					print("Unable to get song data for selected row for showing detail view")
+					return
+			}
+			vc.songInfo = songData
 		}
 	}
 

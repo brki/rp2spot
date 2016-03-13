@@ -14,11 +14,12 @@ struct Constant {
 	static let SPOTIFY_TOKEN_SWAP_URL = NSURL(string: Secrets.SPOTIFY_TOKEN_SWAP_URL)!
 	static let SPOTIFY_TOKEN_REFRESH_URL = NSURL(string: Secrets.SPOTIFY_TOKEN_REFRESH_URL)!
 	static let SPOTIFY_SESSION_USER_DEFAULTS_KEY = "SpotifySession"
+	static let SPOTIFY_APPSTORE_URL = NSURL(string: "itms-apps://itunes.apple.com/app/id324684580")!
 
 	static let RADIO_PARADISE_HISTORY_URL_BASE = Secrets.RADIO_PARADISE_HISTORY_URL_BASE
 	static let RADIO_PARADISE_IMAGE_URL_BASE = "https://www.radioparadise.com/graphics/covers/"
 	static let RADIO_PARADISE_MINIMUM_HISTORY_DATE = Date.sharedInstance.dateFromRPDateString("2015-02-24T16:45:00+00:00")!
-	static let RADIO_PARADISE_SONG_INFO_URL_TEMPLATE="https://www.radioparadise.com/rp_2.php?#name=songinfo&song_id={songid}"
+	static let RADIO_PARADISE_SONG_INFO_URL_TEMPLATE="https://www.radioparadise.com/mx-content.php?name=Music&file=songinfo&song_id={songid}"
 
 
 	// The Spotify web service limits to a maximum of 50 URIs when fetching track information.
