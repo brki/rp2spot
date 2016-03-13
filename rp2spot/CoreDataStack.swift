@@ -25,7 +25,7 @@ class CoreDataStack {
 
 	The handler will be called when the final save completes, or when an error occurs.
 	*/
-	static func saveContext(context: NSManagedObjectContext, includeParentContexts: Bool = true, handler: saveCompletionHandler? = nil) {
+	static func saveContext(context: NSManagedObjectContext, waitForChildContext: Bool = false, includeParentContexts: Bool = true, handler: saveCompletionHandler? = nil) {
 
 		let isChildContext = context.parentContext != nil
 
@@ -43,10 +43,11 @@ class CoreDataStack {
 		}
 
 		if isChildContext {
-			context.performBlock {
+			let childSaveBlock = waitForChildContext ? context.performBlockAndWait : context.performBlock
+			childSaveBlock {
 				saveCurrentContext {
 					if includeParentContexts, let parentContext = context.parentContext {
-						CoreDataStack.saveContext(parentContext, includeParentContexts: true, handler: handler)
+						CoreDataStack.saveContext(parentContext, waitForChildContext: waitForChildContext, includeParentContexts: true, handler: handler)
 					} else {
 						handler?(error: nil, isChildContext: true)
 					}

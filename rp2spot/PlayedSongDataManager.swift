@@ -292,7 +292,7 @@ class PlayedSongDataManager {
 				return
 			}
 		}
-		CoreDataStack.saveContext(context)
+		CoreDataStack.saveContext(self.context, waitForChildContext: true)
 	}
 
 
