@@ -10,21 +10,35 @@ import Foundation
 
 struct AudioPlayerPlaylist {
 	let list: [PlayedSongData]
-	var currentIndex: Int
-	var trackToIndexMap = [String: Int]()
-	var trackMetadata = [String: SPTTrack]()
+	var currentIndex: Int?
+	var trackToIndexMap = [String: Int]() // key is in form "foo" (not "spotify:track:foo"), value is an index into ``list``
+	var trackMetadata = [String: SPTTrack]() // key is in form "foo" (not "spotify:track:foo")
 
-	init(list: [PlayedSongData], currentIndex: Int) {
+	init(list: [PlayedSongData], currentIndex: Int? = nil) {
 		self.list = list
 		self.currentIndex = currentIndex
 		for (index, song) in list.enumerate() {
-			trackToIndexMap[SpotifyClient.fullSpotifyTrackId(song.spotifyTrackId!)] = index
+			trackToIndexMap[song.spotifyTrackId!] = index
 		}
 	}
 
 	func isLastTrack(spotifyTrackId: String) -> Bool {
 		if let index = trackToIndexMap[spotifyTrackId] {
 			return index == list.count - 1
+		}
+		return false
+	}
+
+	func currentTrackIsLastTrack() -> Bool {
+		if let index = currentIndex {
+			return index == list.count - 1
+		}
+		return false
+	}
+
+	func currentTrackIsFirstTrack() -> Bool {
+		if let index = currentIndex {
+			return index == 0
 		}
 		return false
 	}
@@ -39,15 +53,35 @@ struct AudioPlayerPlaylist {
 		}
 	}
 
+	mutating func setCurrentTrack(trackId: String) {
+		if let index = trackToIndexMap[trackId] {
+			currentIndex = index
+		} else {
+			currentIndex = nil
+		}
+	}
+
 	mutating func incrementIndex() {
-		if currentIndex < list.count - 1 {
-			currentIndex++
+		guard currentIndex != nil else {
+			if list.count > 0 {
+				currentIndex = 0
+			}
+			return
+		}
+		if currentIndex! < list.count - 1 {
+			currentIndex!++
 		}
 	}
 
 	mutating func decrementIndex() {
-		if currentIndex > 0 {
-			currentIndex--
+		guard currentIndex != nil else {
+			if list.count > 0 {
+				currentIndex = 0
+			}
+			return
+		}
+		if currentIndex! > 0 {
+			currentIndex!--
 		}
 	}
 }

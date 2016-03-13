@@ -12,11 +12,17 @@ import MediaPlayer
 
 class AudioPlayerViewController: UIViewController {
 
+	enum PlayerStatus {
+		case
+		Active,		// Player is active an presumably visible
+		Disabled	// Player is non-active, and presumably invisible
+	}
+
 	@IBOutlet weak var playPauseButton: UIButton!
 	@IBOutlet weak var nextTrackButton: UIButton!
 	@IBOutlet weak var previousTrackButton: UIButton!
 
-	var playlist = AudioPlayerPlaylist(list:[], currentIndex: 0)
+	var playlist = AudioPlayerPlaylist(list:[])
 
 	var spotify = SpotifyClient.sharedInstance
 
@@ -24,13 +30,20 @@ class AudioPlayerViewController: UIViewController {
 	// be displayed in the control center.
 	var nowPlayingCenter = MPNowPlayingInfoCenter.defaultCenter()
 
+	var status: PlayerStatus = .Disabled {
+		didSet {
+			if status != oldValue {
+				delegate?.playerStatusChanged(status)
+			}
+		}
+	}
+
 	var delegate: AudioStatusObserver?
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		spotify.player.delegate = self
 		spotify.player.playbackDelegate = self
-		spotify.player.`repeat` = false
 
 		// Listen for a notification so that we can tell when
 		// a user has unplugged their headphones.
@@ -61,12 +74,18 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func startPlaying(sender: AnyObject? = nil) {
-		// TODO: check if there is something to play.
-		spotify.player.setIsPlaying(true) { error in
-			if let err = error {
-				// TODO: notify delegate of error
-				return
+		if status == .Active {
+			spotify.player.setIsPlaying(true) { error in
+				if let err = error {
+					// TODO: notify delegate of error
+					return
+				}
 			}
+		} else {
+			// This may be triggered by a remote control when the player is disabled.  If that
+			// is the case, then the tracklist and index will need to be communicated to the
+			// Spotify player controller again.
+			playTracks(playlist)
 		}
 	}
 
@@ -80,14 +99,50 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func skipToNextTrack(sender: AnyObject) {
-		spotify.player.skipNext() { error in
-			// TODO: notify delegate of error
+		if status == .Active {
+			if playlist.currentTrackIsLastTrack() {
+				// We do not want to wrap around  to the other side, which is what would
+				// happen if we're at the end and player.skipNext() is called.
+				// Instead, just start that last song playing again.
+				startPlaying()
+			} else {
+
+				// This is normal case, when the player is active and we're not at the first track.
+
+				spotify.player.skipNext() { error in
+					// TODO: notify delegate of error
+				}
+			}
+		} else {
+			// This may be triggered by a remote control when the player is disabled.  If that
+			// is the case, then the tracklist and index will need to be communicated to the
+			// Spotify player controller again.
+			playlist.incrementIndex()
+			playTracks(playlist)
 		}
 	}
 	
 	@IBAction func skipToPreviousTrack(sender: AnyObject) {
-		spotify.player.skipPrevious() { error in
-			// TODO: notify delegate of error
+		if status == .Active {
+			if playlist.currentTrackIsFirstTrack() {
+				// We do not want to wrap around  to the other side, which is what would
+				// happen if we're at the first track and player.skipPrevious() is called.
+				// Instead, just start that last song playing again.
+				startPlaying()
+			} else {
+
+				// This is normal case, when the player is active and we're not at the first track.
+
+				spotify.player.skipPrevious() { error in
+					// TODO: notify delegate of error
+				}
+			}
+		} else {
+			// This may be triggered by a remote control when the player is disabled.  If that
+			// is the case, then the tracklist and index will need to be communicated to the
+			// Spotify player controller again.
+			playlist.decrementIndex()
+			playTracks(playlist)
 		}
 	}
 
@@ -105,9 +160,7 @@ class AudioPlayerViewController: UIViewController {
 					// TODO: notify delegate of error
 					return
 				}
-
-				// TODO: notify delegate that stop button was pressed.
-				(self.parentViewController! as! HistoryBrowserViewController).playerContainerViewHeightConstraint.constant = 0
+				self.status = .Disabled
 			}
 		}
 	}
@@ -115,10 +168,11 @@ class AudioPlayerViewController: UIViewController {
 	func playTracks(playList: AudioPlayerPlaylist) {
 		self.playlist = playList
 		let trackURIs = spotify.URIsForTrackIds(playList.list.map({ $0.spotifyTrackId! }))
-		guard trackURIs.count > 0 else {
-			print("playTracks: no tracks to play!")
+		guard let index = self.playlist.currentIndex else {
+			print("playTracks: No currentIndex, so can not start playing.")
 			return
 		}
+		status = .Active
 
 		spotify.loginOrRenewSession() { willTriggerNotification, error in
 			guard error == nil else {
@@ -128,7 +182,7 @@ class AudioPlayerViewController: UIViewController {
 			}
 			// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
 
-			self.spotify.playTracks(trackURIs, fromIndex:self.playlist.currentIndex) { error in
+			self.spotify.playTracks(trackURIs, fromIndex:index) { error in
 				guard error == nil else {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					return
@@ -156,9 +210,14 @@ class AudioPlayerViewController: UIViewController {
 		playPauseButton.imageView!.image = UIImage(named: imageName)!
 	}
 
-	func updateNowPlayingInfo() {
-		guard let track = playlist.trackMetadata[SPTTrack.identifierFromURI(spotify.player.currentTrackURI)] else {
-			print("Unable to get current track metadata")
+	func updateNowPlayingInfo(var trackId: String? = nil) {
+		if trackId == nil {
+			trackId = SPTTrack.identifierFromURI(spotify.player.currentTrackURI)
+		}
+
+		guard let track = playlist.trackMetadata[trackId!] else {
+			// This happens when no data is available yet (e.g.
+			// before the metadata request delivers data).
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
@@ -249,7 +308,12 @@ extension AudioPlayerViewController {
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangeToTrack trackMetadata: [NSObject : AnyObject]!) {
-		updateNowPlayingInfo()
+		// The trackMetadata object *should* have the track identifier too, but 
+		// trackMetadata itself is occaionally nil, despite the method signature 
+		// indicating otherwise.  So, fetch the track id from the player.
+		let shortTrackId = SPTTrack.identifierFromURI(spotify.player.currentTrackURI)
+		playlist.setCurrentTrack(shortTrackId)
+		updateNowPlayingInfo(shortTrackId)
 	}
 
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
@@ -272,6 +336,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if let interested = delegate {
 			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
 		}
+		updateUI(isPlaying: true)
 	}
 
 	

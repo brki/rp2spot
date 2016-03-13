@@ -19,6 +19,7 @@ class SpotifyClient {
 	lazy var player: SPTAudioStreamingController = {
 		let player = SPTAudioStreamingController(clientId: self.auth.clientID)
 		player.setTargetBitrate(UserSetting.sharedInstance.spotifyStreamingQuality, callback: nil)
+		player.`repeat` = false
 		return player
 	}()
 
@@ -40,6 +41,10 @@ class SpotifyClient {
 
 	static func fullSpotifyTrackId(shortId: String) -> String {
 		return "spotify:track:\(shortId)"
+	}
+
+	static func shortSpotifyTrackId(fullId: String) -> String {
+		return fullId.stringByReplacingOccurrencesOfString("spotify:track:", withString: "")
 	}
 
 	/**

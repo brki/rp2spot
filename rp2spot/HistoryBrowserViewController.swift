@@ -105,6 +105,14 @@ class HistoryBrowserViewController: UIViewController {
 			}
 		}
 	}
+
+	func hidePlayer() {
+		self.playerContainerViewHeightConstraint.constant = 0
+	}
+
+	func showPlayer() {
+		self.playerContainerViewHeightConstraint.constant = 100
+	}
 }
 
 extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
@@ -128,6 +136,18 @@ extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate 
 }
 
 extension HistoryBrowserViewController: AudioStatusObserver {
+	func playerStatusChanged(newStatus: AudioPlayerViewController.PlayerStatus) {
+		if newStatus == .Active {
+			async_main {
+				self.showPlayer()
+			}
+		} else {
+			async_main {
+				self.hidePlayer()
+			}
+		}
+	}
+
 	func trackStartedPlaying(spotifyShortTrackId: String) {
 		currentlyPlayingTrackId = spotifyShortTrackId
 		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: true)
@@ -261,11 +281,6 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 				guard playList.list.count > 0 else {
 					print("Empty playlist: nothing to play")
 					return
-				}
-
-				// TODO: handle the container view resizing better:
-				async_main {
-					self.playerContainerViewHeightConstraint.constant = 100
 				}
 
 				self.audioPlayerVC.playTracks(playList)

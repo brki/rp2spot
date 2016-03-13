@@ -24,4 +24,6 @@ protocol AudioStatusObserver {
 	- spotifyTrackId: id in the form "spotify:track:askseufsdfsdf12"
 	*/
 	func trackStoppedPlaying(spotifyTrackId: String)
+
+	func playerStatusChanged(newStatus: AudioPlayerViewController.PlayerStatus)
 }
