@@ -405,6 +405,19 @@ class PlayedSongDataManager {
 			}
 		}
 	}
+
+	func currentSongData(ascendingDate: Bool = true) -> [PlayedSongData] {
+		var songData = [PlayedSongData]()
+		context.performBlockAndWait {
+			for song in self.fetchedResultsController.fetchedObjects as! [PlayedSong] {
+				songData.append(PlayedSongData(song: song))
+			}
+		}
+		if ascendingDate {
+			return songData.reverse()
+		}
+		return songData
+	}
 }
 
 // MARK: UITableViewDataSource helpers

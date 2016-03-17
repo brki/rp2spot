@@ -48,6 +48,9 @@ class HistoryBrowserViewController: UIViewController {
 				}
 			}
 		}
+
+		let backBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: nil, action: nil)
+		navigationItem.backBarButtonItem = backBarButtonItem
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -57,10 +60,14 @@ class HistoryBrowserViewController: UIViewController {
 
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 		let destinationVC = segue.destinationViewController
+
 		if let vc = destinationVC as? AudioPlayerViewController {
+
 			audioPlayerVC = vc
 			audioPlayerVC.delegate = self
+
 		} else if let vc = destinationVC as? SongInfoViewController {
+
 			guard let cell = sender as? UITableViewCell,
 				indexPath = tableView.indexPathForCell(cell),
 				songData = historyData.songDataForObjectAtIndexPath(indexPath) else {
@@ -68,6 +75,10 @@ class HistoryBrowserViewController: UIViewController {
 					return
 			}
 			vc.songInfo = songData
+
+		} else if let vc = destinationVC as? PlaylistViewController {
+			let songData = historyData.currentSongData()
+			vc.localPlaylist = LocalPlaylistSongs(songs: songData)
 		}
 	}
 

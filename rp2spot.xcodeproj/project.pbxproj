@@ -13,6 +13,8 @@
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
 		D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */; };
+		D38839FD1C9749AA001C4FE3 /* PlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */; };
+		D38839FF1C974B03001C4FE3 /* PlaylistTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */; };
 		D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */; };
 		D39992641C81E500008AECD4 /* UserSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39992631C81E4FF008AECD4 /* UserSetting.swift */; };
 		D39DA47E1C91F29500FC12F8 /* AudioPlayerPlaylist.swift in Sources */ = {isa = PBXBuildFile; fileRef = D39DA47D1C91F29500FC12F8 /* AudioPlayerPlaylist.swift */; };
@@ -20,6 +22,7 @@
 		D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */; };
 		D3AD910E1C7E0AEA0076FE76 /* ErrorInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */; };
 		D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910F1C7E0CA80076FE76 /* Utilities.swift */; };
+		D3B922D61C9B299200B60CE3 /* LocalPlaylistSongs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B922D51C9B299200B60CE3 /* LocalPlaylistSongs.swift */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
 		D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA801C6248E10055B650 /* Main.storyboard */; };
 		D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */; };
@@ -70,6 +73,8 @@
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
 		D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
+		D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistViewController.swift; sourceTree = "<group>"; };
+		D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistTableViewCell.swift; sourceTree = "<group>"; };
 		D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlainHistoryTableViewCell.swift; sourceTree = "<group>"; };
 		D39992631C81E4FF008AECD4 /* UserSetting.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSetting.swift; sourceTree = "<group>"; };
 		D39DA47D1C91F29500FC12F8 /* AudioPlayerPlaylist.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayerPlaylist.swift; sourceTree = "<group>"; };
@@ -77,6 +82,7 @@
 		D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioStatusObserver.swift; sourceTree = "<group>"; };
 		D3AD910D1C7E0AEA0076FE76 /* ErrorInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ErrorInfo.swift; sourceTree = "<group>"; };
 		D3AD910F1C7E0CA80076FE76 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
+		D3B922D51C9B299200B60CE3 /* LocalPlaylistSongs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalPlaylistSongs.swift; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3C0CA811C6248E10055B650 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -162,6 +168,7 @@
 			isa = PBXGroup;
 			children = (
 				D3992AAF1C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift */,
+				D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */,
 			);
 			name = Views;
 			sourceTree = "<group>";
@@ -255,9 +262,10 @@
 			isa = PBXGroup;
 			children = (
 				D3C96A571C8E291A00CABFE1 /* HistoryBrowserViewController.swift */,
+				D361C7271C90C1B9000B803E /* SongInfoViewController.swift */,
+				D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */,
 				D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */,
 				D3D6FF441C8DD65100B7E8A6 /* AudioPlayerViewController.swift */,
-				D361C7271C90C1B9000B803E /* SongInfoViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -274,6 +282,7 @@
 				D39992631C81E4FF008AECD4 /* UserSetting.swift */,
 				D39DA47D1C91F29500FC12F8 /* AudioPlayerPlaylist.swift */,
 				D39DA47F1C91FD9D00FC12F8 /* PlayedSongDataManager.swift */,
+				D3B922D51C9B299200B60CE3 /* LocalPlaylistSongs.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -457,14 +466,17 @@
 				D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */,
 				D39992641C81E500008AECD4 /* UserSetting.swift in Sources */,
 				D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */,
+				D38839FD1C9749AA001C4FE3 /* PlaylistViewController.swift in Sources */,
 				D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
 				D3C98A091C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift in Sources */,
 				D3C96A581C8E291A00CABFE1 /* HistoryBrowserViewController.swift in Sources */,
+				D3B922D61C9B299200B60CE3 /* LocalPlaylistSongs.swift in Sources */,
 				D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */,
 				D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */,
+				D38839FF1C974B03001C4FE3 /* PlaylistTableViewCell.swift in Sources */,
 				D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */,
 				D39DA4801C91FD9D00FC12F8 /* PlayedSongDataManager.swift in Sources */,
 				D3C98A061C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift in Sources */,
