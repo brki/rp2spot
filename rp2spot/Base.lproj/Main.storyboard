@@ -165,61 +165,77 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="W9Q-YW-8yk">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="268"/>
+                                <rect key="frame" x="0.0" y="4" width="600" height="268"/>
                             </imageView>
-                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="fgm-W9-7vh">
-                                <rect key="frame" x="0.0" y="268" width="600" height="268"/>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zLw-nt-U18">
+                                <rect key="frame" x="0.0" y="272" width="600" height="264"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="6" baselineRelativeArrangement="YES" translatesAutoresizingMaskIntoConstraints="NO" id="oOr-pN-zBR" userLabel="Song Info Stack View">
-                                        <rect key="frame" x="275.5" y="0.0" width="49" height="89.5"/>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="fgm-W9-7vh">
+                                        <rect key="frame" x="205.5" y="0.0" width="189" height="162"/>
                                         <subviews>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="HxH-jb-6MI" userLabel="Song Title">
-                                                <rect key="frame" x="0.0" y="0.0" width="49" height="39"/>
-                                                <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
-                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cWH-HC-FdX" userLabel="Artist">
-                                                <rect key="frame" x="0.0" y="25.5" width="49" height="39"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Album" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LWI-sc-fnX" userLabel="Album">
-                                                <rect key="frame" x="0.0" y="50" width="49" height="39.5"/>
-                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                                <nil key="highlightedColor"/>
-                                            </label>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="oOr-pN-zBR" userLabel="Song Info Stack View">
+                                                <rect key="frame" x="70" y="0.0" width="49" height="73.5"/>
+                                                <subviews>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="HxH-jb-6MI" userLabel="Song Title">
+                                                        <rect key="frame" x="0.0" y="0.0" width="49" height="20.5"/>
+                                                        <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="15"/>
+                                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Artist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cWH-HC-FdX" userLabel="Artist">
+                                                        <rect key="frame" x="0.0" y="26.5" width="49" height="20.5"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Album" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LWI-sc-fnX" userLabel="Album">
+                                                        <rect key="frame" x="0.0" y="53" width="49" height="20.5"/>
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                        <nil key="highlightedColor"/>
+                                                    </label>
+                                                </subviews>
+                                            </stackView>
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="TCV-jm-Xt9">
+                                                <rect key="frame" x="0.0" y="88.5" width="189" height="73.5"/>
+                                                <subviews>
+                                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="500" verticalCompressionResistancePriority="500" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYu-Vy-Ci3" userLabel="Radio Paradise Info button">
+                                                        <rect key="frame" x="0.0" y="0.0" width="189" height="37"/>
+                                                        <state key="normal" title="Radio Paradise song details"/>
+                                                        <connections>
+                                                            <action selector="showRadioParadiseInfoPage:" destination="zEv-KC-qin" eventType="touchUpInside" id="ffh-FL-gKu"/>
+                                                        </connections>
+                                                    </button>
+                                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="500" verticalCompressionResistancePriority="250" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lSr-HA-fQs" userLabel="Open in Spotify button">
+                                                        <rect key="frame" x="41.5" y="37" width="106" height="36.5"/>
+                                                        <state key="normal" title="Open in Spotify"/>
+                                                        <connections>
+                                                            <action selector="openInSpotify:" destination="zEv-KC-qin" eventType="touchUpInside" id="fl8-pz-UXh"/>
+                                                        </connections>
+                                                    </button>
+                                                </subviews>
+                                            </stackView>
                                         </subviews>
                                     </stackView>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYu-Vy-Ci3" userLabel="Radio Paradise Info button">
-                                        <rect key="frame" x="205.5" y="89.5" width="189" height="89"/>
-                                        <state key="normal" title="Radio Paradise song details"/>
-                                        <connections>
-                                            <action selector="showRadioParadiseInfoPage:" destination="zEv-KC-qin" eventType="touchUpInside" id="ffh-FL-gKu"/>
-                                        </connections>
-                                    </button>
-                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lSr-HA-fQs" userLabel="Open in Spotify button">
-                                        <rect key="frame" x="247" y="178.5" width="106" height="89.5"/>
-                                        <state key="normal" title="Open in Spotify"/>
-                                        <connections>
-                                            <action selector="openInSpotify:" destination="zEv-KC-qin" eventType="touchUpInside" id="fl8-pz-UXh"/>
-                                        </connections>
-                                    </button>
                                 </subviews>
-                            </stackView>
+                                <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstItem="fgm-W9-7vh" firstAttribute="centerX" secondItem="zLw-nt-U18" secondAttribute="centerX" id="Edz-vF-Cgg"/>
+                                    <constraint firstItem="fgm-W9-7vh" firstAttribute="top" secondItem="zLw-nt-U18" secondAttribute="top" id="bSq-HM-7u4"/>
+                                    <constraint firstItem="fgm-W9-7vh" firstAttribute="bottom" relation="lessThanOrEqual" secondItem="zLw-nt-U18" secondAttribute="bottom" id="m6s-bA-ovC"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="AWE-Nl-0pj" firstAttribute="top" secondItem="fgm-W9-7vh" secondAttribute="bottom" id="3EA-ap-0Ax"/>
-                            <constraint firstItem="fgm-W9-7vh" firstAttribute="width" secondItem="APS-ez-rQg" secondAttribute="width" id="3zR-hH-Shw"/>
                             <constraint firstItem="W9Q-YW-8yk" firstAttribute="leading" secondItem="APS-ez-rQg" secondAttribute="leading" id="6B1-MB-6ed"/>
-                            <constraint firstItem="fgm-W9-7vh" firstAttribute="leading" secondItem="APS-ez-rQg" secondAttribute="leading" id="MIm-cF-TT2"/>
+                            <constraint firstItem="AWE-Nl-0pj" firstAttribute="top" secondItem="zLw-nt-U18" secondAttribute="bottom" id="BRf-8A-5GM"/>
+                            <constraint firstItem="zLw-nt-U18" firstAttribute="leading" secondItem="APS-ez-rQg" secondAttribute="leading" id="a59-m1-N8A"/>
                             <constraint firstItem="W9Q-YW-8yk" firstAttribute="width" secondItem="APS-ez-rQg" secondAttribute="width" id="bM9-aJ-mAv"/>
-                            <constraint firstItem="W9Q-YW-8yk" firstAttribute="top" secondItem="Zlu-PX-Nei" secondAttribute="bottom" id="fYL-lE-z2j"/>
+                            <constraint firstItem="W9Q-YW-8yk" firstAttribute="top" secondItem="Zlu-PX-Nei" secondAttribute="bottom" constant="4" id="fYL-lE-z2j"/>
+                            <constraint firstAttribute="trailing" secondItem="zLw-nt-U18" secondAttribute="trailing" id="iP4-e4-Cw4"/>
                             <constraint firstItem="W9Q-YW-8yk" firstAttribute="height" secondItem="APS-ez-rQg" secondAttribute="height" multiplier="1/2" id="lHG-CS-wZS"/>
-                            <constraint firstItem="fgm-W9-7vh" firstAttribute="top" secondItem="W9Q-YW-8yk" secondAttribute="bottom" id="ynN-gN-7hA"/>
+                            <constraint firstItem="zLw-nt-U18" firstAttribute="top" secondItem="W9Q-YW-8yk" secondAttribute="bottom" id="yBJ-Y1-quG"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
