@@ -29,4 +29,8 @@ class PlaylistCreationViewController: UIViewController {
 	
 	@IBAction func openInSpotify(sender: UIButton) {
 	}
+
+	@IBAction func back(sender: UIBarButtonItem) {
+		dismissViewControllerAnimated(true, completion: nil)
+	}
 }

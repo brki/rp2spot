@@ -14,9 +14,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 	var window: UIWindow?
 
+	func setStatusBarBackgroundColor(color: UIColor) {
+		guard  let statusBar = UIApplication.sharedApplication().valueForKey("statusBarWindow")?.valueForKey("statusBar") as? UIView else {
+			return
+		}
+		statusBar.backgroundColor = color
+	}
 
 	func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-		// Override point for customization after application launch.
+//		setStatusBarBackgroundColor(UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0))
+		setStatusBarBackgroundColor(UIColor.blackColor())
 		return true
 	}
 

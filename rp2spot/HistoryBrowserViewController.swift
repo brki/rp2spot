@@ -48,9 +48,6 @@ class HistoryBrowserViewController: UIViewController {
 				}
 			}
 		}
-
-		let backBarButtonItem = UIBarButtonItem(title: "Cancel", style: .Plain, target: nil, action: nil)
-		navigationItem.backBarButtonItem = backBarButtonItem
 	}
 
 	override func didReceiveMemoryWarning() {

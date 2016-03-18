@@ -11,11 +11,31 @@ import UIKit
 class PlaylistViewController: UIViewController {
 	var localPlaylist: LocalPlaylistSongs!
 	@IBOutlet weak var tableView: UITableView!
+	@IBOutlet weak var instructionsLabel: UILabel!
 
+	var instructionsHidden: Bool = false {
+		didSet {
+			if oldValue != instructionsHidden {
+				showOrHideInstructions(instructionsHidden)
+			}
+		}
+	}
 	override func viewDidLoad() {
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
+		instructionsLabel.backgroundColor = Constant.Color.LightGrey.color()
+	}
+
+	@IBAction func cancel(sender: AnyObject) {
+		dismissViewControllerAnimated(true, completion: nil)
+	}
+
+	func showOrHideInstructions(hide: Bool) {
+		let targetAlpha = hide ? 0.0 : 1.0
+		UIView.animateWithDuration(0.5) {
+			self.instructionsLabel.alpha = CGFloat(targetAlpha)
+		}
 	}
 }
 
@@ -46,5 +66,9 @@ extension PlaylistViewController: UITableViewDelegate {
 	func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
 		localPlaylist.toggleSelection(indexPath.row)
 		tableView.cellForRowAtIndexPath(indexPath)?.accessoryType = .None
+	}
+
+	func scrollViewDidScroll(scrollView: UIScrollView) {
+		instructionsHidden = tableView.contentOffset.y > 0
 	}
 }
