@@ -12,6 +12,7 @@ struct LocalPlaylistSongs {
 	let songs: [PlayedSongData]
 	var selected = [Int: Bool]()
 	var maxSelected = Constant.SPOTIFY_AUTH_CALLBACK_URL
+	var spotifyPlaylistId: String?
 
 	init(songs: [PlayedSongData]) {
 		self.songs = songs

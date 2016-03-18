@@ -55,10 +55,10 @@
                                         <rect key="frame" x="0.0" y="28" width="600" height="64"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Zpf-6a-3k3" id="7Mu-nc-o5T">
-                                            <rect key="frame" x="0.0" y="0.0" width="553" height="63"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="553" height="63.5"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="zx9-K3-ytB" userLabel="Album image view">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="zx9-K3-ytB" userLabel="Album image view">
                                                     <rect key="frame" x="8" y="0.0" width="64" height="64"/>
                                                     <constraints>
                                                         <constraint firstAttribute="width" constant="64" id="ET8-f2-0jd"/>
@@ -192,14 +192,14 @@
                                         </subviews>
                                     </stackView>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYu-Vy-Ci3" userLabel="Radio Paradise Info button">
-                                        <rect key="frame" x="206" y="79" width="189" height="78"/>
+                                        <rect key="frame" x="206" y="79" width="189" height="79"/>
                                         <state key="normal" title="Radio Paradise song details"/>
                                         <connections>
                                             <action selector="showRadioParadiseInfoPage:" destination="zEv-KC-qin" eventType="touchUpInside" id="ffh-FL-gKu"/>
                                         </connections>
                                     </button>
                                     <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lSr-HA-fQs" userLabel="Open in Spotify button">
-                                        <rect key="frame" x="247" y="157" width="106" height="79"/>
+                                        <rect key="frame" x="247" y="158" width="106" height="79"/>
                                         <state key="normal" title="Open in Spotify"/>
                                         <connections>
                                             <action selector="openInSpotify:" destination="zEv-KC-qin" eventType="touchUpInside" id="fl8-pz-UXh"/>
@@ -247,7 +247,7 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gjA-9z-Gzy">
                                 <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                                 <subviews>
-                                    <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0vF-Gv-tJR" userLabel="Player Container View">
+                                    <containerView opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0vF-Gv-tJR" userLabel="Player Container View">
                                         <rect key="frame" x="0.0" y="500" width="600" height="100"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="100" placeholder="YES" id="G9l-Ga-m75"/>
@@ -262,10 +262,10 @@
                                                 <rect key="frame" x="0.0" y="28" width="600" height="64"/>
                                                 <autoresizingMask key="autoresizingMask"/>
                                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="TT5-Vm-6ax" id="yZh-2L-MqG">
-                                                    <rect key="frame" x="0.0" y="0.0" width="561" height="63"/>
+                                                    <rect key="frame" x="0.0" y="0.0" width="561" height="63.5"/>
                                                     <autoresizingMask key="autoresizingMask"/>
                                                     <subviews>
-                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wps-ha-HQL" userLabel="Album image view">
+                                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="wps-ha-HQL" userLabel="Album image view">
                                                             <rect key="frame" x="8" y="1" width="64" height="63"/>
                                                             <constraints>
                                                                 <constraint firstAttribute="width" constant="64" id="wXs-rZ-DeM"/>
@@ -341,7 +341,11 @@
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" title="Create playlist" prompt="Select the songs you want to include." id="zQF-sR-Hjk">
-                        <barButtonItem key="rightBarButtonItem" title="Next" id="Te7-sC-5Wi"/>
+                        <barButtonItem key="rightBarButtonItem" title="Next" id="Te7-sC-5Wi">
+                            <connections>
+                                <segue destination="iEH-ei-cDa" kind="show" id="of9-YM-po8"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="tableView" destination="Vmc-ek-QqW" id="Mcj-VR-auX"/>
@@ -350,6 +354,110 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6HS-Za-mC9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="346" y="563"/>
+        </scene>
+        <!--Playlist Creation View Controller-->
+        <scene sceneID="abt-TZ-H0t">
+            <objects>
+                <viewController id="iEH-ei-cDa" customClass="PlaylistCreationViewController" customModule="rp2spot" customModuleProvider="target" sceneMemberID="viewController">
+                    <layoutGuides>
+                        <viewControllerLayoutGuide type="top" id="ip8-Kn-Xli"/>
+                        <viewControllerLayoutGuide type="bottom" id="N76-w1-SUK"/>
+                    </layoutGuides>
+                    <view key="view" contentMode="scaleToFill" id="9aq-VN-fYU">
+                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NHE-WE-mwp">
+                                <rect key="frame" x="0.0" y="94" width="600" height="506"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Create a Spotify playlist with x songs" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Haf-Qu-R4G">
+                                        <rect key="frame" x="29" y="55.5" width="281" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Public playlist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tun-HH-aVv">
+                                        <rect key="frame" x="29" y="91" width="104.5" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="glb-5Q-eJ2">
+                                        <rect key="frame" x="460" y="86" width="51" height="31"/>
+                                    </switch>
+                                    <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Playlist title" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="DYt-UW-NgV">
+                                        <rect key="frame" x="29" y="126.5" width="480" height="30"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                        <textInputTraits key="textInputTraits"/>
+                                    </textField>
+                                    <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3kk-bP-fcW">
+                                        <rect key="frame" x="463" y="171.5" width="46" height="30"/>
+                                        <state key="normal" title="Create"/>
+                                        <connections>
+                                            <action selector="createPlaylist:" destination="iEH-ei-cDa" eventType="touchUpInside" id="5rU-eb-WSR"/>
+                                        </connections>
+                                    </button>
+                                    <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Playlist was created" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h86-2q-IW9" userLabel="Creation status label">
+                                        <rect key="frame" x="29" y="204" width="151" height="20.5"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button hidden="YES" opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cho-kL-A4J">
+                                        <rect key="frame" x="190" y="200" width="106" height="30"/>
+                                        <state key="normal" title="Open in Spotify"/>
+                                        <connections>
+                                            <action selector="openInSpotify:" destination="iEH-ei-cDa" eventType="touchUpInside" id="L8w-s7-mi3"/>
+                                        </connections>
+                                    </button>
+                                    <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="U2V-3B-L8C">
+                                        <rect key="frame" x="290" y="164" width="20" height="20"/>
+                                    </activityIndicatorView>
+                                </subviews>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstItem="Tun-HH-aVv" firstAttribute="top" secondItem="Haf-Qu-R4G" secondAttribute="bottom" constant="15" id="799-G1-D6h"/>
+                                    <constraint firstItem="DYt-UW-NgV" firstAttribute="leading" secondItem="Haf-Qu-R4G" secondAttribute="leading" id="Abw-Cl-bDm"/>
+                                    <constraint firstItem="glb-5Q-eJ2" firstAttribute="centerY" secondItem="Tun-HH-aVv" secondAttribute="centerY" id="Blb-Kq-Q5S"/>
+                                    <constraint firstItem="U2V-3B-L8C" firstAttribute="top" secondItem="DYt-UW-NgV" secondAttribute="bottom" constant="7.5" id="JH2-Bg-Kd5"/>
+                                    <constraint firstItem="Tun-HH-aVv" firstAttribute="leading" secondItem="Haf-Qu-R4G" secondAttribute="leading" id="MSv-Gd-KuB"/>
+                                    <constraint firstItem="3kk-bP-fcW" firstAttribute="top" secondItem="DYt-UW-NgV" secondAttribute="bottom" constant="15" id="NzO-3z-hWG"/>
+                                    <constraint firstItem="h86-2q-IW9" firstAttribute="leading" secondItem="Haf-Qu-R4G" secondAttribute="leading" id="SEx-1S-oaO"/>
+                                    <constraint firstItem="U2V-3B-L8C" firstAttribute="centerX" secondItem="NHE-WE-mwp" secondAttribute="centerX" id="ZQY-2b-Fcp"/>
+                                    <constraint firstItem="glb-5Q-eJ2" firstAttribute="trailing" secondItem="DYt-UW-NgV" secondAttribute="trailing" id="ZQx-5H-Mte"/>
+                                    <constraint firstItem="DYt-UW-NgV" firstAttribute="width" secondItem="NHE-WE-mwp" secondAttribute="width" multiplier="0.8" id="bPJ-IN-X1U"/>
+                                    <constraint firstItem="DYt-UW-NgV" firstAttribute="top" secondItem="Tun-HH-aVv" secondAttribute="bottom" constant="15" id="cXt-CE-YeV"/>
+                                    <constraint firstItem="h86-2q-IW9" firstAttribute="top" secondItem="U2V-3B-L8C" secondAttribute="bottom" constant="20" id="hn6-Rv-vuu"/>
+                                    <constraint firstItem="Haf-Qu-R4G" firstAttribute="top" secondItem="NHE-WE-mwp" secondAttribute="top" constant="55.5" id="kSy-ns-lx3"/>
+                                    <constraint firstItem="Cho-kL-A4J" firstAttribute="centerY" secondItem="h86-2q-IW9" secondAttribute="centerY" id="kxc-wh-kps"/>
+                                    <constraint firstItem="Cho-kL-A4J" firstAttribute="leading" secondItem="h86-2q-IW9" secondAttribute="trailing" constant="10" id="t8Y-ND-gfp"/>
+                                    <constraint firstItem="3kk-bP-fcW" firstAttribute="trailing" secondItem="DYt-UW-NgV" secondAttribute="trailing" id="uQF-hc-eBu"/>
+                                    <constraint firstItem="Haf-Qu-R4G" firstAttribute="leading" secondItem="NHE-WE-mwp" secondAttribute="leading" constant="29" id="vBA-5s-0zk"/>
+                                </constraints>
+                            </view>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <constraints>
+                            <constraint firstItem="NHE-WE-mwp" firstAttribute="leading" secondItem="9aq-VN-fYU" secondAttribute="leading" id="ASb-0Y-904"/>
+                            <constraint firstItem="N76-w1-SUK" firstAttribute="top" secondItem="NHE-WE-mwp" secondAttribute="bottom" id="i71-nT-HjE"/>
+                            <constraint firstItem="NHE-WE-mwp" firstAttribute="top" secondItem="ip8-Kn-Xli" secondAttribute="bottom" id="pxR-28-1AG"/>
+                            <constraint firstAttribute="trailing" secondItem="NHE-WE-mwp" secondAttribute="trailing" id="qbE-Jr-jbE"/>
+                        </constraints>
+                    </view>
+                    <connections>
+                        <outlet property="activityIndicator" destination="U2V-3B-L8C" id="mJM-fU-dji"/>
+                        <outlet property="controlsView" destination="NHE-WE-mwp" id="5kz-aB-cPh"/>
+                        <outlet property="createPlaylistButton" destination="3kk-bP-fcW" id="a9G-sd-TbN"/>
+                        <outlet property="creationStatusLabel" destination="h86-2q-IW9" id="uUq-4F-9L1"/>
+                        <outlet property="instructionsLabel" destination="Haf-Qu-R4G" id="qfM-FY-kat"/>
+                        <outlet property="openInSpotifyButton" destination="Cho-kL-A4J" id="zr3-sj-Quf"/>
+                        <outlet property="playlistTitle" destination="DYt-UW-NgV" id="ETn-og-JUb"/>
+                        <outlet property="publicPlaylistSwitch" destination="glb-5Q-eJ2" id="vJU-cu-eMz"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="m8Q-EI-6Gk" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1084" y="563"/>
         </scene>
         <!--Audio Player View Controller-->
         <scene sceneID="DXA-dz-3KY">

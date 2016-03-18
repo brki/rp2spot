@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345FC461C8CDDA300F118B3 /* Array+extension.swift */; };
+		D352855F1C9C986900F8DC94 /* PlaylistCreationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */; };
 		D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D361C7271C90C1B9000B803E /* SongInfoViewController.swift */; };
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
@@ -68,6 +69,7 @@
 
 /* Begin PBXFileReference section */
 		D345FC461C8CDDA300F118B3 /* Array+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+extension.swift"; sourceTree = "<group>"; };
+		D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistCreationViewController.swift; sourceTree = "<group>"; };
 		D361C7271C90C1B9000B803E /* SongInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongInfoViewController.swift; sourceTree = "<group>"; };
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
@@ -264,6 +266,7 @@
 				D3C96A571C8E291A00CABFE1 /* HistoryBrowserViewController.swift */,
 				D361C7271C90C1B9000B803E /* SongInfoViewController.swift */,
 				D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */,
+				D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */,
 				D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */,
 				D3D6FF441C8DD65100B7E8A6 /* AudioPlayerViewController.swift */,
 			);
@@ -453,6 +456,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3AD910E1C7E0AEA0076FE76 /* ErrorInfo.swift in Sources */,
+				D352855F1C9C986900F8DC94 /* PlaylistCreationViewController.swift in Sources */,
 				D3FC5E701C70A51000443F68 /* PlayedSong+CoreDataProperties.swift in Sources */,
 				D3D6FF451C8DD65100B7E8A6 /* AudioPlayerViewController.swift in Sources */,
 				D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */,
