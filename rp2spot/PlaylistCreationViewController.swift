@@ -22,6 +22,7 @@ class PlaylistCreationViewController: UIViewController {
 	override func viewDidLoad() {
 		controlsView.backgroundColor = Constant.Color.SageGreen.color()
 		playlistTitle.backgroundColor = Constant.Color.LightGrey.color()
+		playlistTitle.delegate = self
 	}
 	
 	@IBAction func createPlaylist(sender: UIButton) {
@@ -32,5 +33,20 @@ class PlaylistCreationViewController: UIViewController {
 
 	@IBAction func back(sender: UIBarButtonItem) {
 		dismissViewControllerAnimated(true, completion: nil)
+	}
+}
+
+extension PlaylistCreationViewController: UITextFieldDelegate {
+	func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+		if let text = textField.text {
+			let newString = (text as NSString).stringByReplacingCharactersInRange(range, withString: string).trim()
+			createPlaylistButton.enabled = newString != ""
+		}
+		return true
+	}
+
+	func textFieldShouldClear(textField: UITextField) -> Bool {
+		createPlaylistButton.enabled = false
+		return true
 	}
 }

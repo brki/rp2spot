@@ -10,6 +10,7 @@
 		D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345FC461C8CDDA300F118B3 /* Array+extension.swift */; };
 		D352855F1C9C986900F8DC94 /* PlaylistCreationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */; };
 		D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D361C7271C90C1B9000B803E /* SongInfoViewController.swift */; };
+		D378C5101C9D8A87006A9BF0 /* String+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D378C50F1C9D8A87006A9BF0 /* String+extension.swift */; };
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
@@ -71,6 +72,7 @@
 		D345FC461C8CDDA300F118B3 /* Array+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+extension.swift"; sourceTree = "<group>"; };
 		D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistCreationViewController.swift; sourceTree = "<group>"; };
 		D361C7271C90C1B9000B803E /* SongInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongInfoViewController.swift; sourceTree = "<group>"; };
+		D378C50F1C9D8A87006A9BF0 /* String+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+extension.swift"; sourceTree = "<group>"; };
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
@@ -162,6 +164,7 @@
 			children = (
 				D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */,
 				D345FC461C8CDDA300F118B3 /* Array+extension.swift */,
+				D378C50F1C9D8A87006A9BF0 /* String+extension.swift */,
 			);
 			name = "Core Extensions";
 			sourceTree = "<group>";
@@ -463,6 +466,7 @@
 				D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */,
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
+				D378C5101C9D8A87006A9BF0 /* String+extension.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
 				D39DA47E1C91F29500FC12F8 /* AudioPlayerPlaylist.swift in Sources */,
 				D3FC5E651C6F5AA100443F68 /* SpotifyClient.swift in Sources */,
