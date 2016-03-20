@@ -38,6 +38,11 @@ class PlaylistCreationViewController: UIViewController {
 		scrollView.backgroundColor = sageGreen
 		playlistTitle.backgroundColor = Constant.Color.LightGrey.color()
 		playlistTitle.delegate = self
+
+		// Add a tap recognizer so that keyboard will be dismissed when user taps view outisde of text field:
+		let tapRecognizer = UITapGestureRecognizer(target: self, action: "viewTapped:")
+		tapRecognizer.numberOfTapsRequired = 1
+		view.addGestureRecognizer(tapRecognizer)
 	}
 
 	override func viewWillAppear(animated: Bool) {
@@ -68,8 +73,10 @@ class PlaylistCreationViewController: UIViewController {
 	@IBAction func back(sender: UIBarButtonItem) {
 		dismissViewControllerAnimated(true, completion: nil)
 	}
-	
+
+
 	@IBAction func createPlaylist(sender: UIButton) {
+		view.endEditing(true)
 		let title = (playlistTitle.text ?? "").trim()
 		guard title.characters.count > 0 else {
 			Utility.presentAlert("Playlist title is empty", message: "Give the playlist a name, then try again")
@@ -152,6 +159,10 @@ class PlaylistCreationViewController: UIViewController {
 		}
 		openInSpotifyButton.hidden = false
 		openInSpotifyButton.enabled = true
+	}
+
+	func viewTapped(sender: UITapGestureRecognizer) {
+		view.endEditing(true)
 	}
 }
 
