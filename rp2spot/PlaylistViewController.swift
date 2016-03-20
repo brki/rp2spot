@@ -31,6 +31,14 @@ class PlaylistViewController: UIViewController {
 		dismissViewControllerAnimated(true, completion: nil)
 	}
 
+	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+		super.prepareForSegue(segue, sender: sender)
+		let destinationVC = segue.destinationViewController
+		if let vc = destinationVC as? PlaylistCreationViewController {
+			vc.localPlaylist = localPlaylist
+		}
+	}
+
 	func showOrHideInstructions(hide: Bool) {
 		let targetAlpha = hide ? 0.0 : 1.0
 		UIView.animateWithDuration(0.5) {

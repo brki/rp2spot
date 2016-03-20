@@ -22,6 +22,9 @@ class PlaylistCreationViewController: UIViewController {
 	@IBOutlet weak var scrollView: UIScrollView!
 	@IBOutlet weak var controlsViewHeightConstraint: NSLayoutConstraint!
 
+	var localPlaylist: LocalPlaylistSongs!
+	var playlistURI: NSURL?
+
 	var isRotating = false				// Will be true during rotation
 	var activeTextField: UITextField?	// Keeps track of the active text field.
 
@@ -51,13 +54,60 @@ class PlaylistCreationViewController: UIViewController {
 	}
 
 	@IBAction func createPlaylist(sender: UIButton) {
+		let title = (playlistTitle.text ?? "").trim()
+		guard title.characters.count > 0 else {
+			Utility.presentAlert("Playlist title is empty", message: "Give the playlist a name, then try again")
+			return
+		}
+		let selectedTrackIds = localPlaylist.selectedTrackIds()
+		guard selectedTrackIds.count > 0 else {
+			Utility.presentAlert("No tracks selected", message: "Select some tracks first, then try again")
+			return
+		}
+		SpotifyClient.sharedInstance.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.selected) { playlistSnapshot, error in
+			guard error == nil else {
+				// TODO: give more detail in error, depending on cause
+				let info = error!.localizedDescription
+				Utility.presentAlert("Failed to create playlist", message: "Playlist '\(title)' could not be created: \(info)")
+				return
+			}
+
+			guard let playlist = playlistSnapshot else {
+				Utility.presentAlert("Failed to create playlist", message: "Playlist '\(title)' could not be created: no error information available")
+				return
+			}
+
+			self.playlistURI = playlist.uri
+			async_main  {
+				self.creationStatusLabel.text = "Playlist created"
+				self.showOpenInSpotify()
+			}
+		}
 	}
 	
 	@IBAction func openInSpotify(sender: UIButton) {
+		guard let uri = playlistURI else {
+			print("Open in Spotify tapped, but no playlist URI available")
+			return
+		}
+		UIApplication.sharedApplication().openURL(uri)
 	}
 
 	@IBAction func back(sender: UIBarButtonItem) {
 		dismissViewControllerAnimated(true, completion: nil)
+	}
+
+	func showOpenInSpotify() {
+		guard let uri = playlistURI else {
+			print("No playlist URI available")
+			return
+		}
+		guard UIApplication.sharedApplication().canOpenURL(uri) else {
+			print("Spotify application not available")
+			return
+		}
+		openInSpotifyButton.hidden = false
+		openInSpotifyButton.enabled = true
 	}
 }
 

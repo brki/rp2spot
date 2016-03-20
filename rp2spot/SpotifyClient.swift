@@ -104,6 +104,9 @@ class SpotifyClient {
 		return NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId))
 	}
 
+	/**
+	Gets NSURLS for the provided (short form) Spotify track ids.
+	*/
 	func URIsForTrackIds(trackIds: [String]) -> [NSURL] {
 		var URIs = [NSURL]()
 		for id in trackIds {
@@ -170,6 +173,36 @@ class SpotifyClient {
 				return
 			}
 			handler(trackMetadata: metadata, error: nil)
+		}
+	}
+
+	func createPlaylistWithTracks(playlistName: String, trackIds: [String], publicFlag: Bool, handler: (playlistSnapshot: SPTPlaylistSnapshot?, error: NSError?) -> Void) {
+
+		// perhaps: use rawer request to avoid having to fetch track info first.
+		let trackURIs = URIsForTrackIds(trackIds)
+
+		// create a new playlist
+		loginOrRenewSession() { willTriggerNotification, error in
+			guard error == nil else {
+				handler(playlistSnapshot: nil, error: error)
+				return
+			}
+			guard !willTriggerNotification else {
+				// TODO: handle continuing with process after app is re-opened via a URL?
+				return
+			}
+
+			SPTPlaylistList.createPlaylistWithName(playlistName, publicFlag: publicFlag, session: self.auth.session, callback: { error, playlist in
+				guard error == nil else {
+					handler(playlistSnapshot: nil, error: error!)
+					return
+				}
+				// TODO: handle case of more than 100 tracks being present:
+				playlist.addTracksToPlaylist(trackURIs, withSession: self.auth.session) { error in
+					handler(playlistSnapshot: playlist, error: error)
+				}
+			})
+
 		}
 	}
 }

@@ -33,4 +33,17 @@ struct LocalPlaylistSongs {
 	func songAtIndex(index: Int) -> (song: PlayedSongData, selected: Bool) {
 		return (songs[index], selected[index] != nil)
 	}
+
+	/**
+	Gets the track ids of the selected songs, in the order that they have in self.songs.
+	*/
+	func selectedTrackIds() -> [String] {
+		var selectedIds = [String]()
+		for index in selected.keys.sort() {
+			if let trackId = songs[index].spotifyTrackId {
+				selectedIds.append(trackId)
+			}
+		}
+		return selectedIds
+	}
 }

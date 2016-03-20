@@ -180,14 +180,16 @@ class AudioPlayerViewController: UIViewController {
 				// TODO: notify delegate of error
 				return
 			}
-			// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
+			guard !willTriggerNotification else {
+				// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
+				return
+			}
 
 			self.spotify.playTracks(trackURIs, fromIndex:index) { error in
 				guard error == nil else {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					return
 				}
-				// TODO: get track metadata to display, using:
 				SPTTrack.tracksWithURIs(trackURIs, accessToken: nil, market: nil) { error, trackInfoList in
 					guard error == nil else {
 						print("Error fetching track infos: \(error!)")
