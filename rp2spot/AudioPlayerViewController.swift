@@ -174,13 +174,13 @@ class AudioPlayerViewController: UIViewController {
 		}
 		status = .Active
 
-		spotify.loginOrRenewSession() { willTriggerNotification, error in
+		spotify.loginOrRenewSession() { willTriggerLogin, sessionValid, error in
 			guard error == nil else {
 				print("error while trying to renew session: \(error)")
 				// TODO: notify delegate of error
 				return
 			}
-			guard !willTriggerNotification else {
+			guard !willTriggerLogin else {
 				// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
 				return
 			}

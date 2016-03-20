@@ -24,9 +24,13 @@ class PlaylistCreationViewController: UIViewController {
 
 	var localPlaylist: LocalPlaylistSongs!
 	var playlistURI: NSURL?
+	let spotify = SpotifyClient.sharedInstance
+	var postLoginBlock: (() -> Void)?
+
 
 	var isRotating = false				// Will be true during rotation
 	var activeTextField: UITextField?	// Keeps track of the active text field.
+
 
 	override func viewDidLoad() {
 		let sageGreen = Constant.Color.SageGreen.color()
@@ -53,6 +57,18 @@ class PlaylistCreationViewController: UIViewController {
 		unregisterForKeyboardAndStatusBarNotifications()
 	}
 
+	@IBAction func openInSpotify(sender: UIButton) {
+		guard let uri = playlistURI else {
+			print("Open in Spotify tapped, but no playlist URI available")
+			return
+		}
+		UIApplication.sharedApplication().openURL(uri)
+	}
+
+	@IBAction func back(sender: UIBarButtonItem) {
+		dismissViewControllerAnimated(true, completion: nil)
+	}
+	
 	@IBAction func createPlaylist(sender: UIButton) {
 		let title = (playlistTitle.text ?? "").trim()
 		guard title.characters.count > 0 else {
@@ -64,11 +80,32 @@ class PlaylistCreationViewController: UIViewController {
 			Utility.presentAlert("No tracks selected", message: "Select some tracks first, then try again")
 			return
 		}
-		SpotifyClient.sharedInstance.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.selected) { playlistSnapshot, error in
+
+		tryCreatePlaylist(title, selectedTrackIds: selectedTrackIds)
+	}
+
+	/**
+	Try to create the playlist.
+	
+	This may not be immediately possible if the user needs to log in first.  If that is the case, save a closure that
+	can be executed on sucessful login, and register to get notified when the session is updated.
+	*/
+	func tryCreatePlaylist(title: String, selectedTrackIds: [String]) {
+		createPlaylistButton.enabled = false
+
+		spotify.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.selected) { playlistSnapshot, willTriggerLogin, error in
 			guard error == nil else {
-				// TODO: give more detail in error, depending on cause
 				let info = error!.localizedDescription
 				Utility.presentAlert("Failed to create playlist", message: "Playlist '\(title)' could not be created: \(info)")
+				return
+			}
+
+			guard !willTriggerLogin else {
+				self.postLoginBlock = { [unowned self] in
+					self.postLoginBlock = nil
+					self.tryCreatePlaylist(title, selectedTrackIds: selectedTrackIds)
+				}
+				NSNotificationCenter.defaultCenter().addObserver(self, selector: "spotifySessionUpdated:", name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
 				return
 			}
 
@@ -80,21 +117,28 @@ class PlaylistCreationViewController: UIViewController {
 			self.playlistURI = playlist.uri
 			async_main  {
 				self.creationStatusLabel.text = "Playlist created"
-				self.showOpenInSpotify()
+				self.creationStatusLabel.hidden = false
+				self.creationStatusLabel.alpha = 0
+				UIView.animateWithDuration(0.4) {
+					self.creationStatusLabel.alpha = 1.0
+					self.showOpenInSpotify()
+				}
 			}
 		}
 	}
-	
-	@IBAction func openInSpotify(sender: UIButton) {
-		guard let uri = playlistURI else {
-			print("Open in Spotify tapped, but no playlist URI available")
+
+	func spotifySessionUpdated(notification: NSNotification) {
+		NSNotificationCenter.defaultCenter().removeObserver(self, name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
+		guard let postLogin = postLoginBlock else {
 			return
 		}
-		UIApplication.sharedApplication().openURL(uri)
-	}
-
-	@IBAction func back(sender: UIBarButtonItem) {
-		dismissViewControllerAnimated(true, completion: nil)
+		guard spotify.auth.session.isValid() else {
+			print("No valid session after session update: discarding postLogin block")
+			enableCreatePlaylistButtonIfValidTitlePresent(playlistTitle.text)
+			postLoginBlock = nil
+			return
+		}
+		postLogin()
 	}
 
 	func showOpenInSpotify() {
@@ -118,10 +162,15 @@ extension PlaylistCreationViewController: UITextFieldDelegate {
 	*/
 	func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
 		if let text = textField.text {
-			let newString = (text as NSString).stringByReplacingCharactersInRange(range, withString: string).trim()
-			createPlaylistButton.enabled = newString != ""
+			let newString = (text as NSString).stringByReplacingCharactersInRange(range, withString: string)
+			enableCreatePlaylistButtonIfValidTitlePresent(newString)
 		}
 		return true
+	}
+
+	func enableCreatePlaylistButtonIfValidTitlePresent(title: String?) {
+		let titleText = title ?? ""
+		createPlaylistButton.enabled = titleText.trim() != ""
 	}
 
 	func textFieldShouldClear(textField: UITextField) -> Bool {

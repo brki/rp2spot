@@ -16,14 +16,18 @@ struct Constant {
 	static let SPOTIFY_SESSION_USER_DEFAULTS_KEY = "SpotifySession"
 	static let SPOTIFY_APPSTORE_URL = NSURL(string: "itms-apps://itunes.apple.com/app/id324684580")!
 
+	// The maximum number of tracks that can be added to a playlist in one API call:
+	static let SPOTIFY_MAX_PLAYLIST_ADD_TRACKS = 100
+
+	// The Spotify web service limits to a maximum of 50 URIs when fetching track information.
+	static let SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH = 50
+
 	static let RADIO_PARADISE_HISTORY_URL_BASE = Secrets.RADIO_PARADISE_HISTORY_URL_BASE
 	static let RADIO_PARADISE_IMAGE_URL_BASE = "https://www.radioparadise.com/graphics/covers/"
 	static let RADIO_PARADISE_MINIMUM_HISTORY_DATE = Date.sharedInstance.dateFromRPDateString("2015-02-24T16:45:00+00:00")!
 	static let RADIO_PARADISE_SONG_INFO_URL_TEMPLATE="https://www.radioparadise.com/mx-content.php?name=Music&file=songinfo&song_id={songid}"
 
 
-	// The Spotify web service limits to a maximum of 50 URIs when fetching track information.
-	static let AUDIO_PLAYER_MAX_TRACK_LIST_SIZE = 50
 
 	enum Color: UInt {
 		case SageGreen = 0xEEFFEC

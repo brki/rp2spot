@@ -70,34 +70,28 @@ class SpotifyClient {
 	}
 
 	func renewSession(completionHandler:(error: NSError?) -> Void) {
-
 		auth.renewSession(auth.session) { error, session in
 			self.auth.session = session
-			// or post a notification here? (instead of having a completion handler)
 			completionHandler(error: error)
 		}
 	}
 
-	func loginOrRenewSession(handler: (willTriggerNotification: Bool, error: NSError?) -> Void) {
-		// TODO: cleanup these prints:
+	func loginOrRenewSession(handler: (willTriggerLogin: Bool, sessionValid: Bool, error: NSError?) -> Void) {
 		guard auth.session != nil else {
-
-			print("will trigger login")
-			handler(willTriggerNotification: true, error: nil)
+			handler(willTriggerLogin: true, sessionValid: false, error: nil)
 			triggerSafariLogin()
 			return
 		}
 
-		if auth.session.isValid() {
-			print("already have a valid session, nothing to do")
-			handler(willTriggerNotification: false, error: nil)
+		if !auth.session.isValid() {
+			renewSession() { error in
+				handler(willTriggerLogin: false, sessionValid:self.auth.session.isValid(), error: error)
+			}
 			return
 		}
 
-		print("will renew session")
-		renewSession() { error in
-			handler(willTriggerNotification: false, error: error)
-		}
+		// Already have a valid session, we're good to go.
+		handler(willTriggerLogin: false, sessionValid: true, error: nil)
 	}
 
 	func trackURI(trackId: String) -> NSURL? {
@@ -176,33 +170,64 @@ class SpotifyClient {
 		}
 	}
 
-	func createPlaylistWithTracks(playlistName: String, trackIds: [String], publicFlag: Bool, handler: (playlistSnapshot: SPTPlaylistSnapshot?, error: NSError?) -> Void) {
+	func createPlaylistWithTracks(playlistName: String, trackIds: [String], publicFlag: Bool,
+		handler: (playlistSnapshot: SPTPlaylistSnapshot?, willTriggerLogin: Bool, error: NSError?) -> Void) {
 
-		// perhaps: use rawer request to avoid having to fetch track info first.
 		let trackURIs = URIsForTrackIds(trackIds)
 
-		// create a new playlist
-		loginOrRenewSession() { willTriggerNotification, error in
-			guard error == nil else {
-				handler(playlistSnapshot: nil, error: error)
-				return
-			}
-			guard !willTriggerNotification else {
-				// TODO: handle continuing with process after app is re-opened via a URL?
+		loginOrRenewSession() { willTriggerLogin, sessionValid, error in
+			guard error == nil && !willTriggerLogin else {
+				handler(playlistSnapshot: nil, willTriggerLogin: willTriggerLogin, error: error)
 				return
 			}
 
+			// create a new playlist
 			SPTPlaylistList.createPlaylistWithName(playlistName, publicFlag: publicFlag, session: self.auth.session, callback: { error, playlist in
 				guard error == nil else {
-					handler(playlistSnapshot: nil, error: error!)
+					handler(playlistSnapshot: nil, willTriggerLogin: false, error: error!)
 					return
 				}
-				// TODO: handle case of more than 100 tracks being present:
-				playlist.addTracksToPlaylist(trackURIs, withSession: self.auth.session) { error in
-					handler(playlistSnapshot: playlist, error: error)
+
+				self.addTracksToPlaylist(playlist, trackURIs: trackURIs, processedCount: 0) { error, processedCount in
+					if error != nil {
+						print("createPlaylistWithTracks: error adding tracks: processedCount: \(processedCount), error: \(error!)")
+					}
+					handler(playlistSnapshot: playlist, willTriggerLogin: false, error: error)
 				}
+
 			})
 
 		}
+	}
+
+	func addTracksToPlaylist(playlist: SPTPlaylistSnapshot, trackURIs: [NSURL], var processedCount: Int = 0, handler: (error: NSError?, processedCount: Int) -> Void) {
+		var tracksToProcess: [NSURL]
+		var leftoverTracks: [NSURL]?
+		if trackURIs.count > Constant.SPOTIFY_MAX_PLAYLIST_ADD_TRACKS {
+			let maxIndex = Constant.SPOTIFY_MAX_PLAYLIST_ADD_TRACKS - 1
+			tracksToProcess = Array(trackURIs[0 ... maxIndex])
+			leftoverTracks = Array(trackURIs[(maxIndex + 1) ... (trackURIs.count - 1)])
+		} else {
+			tracksToProcess = trackURIs
+			leftoverTracks = nil
+		}
+		playlist.addTracksToPlaylist(tracksToProcess, withSession: self.auth.session) { error in
+
+			// If there was an error, or if there are no more tracks to process, call the completion handler:
+			guard error == nil else {
+				handler(error: error, processedCount: processedCount)
+				return
+			}
+
+			processedCount += tracksToProcess.count
+			guard let tracks = leftoverTracks else {
+				handler(error: nil, processedCount: processedCount)
+				return
+			}
+
+			// Otherwise, continue processing tracks:
+			self.addTracksToPlaylist(playlist, trackURIs: tracks, processedCount: processedCount, handler: handler)
+		}
+
 	}
 }

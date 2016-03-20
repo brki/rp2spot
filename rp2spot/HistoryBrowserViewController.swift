@@ -293,7 +293,7 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 				return
 			}
 
-			self.historyData.trackListCenteredAtIndexPath(indexPath, maxElements: Constant.AUDIO_PLAYER_MAX_TRACK_LIST_SIZE) { playList in
+			self.historyData.trackListCenteredAtIndexPath(indexPath, maxElements: Constant.SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH) { playList in
 
 				guard playList.list.count > 0 else {
 					print("Empty playlist: nothing to play")

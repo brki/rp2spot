@@ -421,42 +421,42 @@
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Public playlist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tun-HH-aVv">
-                                                <rect key="frame" x="29" y="92" width="105" height="20"/>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Public playlist" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Tun-HH-aVv">
+                                                <rect key="frame" x="29" y="92" width="105" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
                                             <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="glb-5Q-eJ2">
-                                                <rect key="frame" x="460" y="87" width="51" height="31"/>
+                                                <rect key="frame" x="460" y="88" width="51" height="31"/>
                                             </switch>
-                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Playlist title" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="DYt-UW-NgV">
-                                                <rect key="frame" x="29" y="127" width="480" height="30"/>
+                                            <textField opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" placeholder="Playlist title" textAlignment="natural" minimumFontSize="17" clearButtonMode="whileEditing" translatesAutoresizingMaskIntoConstraints="NO" id="DYt-UW-NgV">
+                                                <rect key="frame" x="29" y="128" width="480" height="30"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                 <textInputTraits key="textInputTraits" returnKeyType="done"/>
                                             </textField>
-                                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3kk-bP-fcW">
-                                                <rect key="frame" x="463" y="172" width="46" height="30"/>
+                                            <button opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3kk-bP-fcW">
+                                                <rect key="frame" x="463" y="173" width="46" height="30"/>
                                                 <state key="normal" title="Create"/>
                                                 <connections>
                                                     <action selector="createPlaylist:" destination="iEH-ei-cDa" eventType="touchUpInside" id="5rU-eb-WSR"/>
                                                 </connections>
                                             </button>
-                                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Playlist was created" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h86-2q-IW9" userLabel="Creation status label">
-                                                <rect key="frame" x="29" y="204" width="151" height="21"/>
+                                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Playlist was created" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="h86-2q-IW9" userLabel="Creation status label">
+                                                <rect key="frame" x="29" y="205" width="151" height="21"/>
                                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                 <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                 <nil key="highlightedColor"/>
                                             </label>
-                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" misplaced="YES" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cho-kL-A4J">
-                                                <rect key="frame" x="190" y="200" width="106" height="30"/>
+                                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" enabled="NO" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Cho-kL-A4J">
+                                                <rect key="frame" x="190" y="201" width="319" height="30"/>
                                                 <state key="normal" title="Open in Spotify"/>
                                                 <connections>
                                                     <action selector="openInSpotify:" destination="iEH-ei-cDa" eventType="touchUpInside" id="L8w-s7-mi3"/>
                                                 </connections>
                                             </button>
-                                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" misplaced="YES" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="U2V-3B-L8C">
-                                                <rect key="frame" x="290" y="164" width="20" height="20"/>
+                                            <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="gray" translatesAutoresizingMaskIntoConstraints="NO" id="U2V-3B-L8C">
+                                                <rect key="frame" x="290" y="165" width="20" height="20"/>
                                             </activityIndicatorView>
                                         </subviews>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
@@ -471,12 +471,13 @@
                                             <constraint firstItem="U2V-3B-L8C" firstAttribute="centerX" secondItem="NHE-WE-mwp" secondAttribute="centerX" id="ZQY-2b-Fcp"/>
                                             <constraint firstItem="glb-5Q-eJ2" firstAttribute="trailing" secondItem="DYt-UW-NgV" secondAttribute="trailing" id="ZQx-5H-Mte"/>
                                             <constraint firstItem="DYt-UW-NgV" firstAttribute="width" secondItem="NHE-WE-mwp" secondAttribute="width" multiplier="0.8" id="bPJ-IN-X1U"/>
+                                            <constraint firstItem="Cho-kL-A4J" firstAttribute="centerY" secondItem="h86-2q-IW9" secondAttribute="centerY" id="bbE-Ar-8IP"/>
                                             <constraint firstItem="DYt-UW-NgV" firstAttribute="top" secondItem="Tun-HH-aVv" secondAttribute="bottom" constant="15" id="cXt-CE-YeV"/>
                                             <constraint firstItem="h86-2q-IW9" firstAttribute="top" secondItem="U2V-3B-L8C" secondAttribute="bottom" constant="20" id="hn6-Rv-vuu"/>
                                             <constraint firstItem="Haf-Qu-R4G" firstAttribute="top" secondItem="NHE-WE-mwp" secondAttribute="top" constant="55.5" id="kSy-ns-lx3"/>
-                                            <constraint firstItem="Cho-kL-A4J" firstAttribute="centerY" secondItem="h86-2q-IW9" secondAttribute="centerY" id="kxc-wh-kps"/>
                                             <constraint firstItem="Cho-kL-A4J" firstAttribute="leading" secondItem="h86-2q-IW9" secondAttribute="trailing" constant="10" id="t8Y-ND-gfp"/>
                                             <constraint firstItem="3kk-bP-fcW" firstAttribute="trailing" secondItem="DYt-UW-NgV" secondAttribute="trailing" id="uQF-hc-eBu"/>
+                                            <constraint firstItem="Cho-kL-A4J" firstAttribute="trailing" secondItem="3kk-bP-fcW" secondAttribute="trailing" id="v8Y-Ww-qA4"/>
                                             <constraint firstItem="Haf-Qu-R4G" firstAttribute="leading" secondItem="NHE-WE-mwp" secondAttribute="leading" constant="29" id="vBA-5s-0zk"/>
                                             <constraint firstAttribute="height" constant="536" id="wO8-3s-6rr"/>
                                         </constraints>
