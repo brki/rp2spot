@@ -16,6 +16,14 @@ class SpotifyClient {
 
 	let auth = SPTAuth.defaultInstance()
 
+	var refreshSessionTimeoutBuffer = NSTimeInterval(60.0 * 10)  // 10 minutes
+
+	let sessionRenewalOperationQueue: NSOperationQueue = {
+		let queue = NSOperationQueue()
+		queue.maxConcurrentOperationCount = 1
+		return queue
+	}()
+
 	lazy var player: SPTAudioStreamingController = {
 		let player = SPTAudioStreamingController(clientId: self.auth.clientID)
 		player.setTargetBitrate(UserSetting.sharedInstance.spotifyStreamingQuality, callback: nil)
@@ -69,10 +77,31 @@ class SpotifyClient {
 		UIApplication.sharedApplication().openURL(auth.loginURL)
 	}
 
-	func renewSession(completionHandler:(error: NSError?) -> Void) {
-		auth.renewSession(auth.session) { error, session in
-			self.auth.session = session
-			completionHandler(error: error)
+	/**
+	Renew session.
+	
+	Only allows one active session renewal process at a time, adding others to a queue.
+
+	If forceRefresh is true, the session renewal request will be made even if a fresh session exists.
+	Otherwise, ff a fresh session already exists when the session renewal block starts executing, the
+	no request for refreshing the session will be made.
+	*/
+	func renewSession(forceRenew: Bool = false, completionHandler:((error: NSError?) -> Void)? = nil) {
+
+		sessionRenewalOperationQueue.addOperationWithBlock {
+			guard forceRenew || self.sessionShouldBeRenewedSoon() else {
+				// Force renew requested, or a session that will not expire soon already exists.
+				completionHandler?(error: nil)
+				return
+			}
+			self.auth.renewSession(self.auth.session) { error, session in
+
+				// TODO: if there's a network error, cancel all operations in queue?
+				if session != nil {
+					self.auth.session = session
+				}
+				completionHandler?(error: error)
+			}
 		}
 	}
 
@@ -83,7 +112,7 @@ class SpotifyClient {
 			return
 		}
 
-		if !auth.session.isValid() {
+		guard auth.session.isValid() else {
 			renewSession() { error in
 				handler(willTriggerLogin: false, sessionValid:self.auth.session.isValid(), error: error)
 			}
@@ -92,7 +121,27 @@ class SpotifyClient {
 
 		// Already have a valid session, we're good to go.
 		handler(willTriggerLogin: false, sessionValid: true, error: nil)
+
+		// Try to renew a session that's getting near it's timeout before it expires.
+		if sessionShouldBeRenewedSoon() {
+			renewSession()
+		}
 	}
+
+	/**
+	Checks if the session should be refreshed.
+
+	Will return true if the session is invalid or is nearing it's expiration time.
+	*/
+	func sessionShouldBeRenewedSoon() -> Bool {
+		guard let session = auth.session where session.isValid() else {
+			return true
+		}
+
+		let expirationDateMinusBuffer = NSDate(timeInterval: -refreshSessionTimeoutBuffer, sinceDate: session.expirationDate)
+		return expirationDateMinusBuffer.earlierDate(NSDate()) == expirationDateMinusBuffer
+	}
+	
 
 	func trackURI(trackId: String) -> NSURL? {
 		return NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId))

@@ -69,23 +69,29 @@ class AudioPlayerViewController: UIViewController {
 		if spotify.player.isPlaying {
 			pausePlaying()
 		} else {
-			startPlaying()
+			self.startPlaying()
 		}
 	}
 
 	func startPlaying(sender: AnyObject? = nil) {
-		if status == .Active {
-			spotify.player.setIsPlaying(true) { error in
+		guard status == .Active else {
+			// This may be triggered by a remote control when the player is disabled.  If that
+			// is the case, then the tracklist and index will need to be communicated to the
+			// Spotify player controller again.
+			self.playTracks(self.playlist)
+			return
+		}
+		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
+			guard sessionValid else {
+				print("Unable to renew session in startPlaying(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				return
+			}
+			self.spotify.player.setIsPlaying(true) { error in
 				if let err = error {
 					// TODO: notify delegate of error
 					return
 				}
 			}
-		} else {
-			// This may be triggered by a remote control when the player is disabled.  If that
-			// is the case, then the tracklist and index will need to be communicated to the
-			// Spotify player controller again.
-			playTracks(playlist)
 		}
 	}
 
@@ -99,50 +105,63 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func skipToNextTrack(sender: AnyObject) {
-		if status == .Active {
-			if playlist.currentTrackIsLastTrack() {
-				// We do not want to wrap around  to the other side, which is what would
-				// happen if we're at the end and player.skipNext() is called.
-				// Instead, just start that last song playing again.
-				startPlaying()
-			} else {
-
-				// This is normal case, when the player is active and we're not at the first track.
-
-				spotify.player.skipNext() { error in
-					// TODO: notify delegate of error
-				}
-			}
-		} else {
+		guard status == .Active else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
-			playlist.incrementIndex()
-			playTracks(playlist)
+			self.playlist.incrementIndex()
+			self.playTracks(self.playlist)
+			return
+		}
+
+		guard !self.playlist.currentTrackIsLastTrack() else {
+			// We do not want to wrap around  to the other side, which is what would
+			// happen if we're at the end and player.skipNext() is called.
+			// Instead, just start that last song playing again.
+			self.startPlaying()
+			return
+		}
+
+		// This is normal case, when the player is active and we're not at the first track.
+		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
+			guard sessionValid else {
+				print("Unable to renew session in skipToNextTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				return
+			}
+			self.spotify.player.skipNext() { error in
+				// TODO: notify delegate of error
+			}
 		}
 	}
 	
 	@IBAction func skipToPreviousTrack(sender: AnyObject) {
-		if status == .Active {
-			if playlist.currentTrackIsFirstTrack() {
-				// We do not want to wrap around  to the other side, which is what would
-				// happen if we're at the first track and player.skipPrevious() is called.
-				// Instead, just start that last song playing again.
-				startPlaying()
-			} else {
-
-				// This is normal case, when the player is active and we're not at the first track.
-
-				spotify.player.skipPrevious() { error in
-					// TODO: notify delegate of error
-				}
-			}
-		} else {
+		guard status == .Active else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
 			playlist.decrementIndex()
 			playTracks(playlist)
+			return
+		}
+
+		guard !playlist.currentTrackIsFirstTrack() else {
+			// We do not want to wrap around  to the other side, which is what would
+			// happen if we're at the first track and player.skipPrevious() is called.
+			// Instead, just start that last song playing again.
+			startPlaying()
+			return
+		}
+
+		// This is normal case, when the player is active and we're not at the first track.
+
+		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
+			guard sessionValid else {
+				print("Unable to renew session in skipToPreviousTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				return
+			}
+			self.spotify.player.skipPrevious() { error in
+				// TODO: notify delegate of error
+			}
 		}
 	}
 
@@ -190,20 +209,25 @@ class AudioPlayerViewController: UIViewController {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					return
 				}
-				SPTTrack.tracksWithURIs(trackURIs, accessToken: nil, market: nil) { error, trackInfoList in
-					guard error == nil else {
-						print("Error fetching track infos: \(error!)")
-						// TODO: notify of error
-						return
-					}
-					guard let infos = trackInfoList as? [SPTTrack] else {
-						print("trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
-						return
-					}
-					self.playlist.setTrackMetadata(infos)
-					self.updateNowPlayingInfo()
-				}
+				self.fetchTrackMetadata(trackURIs)
 			}
+		}
+	}
+
+	func fetchTrackMetadata(trackURIs: [NSURL]) {
+		// TODO: use a method with access token?
+		SPTTrack.tracksWithURIs(trackURIs, accessToken: nil, market: nil) { error, trackInfoList in
+			guard error == nil else {
+				print("Error fetching track infos: \(error!)")
+				// TODO: notify of error
+				return
+			}
+			guard let infos = trackInfoList as? [SPTTrack] else {
+				print("trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
+				return
+			}
+			self.playlist.setTrackMetadata(infos)
+			self.updateNowPlayingInfo()
 		}
 	}
 
