@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */; };
 		D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D345FC461C8CDDA300F118B3 /* Array+extension.swift */; };
 		D352855F1C9C986900F8DC94 /* PlaylistCreationViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */; };
 		D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D361C7271C90C1B9000B803E /* SongInfoViewController.swift */; };
@@ -69,6 +70,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuthRenewalOperation.swift; sourceTree = "<group>"; };
 		D345FC461C8CDDA300F118B3 /* Array+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Array+extension.swift"; sourceTree = "<group>"; };
 		D352855E1C9C986900F8DC94 /* PlaylistCreationViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistCreationViewController.swift; sourceTree = "<group>"; };
 		D361C7271C90C1B9000B803E /* SongInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongInfoViewController.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 			isa = PBXGroup;
 			children = (
 				D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */,
+				D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */,
 			);
 			name = Spotify;
 			sourceTree = "<group>";
@@ -475,6 +478,7 @@
 				D39992641C81E500008AECD4 /* UserSetting.swift in Sources */,
 				D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */,
 				D38839FD1C9749AA001C4FE3 /* PlaylistViewController.swift in Sources */,
+				D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */,
 				D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,

@@ -83,26 +83,12 @@ class SpotifyClient {
 	Only allows one active session renewal process at a time, adding others to a queue.
 
 	If forceRefresh is true, the session renewal request will be made even if a fresh session exists.
-	Otherwise, ff a fresh session already exists when the session renewal block starts executing, the
+	Otherwise, if a fresh session already exists when the session renewal block starts executing, then
 	no request for refreshing the session will be made.
 	*/
 	func renewSession(forceRenew: Bool = false, completionHandler:((error: NSError?) -> Void)? = nil) {
-
-		sessionRenewalOperationQueue.addOperationWithBlock {
-			guard forceRenew || self.sessionShouldBeRenewedSoon() else {
-				// Force renew requested, or a session that will not expire soon already exists.
-				completionHandler?(error: nil)
-				return
-			}
-			self.auth.renewSession(self.auth.session) { error, session in
-
-				// TODO: if there's a network error, cancel all operations in queue?
-				if session != nil {
-					self.auth.session = session
-				}
-				completionHandler?(error: error)
-			}
-		}
+		let renewalOperation = SpotifyAuthRenewalOperation(forceRenew: forceRenew, authCompletionHandler: completionHandler)
+		sessionRenewalOperationQueue.addOperation(renewalOperation)
 	}
 
 	func loginOrRenewSession(handler: (willTriggerLogin: Bool, sessionValid: Bool, error: NSError?) -> Void) {
