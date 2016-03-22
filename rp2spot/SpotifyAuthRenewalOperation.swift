@@ -74,10 +74,12 @@ class SpotifyAuthRenewalOperation: NSOperation {
 			return
 		}
 		spotify.auth.renewSession(spotify.auth.session) { error, session in
-			if session != nil {
-				spotify.auth.session = session
+			if !self.cancelled {
+				if session != nil {
+					spotify.auth.session = session
+				}
+				self.authCompletionHandler?(error: error)
 			}
-			self.authCompletionHandler?(error: error)
 			self.state = .Finished
 		}
 	}
