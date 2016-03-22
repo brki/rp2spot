@@ -201,6 +201,7 @@ class AudioPlayerViewController: UIViewController {
 			}
 			guard !willTriggerLogin else {
 				// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
+				// Perhaps nothing should be done here - the user will simply need to tap again to start playing.
 				return
 			}
 
@@ -365,7 +366,41 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		updateUI(isPlaying: true)
 	}
 
-	
+	/** Called when the audio streaming object becomes the active playback device on the user's account.
+	@param audioStreaming The object that sent the message.
+	*/
+	func audioStreamingDidBecomeActivePlaybackDevice(audioStreaming: SPTAudioStreamingController!) {
+		// Probably do nothing here.
+		print("audioStreamingDidBecomeActivePlaybackDevice")
+	}
+
+	/** Called when the audio streaming object becomes an inactive playback device on the user's account.
+	@param audioStreaming The object that sent the message.
+	*/
+	func audioStreamingDidBecomeInactivePlaybackDevice(audioStreaming: SPTAudioStreamingController!) {
+		// Probably nothing to do here.
+		print("audioStreamingDidBecomeInactivePlaybackDevice")
+	}
+
+	/** Called when the streaming controller lost permission to play audio.
+
+	This typically happens when the user plays audio from their account on another device.
+
+	@param audioStreaming The object that sent the message.
+	*/
+	func audioStreamingDidLosePermissionForPlayback(audioStreaming: SPTAudioStreamingController!) {
+		// TODO: record last track time position, if possible.
+		// TODO: notify user.
+		print("audioStreamingDidLosePermissionForPlayback")
+	}
+
+
+	/** Called when the streaming controller popped a new item from the playqueue.
+
+ @param audioStreaming The object that sent the message.
+ */
+	//	-(void)audioStreamingDidPopQueue:(SPTAudioStreamingController *)audioStreaming;
+
 
 	/** Called before the streaming controller begins playing another track.
 
@@ -374,7 +409,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
  */
 	//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didStopPlayingTrack:(NSURL *)trackUri;
 
-/** Called when the streaming controller fails to play a track.
+	/** Called when the streaming controller fails to play a track.
 
  This typically happens when the track is not available in the current users' region, if you're playing
  multiple tracks the playback will start playing the next track automatically
@@ -382,74 +417,55 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
  @param audioStreaming The object that sent the message.
  @param trackUri The URI of the track that failed to play.
  */
-//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didFailToPlayTrack:(NSURL *)trackUri;
+	//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didFailToPlayTrack:(NSURL *)trackUri;
 
-
-
-
-/** Called when the audio streaming object becomes the active playback device on the user's account.
- @param audioStreaming The object that sent the message.
- */
-//	-(void)audioStreamingDidBecomeActivePlaybackDevice:(SPTAudioStreamingController *)audioStreaming;
-
-
-/** Called when the audio streaming object becomes an inactive playback device on the user's account.
- @param audioStreaming The object that sent the message.
- */
-//-(void)audioStreamingDidBecomeInactivePlaybackDevice:(SPTAudioStreamingController *)audioStreaming;
-
-
-/** Called when the streaming controller lost permission to play audio.
-
- This typically happens when the user plays audio from their account on another device.
-
- @param audioStreaming The object that sent the message.
- */
-//	-(void)audioStreamingDidLosePermissionForPlayback:(SPTAudioStreamingController *)audioStreaming;
-
-
-
-/** Called when the streaming controller popped a new item from the playqueue.
-
- @param audioStreaming The object that sent the message.
- */
-//	-(void)audioStreamingDidPopQueue:(SPTAudioStreamingController *)audioStreaming;
 }
 
 
 // MARK: SPTAudioStreamingDelegate
-// TODO: implement these:
 
 extension AudioPlayerViewController: SPTAudioStreamingDelegate {
-/** Called when the streaming controller encounters a fatal error.
 
- At this point it may be appropriate to inform the user of the problem.
+	/** Called when network connectivity is lost.
+	@param audioStreaming The object that sent the message.
+	*/
+	func audioStreamingDidDisconnect(audioStreaming: SPTAudioStreamingController!) {
+		// TODO: record last track time position, if possible.
+		// TODO: notify user.
+		print("audioStreamingDidDisconnect")
+	}
 
- @param audioStreaming The object that sent the message.
- @param error The error that occurred.
- */
-//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didEncounterError:(NSError *)error;
+	/** Called when network connectivitiy is back after being lost.
+	@param audioStreaming The object that sent the message.
+	*/
+	func audioStreamingDidReconnect(audioStreaming: SPTAudioStreamingController!) {
+		// Probably do nothing here.  We don't want music to suddenly start blaring
+		// out when network connectivity is restored minutes or hours after it was lost.
+		print("audioStreamingDidReconnect")
+	}
 
+	/** Called when the streaming controller encounters a fatal error.
 
-/** Called when the streaming controller recieved a message for the end user from the Spotify service.
+	At this point it may be appropriate to inform the user of the problem.
 
- This string should be presented to the user in a reasonable manner.
+	@param audioStreaming The object that sent the message.
+	@param error The error that occurred.
+	*/
+	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didEncounterError error: NSError!) {
+		// TODO: record last track time position, if possible.
+		// TODO: notify user.
+		print("didEncountError: \(error)")
+	}
 
- @param audioStreaming The object that sent the message.
- @param message The message to display to the user.
- */
-//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didReceiveMessage:(NSString *)message;
+	/** Called when the streaming controller recieved a message for the end user from the Spotify service.
 
+	This string should be presented to the user in a reasonable manner.
 
-/** Called when network connectivity is lost.
- @param audioStreaming The object that sent the message.
- */
-//	-(void)audioStreamingDidDisconnect:(SPTAudioStreamingController *)audioStreaming;
-
-
-/** Called when network connectivitiy is back after being lost.
- @param audioStreaming The object that sent the message.
- */
-//	-(void)audioStreamingDidReconnect:(SPTAudioStreamingController *)audioStreaming;
-
+	@param audioStreaming The object that sent the message.
+	@param message The message to display to the user.
+	*/
+	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didReceiveMessage message: String!) {
+		// TODO: notify user (not sure what these messages are, yet).
+		print("didReceiveMessage: \(message)")
+	}
 }
