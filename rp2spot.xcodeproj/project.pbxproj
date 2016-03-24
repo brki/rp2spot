@@ -37,6 +37,7 @@
 		D3C98A061C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */; };
 		D3C98A091C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C98A081C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift */; };
 		D3D6FF451C8DD65100B7E8A6 /* AudioPlayerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3D6FF441C8DD65100B7E8A6 /* AudioPlayerViewController.swift */; };
+		D3EF74F21CA40D75001A0662 /* SpotifyTrackInfoManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3EF74F11CA40D75001A0662 /* SpotifyTrackInfoManager.swift */; };
 		D3FC5E571C6F2E3A00443F68 /* Spotify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E561C6F2E3A00443F68 /* Spotify.framework */; };
 		D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E581C6F2EB600443F68 /* Alamofire.framework */; };
 		D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */; };
@@ -106,6 +107,7 @@
 		D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryDateSelectorViewController.swift; sourceTree = "<group>"; };
 		D3C98A081C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DateSelectionAcceptingProtocol.swift; sourceTree = "<group>"; };
 		D3D6FF441C8DD65100B7E8A6 /* AudioPlayerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayerViewController.swift; sourceTree = "<group>"; };
+		D3EF74F11CA40D75001A0662 /* SpotifyTrackInfoManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyTrackInfoManager.swift; sourceTree = "<group>"; };
 		D3FC5E561C6F2E3A00443F68 /* Spotify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Spotify.framework; sourceTree = "<group>"; };
 		D3FC5E581C6F2EB600443F68 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
 		D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
@@ -158,6 +160,7 @@
 			children = (
 				D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */,
 				D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */,
+				D3EF74F11CA40D75001A0662 /* SpotifyTrackInfoManager.swift */,
 			);
 			name = Spotify;
 			sourceTree = "<group>";
@@ -487,6 +490,7 @@
 				D3C96A581C8E291A00CABFE1 /* HistoryBrowserViewController.swift in Sources */,
 				D3B922D61C9B299200B60CE3 /* LocalPlaylistSongs.swift in Sources */,
 				D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */,
+				D3EF74F21CA40D75001A0662 /* SpotifyTrackInfoManager.swift in Sources */,
 				D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */,
 				D38839FF1C974B03001C4FE3 /* PlaylistTableViewCell.swift in Sources */,
 				D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */,

@@ -16,6 +16,8 @@ class SpotifyClient {
 
 	let auth = SPTAuth.defaultInstance()
 
+	let trackInfo = SpotifyTrackInfoManager.sharedInstance
+
 	var refreshSessionTimeoutBuffer = NSTimeInterval(60.0 * 10)  // 10 minutes
 
 	let sessionRenewalOperationQueue: NSOperationQueue = {

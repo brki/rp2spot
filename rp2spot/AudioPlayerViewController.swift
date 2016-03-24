@@ -216,18 +216,12 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func fetchTrackMetadata(trackURIs: [NSURL]) {
-		// TODO: use a method with access token?
-		SPTTrack.tracksWithURIs(trackURIs, accessToken: nil, market: nil) { error, trackInfoList in
+		spotify.trackInfo.trackMetadata(trackURIs) { error, trackInfos in
 			guard error == nil else {
-				print("Error fetching track infos: \(error!)")
 				// TODO: notify of error
 				return
 			}
-			guard let infos = trackInfoList as? [SPTTrack] else {
-				print("trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
-				return
-			}
-			self.playlist.setTrackMetadata(infos)
+			self.playlist.setTrackMetadata(trackInfos)
 			self.updateNowPlayingInfo()
 		}
 	}

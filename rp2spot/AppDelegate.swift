@@ -77,5 +77,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		return false
 	}
 
+	func applicationDidReceiveMemoryWarning(application: UIApplication) {
+		SpotifyClient.sharedInstance.trackInfo.cache.removeAllObjects()
+
+		// Note: AlamofireImage's AutoPurgingImageCache listens for low memory warnings and purges
+		// the in-memory cache when one is received.
+	}
+
 }
 
