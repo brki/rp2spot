@@ -58,6 +58,7 @@ class AudioPlayerViewController: UIViewController {
 
 	override func viewWillAppear(animated: Bool) {
 		super.viewWillAppear(animated)
+		updateUI(isPlaying: spotify.player.isPlaying)
 	}
 
 	deinit {
@@ -89,6 +90,7 @@ class AudioPlayerViewController: UIViewController {
 			self.spotify.player.setIsPlaying(true) { error in
 				if let err = error {
 					// TODO: notify delegate of error
+					print("startPlaying(): error trying to setIsPlaying() on player: \(err)")
 					return
 				}
 			}
@@ -96,11 +98,14 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func pausePlaying(sender: AnyObject? = nil) {
+		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		spotify.player.setIsPlaying(false) { error in
 			if let err = error {
+				print("pausePlaying: error while trying to pause player: \(err)")
 				// TODO: notify delegate of error
 				return
 			}
+			self.updateNowPlayingInfo()
 		}
 	}
 
@@ -161,6 +166,7 @@ class AudioPlayerViewController: UIViewController {
 			}
 			self.spotify.player.skipPrevious() { error in
 				// TODO: notify delegate of error
+				self.updateNowPlayingInfo()
 			}
 		}
 	}
@@ -179,6 +185,7 @@ class AudioPlayerViewController: UIViewController {
 					// TODO: notify delegate of error
 					return
 				}
+				self.updateNowPlayingInfo()
 				self.status = .Disabled
 			}
 		}
@@ -206,23 +213,13 @@ class AudioPlayerViewController: UIViewController {
 			}
 
 			self.spotify.playTracks(trackURIs, fromIndex:index, trackStartTime: self.playlist.trackPosition) { error in
-				guard error == nil else {					
+				guard error == nil else {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
+					print("Error in AudioViewController.playTracks(): \(error)")
 					return
 				}
-				self.fetchTrackMetadata(trackURIs)
+				self.updateNowPlayingInfo()
 			}
-		}
-	}
-
-	func fetchTrackMetadata(trackURIs: [NSURL]) {
-		spotify.trackInfo.trackMetadata(trackURIs) { error, trackInfos in
-			guard error == nil else {
-				// TODO: notify of error
-				return
-			}
-			self.playlist.setTrackMetadata(trackInfos)
-			self.updateNowPlayingInfo()
 		}
 	}
 
@@ -232,24 +229,61 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func updateNowPlayingInfo(trackId: String? = nil) {
-		let nowPlayingTrackId = trackId == nil ? SPTTrack.identifierFromURI(spotify.player.currentTrackURI) : trackId!
 
-		guard let track = playlist.trackMetadata[nowPlayingTrackId!] else {
-			// This happens when no data is available yet (e.g.
-			// before the metadata request delivers data).
+		let nowPlayingTrackId = trackId ?? playlist.currentTrack?.spotifyTrackId ?? SPTTrack.identifierFromURI(spotify.player.currentTrackURI)
+
+		guard let nowPlayingId = nowPlayingTrackId else {
+			print("updateNowPlayingInfo(): no nowPlayingId available")
+			return
+		}
+
+		// If the track information is not yet available, try to fetch it:
+		guard let track = playlist.trackMetadata[nowPlayingId] else {
+			// This happens when no data is available yet (e.g. before the metadata request delivers data).
+			setNowPlayingInfo(nil)
+
+			let trackURIs = playlist.trackURIsCenteredOnTrack(
+				nowPlayingId,
+				maxCount: Constant.SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH)
+
+			spotify.trackInfo.trackMetadata(trackURIs) { error, trackInfoList in
+				self.playlist.setTrackMetadata(trackInfoList)
+				// It's possible that the track has changed since the original request; if so
+				// we should not set the now playing info with the old track info.
+				let sameTrackPlaying = SPTTrack.identifierFromURI(self.spotify.player.currentTrackURI) == nowPlayingId
+				if let trackInfo = self.playlist.trackMetadata[nowPlayingId] where sameTrackPlaying {
+					self.setNowPlayingInfo(trackInfo)
+				}
+				if error != nil {
+					print("updateNowPlayingInfo: error when getting track metadata: \(error!)")
+				}
+			}
+			return
+		}
+		setNowPlayingInfo(track)
+	}
+
+	func setNowPlayingInfo(trackInfo: SPTTrack?) {
+		guard let track = trackInfo else {
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
 
 		let artistNames = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joinWithSeparator(", ")
+
 		var nowPlayingInfo: [String: AnyObject] = [
 			MPMediaItemPropertyTitle: track.name,
 			MPMediaItemPropertyAlbumTitle: track.album.name,
-			MPMediaItemPropertyPlaybackDuration: track.duration
+			MPMediaItemPropertyPlaybackDuration: track.duration,
+			MPNowPlayingInfoPropertyElapsedPlaybackTime: spotify.player.currentPlaybackPosition,
+			// This one is necessary for the pause / playback status in control center in the simulator:
+			MPNowPlayingInfoPropertyPlaybackRate: spotify.player.isPlaying ? 1 : 0
 		]
+
 		if artistNames.characters.count > 0 {
 			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames
 		}
+
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
 	}
 }
@@ -337,6 +371,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
 		updateUI(isPlaying: isPlaying)
+		updateNowPlayingInfo()
 	}
 
 	/**
@@ -356,6 +391,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
 		}
 		updateUI(isPlaying: true)
+		updateNowPlayingInfo()
 	}
 
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
@@ -394,14 +430,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	//	-(void)audioStreamingDidPopQueue:(SPTAudioStreamingController *)audioStreaming;
 
 
-	/** Called before the streaming controller begins playing another track.
-
- @param audioStreaming The object that sent the message.
- @param trackUri The URI of the track that stopped.
- */
-	//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didStopPlayingTrack:(NSURL *)trackUri;
-
-	/** Called when the streaming controller fails to play a track.
+ /** Called when the streaming controller fails to play a track.
 
  This typically happens when the track is not available in the current users' region, if you're playing
  multiple tracks the playback will start playing the next track automatically

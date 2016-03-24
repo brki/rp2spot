@@ -15,6 +15,13 @@ struct AudioPlayerPlaylist {
 	var trackToIndexMap = [String: Int]() // key is in form "foo" (not "spotify:track:foo"), value is an index into ``list``
 	var trackMetadata = [String: SPTTrack]() // key is in form "foo" (not "spotify:track:foo")
 
+	var currentTrack: PlayedSongData? {
+		guard let index = currentIndex else {
+			return nil
+		}
+		return list[index]
+	}
+
 	init(list: [PlayedSongData], currentIndex: Int? = nil) {
 		self.list = list
 		self.currentIndex = currentIndex
@@ -45,7 +52,6 @@ struct AudioPlayerPlaylist {
 	}
 
 	mutating func setTrackMetadata(newTrackMetadata: [SPTTrack]?) {
-		trackMetadata.removeAll()
 		guard let metadata = newTrackMetadata else {
 			return
 		}
@@ -62,7 +68,45 @@ struct AudioPlayerPlaylist {
 		}
 	}
 
+	func currentTrackMetadata() -> SPTTrack? {
+		guard let index = currentIndex,
+			trackId = list[index].spotifyTrackId,
+			metadata = trackMetadata[trackId] else {
+			return nil
+		}
+		return metadata
+	}
+
+	/**
+	Gets a list of track URIs for the playlist, centered on the given index.
+	
+	If the index is near the upper or lower limit, or if the current list 
+	has less than maxCount items, then less than maxCount items will be returned.
+	*/
+	func trackURIsCenteredOnIndex(index: Int, maxCount: Int) -> [NSURL] {
+		var selected: [PlayedSongData]
+		if list.count <= maxCount {
+			selected = list
+		} else {
+			let halfOfRange = maxCount / 2
+			let startIndex = max(0, index - halfOfRange)
+			let endIndex = min(list.count - 1, index + halfOfRange)
+			selected = Array(list[startIndex ... endIndex])
+		}
+
+		return SpotifyClient.sharedInstance.URIsForTrackIds(selected.map({ $0.spotifyTrackId! }))
+	}
+
+	func trackURIsCenteredOnTrack(trackId: String, maxCount: Int) -> [NSURL] {
+		guard let index = trackToIndexMap[trackId] else {
+			print("trackURIsCenteredOnTrack: track not in track map")
+			return [NSURL]()
+		}
+		return trackURIsCenteredOnIndex(index, maxCount: maxCount)
+	}
+
 	mutating func incrementIndex() {
+		trackPosition = 0.0
 		guard currentIndex != nil else {
 			if list.count > 0 {
 				currentIndex = 0
@@ -75,6 +119,7 @@ struct AudioPlayerPlaylist {
 	}
 
 	mutating func decrementIndex() {
+		trackPosition = 0.0
 		guard currentIndex != nil else {
 			if list.count > 0 {
 				currentIndex = 0
@@ -82,7 +127,7 @@ struct AudioPlayerPlaylist {
 			return
 		}
 		if currentIndex! > 0 {
-			currentIndex! += 1
+			currentIndex! -= 1
 		}
 	}
 }

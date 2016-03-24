@@ -12,40 +12,7 @@
 
 import Foundation
 
-class SpotifyAuthRenewalOperation: NSOperation {
-
-	enum State: String {
-		case Ready = "isReady"
-		case Executing = "isExecuting"
-		case Finished = "isFinished"
-	}
-
-	override var asynchronous: Bool {
-		return true
-	}
-
-	var state = State.Ready {
-		willSet {
-			willChangeValueForKey(newValue.rawValue)
-			willChangeValueForKey(state.rawValue)
-		}
-		didSet {
-			didChangeValueForKey(oldValue.rawValue)
-			didChangeValueForKey(state.rawValue)
-		}
-	}
-
-	override var ready: Bool {
-		return super.ready && state == .Ready
-	}
-
-	override var executing: Bool {
-		return state == .Executing
-	}
-
-	override var finished: Bool {
-		return state == .Finished
-	}
+class SpotifyAuthRenewalOperation: ConcurrentOperation {
 
 	var forceRenew: Bool
 	var authCompletionHandler: ((error: NSError?) -> Void)?
@@ -53,15 +20,6 @@ class SpotifyAuthRenewalOperation: NSOperation {
 	init(forceRenew: Bool, authCompletionHandler: ((error: NSError?) -> Void)? = nil) {
 		self.forceRenew = forceRenew
 		self.authCompletionHandler = authCompletionHandler
-	}
-
-	override func start() {
-		guard !cancelled else {
-			state = .Finished
-			return
-		}
-		state = .Executing
-		main()
 	}
 
 	override func main() {

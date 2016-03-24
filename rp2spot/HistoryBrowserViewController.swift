@@ -296,14 +296,14 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 				return
 			}
 
-			self.historyData.trackListCenteredAtIndexPath(indexPath, maxElements: Constant.SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH) { playList in
+			self.historyData.trackListWithSelectedIndex(indexPath) { playlist in
 
-				guard playList.list.count > 0 else {
+				guard playlist.list.count > 0 else {
 					print("Empty playlist: nothing to play")
 					return
 				}
 
-				self.audioPlayerVC.playTracks(playList)
+				self.audioPlayerVC.playTracks(playlist)
 			}
 		}
 

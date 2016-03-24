@@ -18,6 +18,13 @@ class SpotifyTrackInfoManager {
 		return cache
 	}()
 
+	lazy var operationQueue: NSOperationQueue = {
+		let queue = NSOperationQueue()
+		queue.maxConcurrentOperationCount = 1
+		return queue
+	}()
+
+
 	/**
 	Gets the track metadata for the given track URIs.
 	
@@ -25,21 +32,8 @@ class SpotifyTrackInfoManager {
 	are not locally cached.
 	*/
 	func trackMetadata(trackURIs: [NSURL], handler: (NSError?, [SPTTrack]?) -> Void) {
-		let (found, missing) = getCachedTrackInfo(trackURIs)
-		print("Found count: \(found.count), missing count: \(missing.count)")
-		if missing.count == 0 {
-			handler(nil, found)
-			return
-		}
-
-		fetchTrackMetadata(missing) { error, trackList in
-			guard error == nil else {
-				handler(error, found)
-				return
-			}
-			// If there was no error, trackList is an array of SPTTrack.
-			handler(nil, found + trackList!)
-		}
+		let operation = SpotifyTrackMetadataOperation(trackURIs: trackURIs, handler:handler)
+		operationQueue.addOperation(operation)
 	}
 
 	/**
@@ -62,30 +56,9 @@ class SpotifyTrackInfoManager {
 		return (found: found, missing: missing)
 	}
 
-	/**
-	Make a network request to the Spotify web service to get track information for the
-	given track URIs.
-	*/
-	func fetchTrackMetadata(trackURIs: [NSURL], handler: (NSError?, [SPTTrack]?) -> Void) {
-		// TODO: use a method with access token?
-		SPTTrack.tracksWithURIs(trackURIs, accessToken: nil, market: nil) { error, trackInfoList in
-			guard error == nil else {
-				handler(error, nil)
-				return
-			}
-			guard let infos = trackInfoList as? [SPTTrack] else {
-				print("trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
-				let err = NSError(domain: "SpotifyTrackInfoManager", code: 1,
-				                  userInfo: [NSLocalizedDescriptionKey: "Error processing track metadata"])
-				handler(err, nil)
-				return
-			}
-
-			// Add the tracks to the cache
-			for info in infos {
-				self.cache.setObject(info, forKey: info.identifier)
-			}
-			handler(nil, infos)
+	func addTracksToCache(tracks: [SPTTrack]) {
+		for track in tracks {
+			cache.setObject(track, forKey: track.identifier)
 		}
 	}
 }

@@ -189,6 +189,7 @@ class SpotifyClient {
 		}
 	}
 
+	// TODO: use cache?
 	func trackInfo(trackId: String, handler: (trackMetadata: [NSObject: AnyObject]?, error: NSError?) -> Void) {
 		guard let URI = trackURI(trackId) else {
 			handler(trackMetadata: nil, error: NSError(domain: "SpotifyClient", code: 1,

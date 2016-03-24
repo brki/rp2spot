@@ -107,6 +107,9 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		return imageURL
 	}
 
+	/**
+	Helper method for json deserialization.
+	*/
 	static func collection(response response: NSHTTPURLResponse, representation: AnyObject) -> [PlayedSongData] {
 		var objects = [PlayedSongData]()
 
@@ -119,6 +122,16 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		}
 
 		return objects
+	}
+
+	/**
+	Returns an array of PlayedSongData objects, given an array of PlayedSong objects.
+
+	Note that it's the caller's responsibility to ensure that this is done in a thread-safe manner
+	for the song's managedObjectContext.
+	*/
+	static func dataItemsFromPlayedSongs(playedSongs: [PlayedSong]) -> [PlayedSongData] {
+		return playedSongs.map({ PlayedSongData(song: $0) })
 	}
 }
 

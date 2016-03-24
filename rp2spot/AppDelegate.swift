@@ -22,7 +22,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	}
 
 	func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-//		setStatusBarBackgroundColor(UIColor(red: 0.1, green: 0.1, blue: 0.1, alpha: 1.0))
 		setStatusBarBackgroundColor(UIColor.blackColor())
 		return true
 	}

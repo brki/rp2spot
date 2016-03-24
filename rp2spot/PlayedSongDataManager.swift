@@ -368,6 +368,39 @@ class PlayedSongDataManager {
 	}
 
 	/**
+	Creates an AudioPlayerPlaylist with tracks that have a Spotify track id.
+	*/
+	func trackListWithSelectedIndex(indexPath: NSIndexPath, handler: (list: AudioPlayerPlaylist) -> Void) {
+		guard songCount > 0 else {
+			handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
+			return
+		}
+
+		context.performBlock {
+			// If the selected song has no spotify track, just return an empty list.
+			guard let selectedSong = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong where selectedSong.spotifyTrackId != nil else {
+				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
+				return
+			}
+
+			var songData = [PlayedSongData]()
+			var selectedIndex = -1
+			var index = 0
+			for song in self.fetchedResultsController.fetchedObjects as! [PlayedSong] {
+				if song.spotifyTrackId != nil {
+					if selectedIndex == -1 && song.spotifyTrackId! == selectedSong.spotifyTrackId! {
+						selectedIndex = index
+					}
+					index += 1
+					songData.append(PlayedSongData(song: song))
+				}
+			}
+
+			handler(list: AudioPlayerPlaylist(list: songData, currentIndex: selectedIndex))
+		}
+	}
+
+	/**
 	Get an array of track ids, starting with the given index path, and going towards more recent objects.
 	*/
 	func trackIdsStartingAtIndexPath(indexPath: NSIndexPath, maxCount: Int = SpotifyClient.MAX_PLAYER_TRACK_COUNT) -> [String] {
