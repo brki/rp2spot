@@ -235,7 +235,9 @@ class SpotifyClient {
 		}
 	}
 
-	func addTracksToPlaylist(playlist: SPTPlaylistSnapshot, trackURIs: [NSURL], var processedCount: Int = 0, handler: (error: NSError?, processedCount: Int) -> Void) {
+	func addTracksToPlaylist(playlist: SPTPlaylistSnapshot, trackURIs: [NSURL], processedCount: Int = 0,
+	                         handler: (error: NSError?, processedCount: Int) -> Void) {
+		var alreadyProcessedCount = processedCount
 		var tracksToProcess: [NSURL]
 		var leftoverTracks: [NSURL]?
 		if trackURIs.count > Constant.SPOTIFY_MAX_PLAYLIST_ADD_TRACKS {
@@ -250,19 +252,18 @@ class SpotifyClient {
 
 			// If there was an error, or if there are no more tracks to process, call the completion handler:
 			guard error == nil else {
-				handler(error: error, processedCount: processedCount)
+				handler(error: error, processedCount: alreadyProcessedCount)
 				return
 			}
 
-			processedCount += tracksToProcess.count
+			alreadyProcessedCount += tracksToProcess.count
 			guard let tracks = leftoverTracks else {
-				handler(error: nil, processedCount: processedCount)
+				handler(error: nil, processedCount: alreadyProcessedCount)
 				return
 			}
 
 			// Otherwise, continue processing tracks:
-			self.addTracksToPlaylist(playlist, trackURIs: tracks, processedCount: processedCount, handler: handler)
+			self.addTracksToPlaylist(playlist, trackURIs: tracks, processedCount: alreadyProcessedCount, handler: handler)
 		}
-
 	}
 }

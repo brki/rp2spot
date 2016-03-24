@@ -338,9 +338,9 @@ class PlayedSongDataManager {
 					if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong where song.spotifyTrackId != nil {
 						laterList.append(PlayedSongData(song: song))
 						laterAdded = true
-						desiredElements--
+						desiredElements -= 1
 					}
-					laterRow--
+					laterRow -= 1
 					hasLater = laterRow >= 0
 				}
 				if desiredElements == 0 {
@@ -353,9 +353,9 @@ class PlayedSongDataManager {
 					if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong where song.spotifyTrackId != nil {
 						earlierList.append(PlayedSongData(song: song))
 						earlierAdded = true
-						desiredElements--
+						desiredElements -= 1
 					}
-					earlierRow++
+					earlierRow += 1
 					hasEarlier = earlierRow <= maxRow
 				}
 			}
@@ -381,9 +381,9 @@ class PlayedSongDataManager {
 				let path = NSIndexPath(forRow: row, inSection: section)
 				if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong, trackId = song.spotifyTrackId {
 					trackIds.append(trackId)
-					trackCount++
+					trackCount += 1
 				}
-				row--
+				row -= 1
 			} while trackCount < maxCount && row >= 0
 		}
 		return trackIds

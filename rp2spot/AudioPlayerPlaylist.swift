@@ -69,7 +69,7 @@ struct AudioPlayerPlaylist {
 			return
 		}
 		if currentIndex! < list.count - 1 {
-			currentIndex!++
+			currentIndex! += 1
 		}
 	}
 
@@ -81,7 +81,7 @@ struct AudioPlayerPlaylist {
 			return
 		}
 		if currentIndex! > 0 {
-			currentIndex!--
+			currentIndex! += 1
 		}
 	}
 }

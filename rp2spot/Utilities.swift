@@ -24,9 +24,9 @@ class Utility {
 		presentAlertControllerOnFrontController(alertController)
 	}
 
-	static func presentAlertControllerOnFrontController(alertController: UIAlertController, var iteration: Int = 0) {
-		iteration += 1
-		guard iteration <= 8 else {
+	static func presentAlertControllerOnFrontController(alertController: UIAlertController, iteration: Int = 0) {
+
+		guard iteration < 8 else {
 			print("presentAlertControllerOnFrontController: After 8 iterations, still not able to get a stable front view controller, giving up.")
 			return
 		}
@@ -44,7 +44,7 @@ class Utility {
 			// If view controller is being dismissed or presented, delay presentation a bit.
 			if controller.isBeingDismissed() || controller.isBeingPresented() {
 				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.37 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
-					presentAlertControllerOnFrontController(alertController, iteration: iteration)
+					presentAlertControllerOnFrontController(alertController, iteration: iteration + 1)
 				}
 				return
 			}

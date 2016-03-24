@@ -49,7 +49,7 @@ class AudioPlayerViewController: UIViewController {
 		// a user has unplugged their headphones.
 		NSNotificationCenter.defaultCenter().addObserver(
 			self,
-			selector: "audioRouteChanged:",
+			selector: #selector(self.audioRouteChanged(_:)),
 			name: AVAudioSessionRouteChangeNotification,
 			object: nil)
 
@@ -237,12 +237,10 @@ class AudioPlayerViewController: UIViewController {
 		playPauseButton.imageView!.image = UIImage(named: imageName)!
 	}
 
-	func updateNowPlayingInfo(var trackId: String? = nil) {
-		if trackId == nil {
-			trackId = SPTTrack.identifierFromURI(spotify.player.currentTrackURI)
-		}
+	func updateNowPlayingInfo(trackId: String? = nil) {
+		let nowPlayingTrackId = trackId == nil ? SPTTrack.identifierFromURI(spotify.player.currentTrackURI) : trackId!
 
-		guard let track = playlist.trackMetadata[trackId!] else {
+		guard let track = playlist.trackMetadata[nowPlayingTrackId!] else {
 			// This happens when no data is available yet (e.g.
 			// before the metadata request delivers data).
 			nowPlayingCenter.nowPlayingInfo = nil
@@ -300,22 +298,22 @@ extension AudioPlayerViewController {
 		let remote = MPRemoteCommandCenter.sharedCommandCenter()
 
 		remote.nextTrackCommand.enabled = true
-		remote.nextTrackCommand.addTarget(self, action: "skipToNextTrack:")
+		remote.nextTrackCommand.addTarget(self, action: #selector(self.skipToNextTrack(_:)))
 
 		remote.previousTrackCommand.enabled = true
-		remote.previousTrackCommand.addTarget(self, action: "skipToPreviousTrack:")
+		remote.previousTrackCommand.addTarget(self, action: #selector(self.skipToPreviousTrack(_:)))
 
 		remote.togglePlayPauseCommand.enabled = true
-		remote.togglePlayPauseCommand.addTarget(self, action: "togglePlayback:")
+		remote.togglePlayPauseCommand.addTarget(self, action: #selector(self.togglePlayback(_:)))
 
 		remote.pauseCommand.enabled = true
-		remote.pauseCommand.addTarget(self, action: "pausePlaying:")
+		remote.pauseCommand.addTarget(self, action: #selector(self.pausePlaying(_:)))
 
 		remote.playCommand.enabled = true
-		remote.playCommand.addTarget(self, action: "startPlaying:")
+		remote.playCommand.addTarget(self, action: #selector(self.startPlaying(_:)))
 
 		remote.stopCommand.enabled = true
-		remote.stopCommand.addTarget(self, action: "stopPlaying:")
+		remote.stopCommand.addTarget(self, action: #selector(self.stopPlaying(_:)))
 	}
 
 	func removeMPRemoteCommandCenterEventListeners() {

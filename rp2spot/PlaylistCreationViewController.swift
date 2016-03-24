@@ -40,7 +40,7 @@ class PlaylistCreationViewController: UIViewController {
 		playlistTitle.delegate = self
 
 		// Add a tap recognizer so that keyboard will be dismissed when user taps view outisde of text field:
-		let tapRecognizer = UITapGestureRecognizer(target: self, action: "viewTapped:")
+		let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.viewTapped(_:)))
 		tapRecognizer.numberOfTapsRequired = 1
 		view.addGestureRecognizer(tapRecognizer)
 	}
@@ -112,7 +112,7 @@ class PlaylistCreationViewController: UIViewController {
 					self.postLoginBlock = nil
 					self.tryCreatePlaylist(title, selectedTrackIds: selectedTrackIds)
 				}
-				NSNotificationCenter.defaultCenter().addObserver(self, selector: "spotifySessionUpdated:", name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
+				NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
 				return
 			}
 
@@ -165,6 +165,7 @@ class PlaylistCreationViewController: UIViewController {
 		view.endEditing(true)
 	}
 }
+
 
 extension PlaylistCreationViewController: UITextFieldDelegate {
 
@@ -237,8 +238,8 @@ extension PlaylistCreationViewController {
 	}
 
 	func registerForKeyboardAndStatusBarNotifications() {
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "keyboardChangingSize:", name: UIKeyboardWillChangeFrameNotification, object: nil)
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: "statusBarChangingSize:", name: UIApplicationWillChangeStatusBarFrameNotification, object: nil)
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.keyboardChangingSize(_:)), name: UIKeyboardWillChangeFrameNotification, object: nil)
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.statusBarChangingSize(_:)), name: UIApplicationWillChangeStatusBarFrameNotification, object: nil)
 
 	}
 

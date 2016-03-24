@@ -108,7 +108,7 @@ class HistoryBrowserViewController: UIViewController {
 		// Configure refresh control for the top of the table view.
 		// A tableViewController is required to use the UIRefreshControl.
 		refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
-		refreshControl.addTarget(self, action: "refreshRequested:", forControlEvents: .ValueChanged)
+		refreshControl.addTarget(self, action: #selector(self.refreshRequested(_:)), forControlEvents: .ValueChanged)
 
 		addChildViewController(tableViewController)
 		tableViewController.tableView = tableView
@@ -132,6 +132,7 @@ class HistoryBrowserViewController: UIViewController {
 	}
 }
 
+
 extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 	func dateSelected(date: NSDate) {
 		historyData.replaceLocalHistory(date) { success in
@@ -146,11 +147,13 @@ extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 	}
 }
 
+
 extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate {
 	func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {
 		return .None
 	}
 }
+
 
 extension HistoryBrowserViewController: AudioStatusObserver {
 	func playerStatusChanged(newStatus: AudioPlayerViewController.PlayerStatus) {
