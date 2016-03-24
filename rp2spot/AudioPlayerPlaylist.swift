@@ -11,6 +11,7 @@ import Foundation
 struct AudioPlayerPlaylist {
 	let list: [PlayedSongData]
 	var currentIndex: Int?
+	var trackPosition: NSTimeInterval = 0.0 // point in the track at which playback should start.
 	var trackToIndexMap = [String: Int]() // key is in form "foo" (not "spotify:track:foo"), value is an index into ``list``
 	var trackMetadata = [String: SPTTrack]() // key is in form "foo" (not "spotify:track:foo")
 

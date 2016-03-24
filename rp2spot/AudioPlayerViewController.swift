@@ -205,8 +205,8 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 
-			self.spotify.playTracks(trackURIs, fromIndex:index) { error in
-				guard error == nil else {
+			self.spotify.playTracks(trackURIs, fromIndex:index, trackStartTime: self.playlist.trackPosition) { error in
+				guard error == nil else {					
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					return
 				}

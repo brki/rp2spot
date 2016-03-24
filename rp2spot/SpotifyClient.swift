@@ -148,8 +148,7 @@ class SpotifyClient {
 		return URIs
 	}
 
-	// TODO: adapt to allow specifying a time in the track to start playing.
-	func playTracks(URIs: [NSURL], fromIndex: Int = 0, handler: ((NSError?) -> Void)? = nil) {
+	func playTracks(URIs: [NSURL], fromIndex: Int = 0, trackStartTime: NSTimeInterval, handler: ((NSError?) -> Void)? = nil) {
 
 		func startPlaying() {
 			// Stop player and clear track list before starting playback of new track list.
@@ -159,7 +158,10 @@ class SpotifyClient {
 					handler?(error)
 					return
 				}
-				self.player.playURIs(URIs, fromIndex:Int32(fromIndex)) { error in
+				let options = SPTPlayOptions()
+				options.trackIndex = Int32(fromIndex)
+				options.startTime = trackStartTime
+				self.player.playURIs(URIs, withOptions: options) { error in
 					if error != nil {
 						print("playTracks: Error while initiating playback")
 					}

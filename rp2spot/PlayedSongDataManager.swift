@@ -365,7 +365,6 @@ class PlayedSongDataManager {
 			playList += laterList
 			handler(list: AudioPlayerPlaylist(list: playList, currentIndex: songIndex))
 		}
-
 	}
 
 	/**
