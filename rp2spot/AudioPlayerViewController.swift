@@ -312,6 +312,9 @@ extension AudioPlayerViewController {
 			return
 		}
 
+		// Save current track position so that playback can resume at the proper spot.
+		playlist.trackPosition = spotify.player.currentPlaybackPosition
+
 		guard let reasonCode = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
 			print("audioRouteChanged: unable to get int value for key AVAudioSessionRouteChangeReasonKey")
 			return
