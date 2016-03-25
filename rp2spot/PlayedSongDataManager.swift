@@ -346,11 +346,13 @@ class PlayedSongDataManager {
 		}
 	}
 
-	func currentSongData() -> [PlayedSongData] {
+	func dataForSpotifyTracks() -> [PlayedSongData] {
 		var songData = [PlayedSongData]()
 		context.performBlockAndWait {
 			for song in self.fetchedResultsController.fetchedObjects as! [PlayedSong] {
-				songData.append(PlayedSongData(song: song))
+				if song.spotifyTrackId != nil {
+					songData.append(PlayedSongData(song: song))
+				}
 			}
 		}
 		return songData

@@ -10,6 +10,7 @@ import UIKit
 
 class PlaylistViewController: UIViewController {
 	var localPlaylist: LocalPlaylistSongs!
+	var firstVisibleDate: NSDate?
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var instructionsLabel: UILabel!
 
@@ -20,11 +21,21 @@ class PlaylistViewController: UIViewController {
 			}
 		}
 	}
+
 	override func viewDidLoad() {
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
 		instructionsLabel.backgroundColor = Constant.Color.LightGrey.color()
+	}
+
+	override func viewWillAppear(animated: Bool) {
+		if let date = firstVisibleDate,
+			index = localPlaylist.songs.indexOf({ date.earlierDate($0.playedAt) == date }) {
+
+			let indexPath = NSIndexPath(forRow: index, inSection: 0)
+			tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Top, animated: false)
+		}
 	}
 
 	@IBAction func cancel(sender: AnyObject) {

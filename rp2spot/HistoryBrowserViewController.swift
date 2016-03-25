@@ -74,8 +74,16 @@ class HistoryBrowserViewController: UIViewController {
 			vc.songInfo = songData
 
 		} else if let vc = destinationVC as? PlaylistViewController {
-			let songData = historyData.currentSongData()
+			let songData = historyData.dataForSpotifyTracks()
 			vc.localPlaylist = LocalPlaylistSongs(songs: songData)
+
+			for cell in tableView.visibleCells as! [PlainHistoryTableViewCell] {
+				if let _ = cell.spotifyTrackId, indexPath = tableView.indexPathForCell(cell) {
+					let song = historyData.songDataForObjectAtIndexPath(indexPath)
+					vc.firstVisibleDate = song?.playedAt
+					break
+				}
+			}
 		}
 	}
 
