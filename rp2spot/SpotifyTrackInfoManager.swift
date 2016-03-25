@@ -12,6 +12,11 @@ class SpotifyTrackInfoManager {
 
 	static let sharedInstance = SpotifyTrackInfoManager()
 
+	/**
+	An in-memory cache of the track metadata.
+	
+	The cache key is the short Spotify track id, the value is a SPTTrack.
+	*/
 	lazy var cache: NSCache = {
 		let cache = NSCache()
 		cache.countLimit = Constant.CACHE_SPOTIFY_TRACK_INFO_MAX_COUNT
@@ -35,6 +40,30 @@ class SpotifyTrackInfoManager {
 		let operation = SpotifyTrackMetadataOperation(trackURIs: trackURIs, handler:handler)
 		operationQueue.addOperation(operation)
 	}
+
+	/**
+	Gets the track metadata for the given track.
+	*/
+	func trackInfo(trackId: String, handler: (NSError?, SPTTrack?) -> Void) {
+		if let trackInfo = cache.objectForKey(trackId) as? SPTTrack {
+			handler(nil, trackInfo)
+			return
+		}
+
+		guard let URI = SpotifyClient.sharedInstance.trackURI(trackId) else {
+			let error = NSError(domain: "SpotifyTrackInfoManager",
+			                    code: 1,
+			                    userInfo: [NSLocalizedDescriptionKey: "Unable to generate spotify URL from provided trackId (\(trackId))"])
+			handler(error, nil)
+			return
+		}
+
+		trackMetadata([URI]) { error, trackInfos in
+			handler(error, trackInfos?[0])
+		}
+	}
+
+
 
 	/**
 	Finds locally cached tracks.

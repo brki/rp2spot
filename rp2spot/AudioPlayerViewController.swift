@@ -195,7 +195,10 @@ class AudioPlayerViewController: UIViewController {
 
 	func playTracks(withPlaylist: AudioPlayerPlaylist? = nil) {
 		if let newPlaylist = withPlaylist {
-			self.playlist = newPlaylist
+			playlist = newPlaylist
+			// Set any already cached metadata for the playlist.
+			let (cachedMetadata, _) = spotify.trackInfo.getCachedTrackInfo(playlist.trackURIs())
+			playlist.setTrackMetadata(cachedMetadata)
 		}
 		let trackURIs = spotify.URIsForTrackIds(playlist.list.map({ $0.spotifyTrackId! }))
 		guard let index = playlist.currentIndex else {

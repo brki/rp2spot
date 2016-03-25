@@ -89,7 +89,7 @@ struct AudioPlayerPlaylist {
 			selected = list
 		} else {
 			let halfOfRange = maxCount / 2
-			let startIndex = max(0, index - halfOfRange)
+			let startIndex = max(0, index - halfOfRange + 1) // +1 to keep final count <= maxCount; assumption: browsing into older history is less likely.
 			let endIndex = min(list.count - 1, index + halfOfRange)
 			selected = Array(list[startIndex ... endIndex])
 		}
@@ -103,6 +103,13 @@ struct AudioPlayerPlaylist {
 			return [NSURL]()
 		}
 		return trackURIsCenteredOnIndex(index, maxCount: maxCount)
+	}
+
+	/**
+	Gets the trackURIs of all playlist songs.
+	*/
+	func trackURIs() -> [NSURL] {
+		return SpotifyClient.sharedInstance.URIsForTrackIds(Array(trackToIndexMap.keys))
 	}
 
 	mutating func incrementIndex() {

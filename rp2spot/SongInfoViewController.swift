@@ -41,6 +41,7 @@ class SongInfoViewController: UIViewController {
 		if songInfo.spotifyTrackId == nil || !UserSetting.sharedInstance.useSpotify {
 			spotifyOpenButton.enabled = false
 		}
+		updateSpotifyTrackInfo()
 	}
 
 	@IBAction func showRadioParadiseInfoPage(sender: AnyObject) {
@@ -72,17 +73,24 @@ class SongInfoViewController: UIViewController {
 		}
 	}
 
-	// TODO perhaps: get track metadata and show other details:
+	/**
+	The information available from the Radio Paradise history service does not necessarily match
+	100% the matching song on Spotify.  Update with the details from Spotify.
+	*/
 	func updateSpotifyTrackInfo() {
 		guard let trackId = songInfo.spotifyTrackId else {
 			return
 		}
-		spotify.trackInfo(trackId) { trackMetadata, error in
-			guard error == nil else {
-				// TODO: notify about error
+		spotify.trackInfo.trackInfo(trackId) { error, trackInfo in
+			guard let track = trackInfo where error == nil else {
+				print("updateSpotifyTrackInfo(): Unable to get track information: error: \(error)")
 				return
 			}
-			// TODO: update UI elements with data.
+			async_main {
+				self.songTitleLabel.text = track.name
+				self.albumNameLabel.text = track.album.name
+				self.artistNameLabel.text = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joinWithSeparator(", ")
+			}
 		}
 	}
 }

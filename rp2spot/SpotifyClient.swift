@@ -189,27 +189,6 @@ class SpotifyClient {
 		}
 	}
 
-	// TODO: use cache?
-	func trackInfo(trackId: String, handler: (trackMetadata: [NSObject: AnyObject]?, error: NSError?) -> Void) {
-		guard let URI = trackURI(trackId) else {
-			handler(trackMetadata: nil, error: NSError(domain: "SpotifyClient", code: 1,
-				userInfo: [NSLocalizedDescriptionKey: "Unable to generate spotify URL from provided trackId (\(trackId))"]))
-			return
-		}
-		SPTTrack.trackWithURI(URI, session: auth.session) { error, trackMetadata in
-			guard error == nil else {
-				handler(trackMetadata: nil, error:  error)
-				return
-			}
-			guard let metadata = trackMetadata as? [NSObject: AnyObject] else {
-				handler(trackMetadata: nil, error: NSError(domain: "SpotifyClient", code: 2,
-					userInfo: [NSLocalizedDescriptionKey: "Unexpected track metadata format"]))
-				return
-			}
-			handler(trackMetadata: metadata, error: nil)
-		}
-	}
-
 	func createPlaylistWithTracks(playlistName: String, trackIds: [String], publicFlag: Bool,
 		handler: (playlistSnapshot: SPTPlaylistSnapshot?, willTriggerLogin: Bool, error: NSError?) -> Void) {
 
