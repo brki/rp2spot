@@ -105,7 +105,6 @@ class AudioPlayerViewController: UIViewController {
 				// TODO: notify delegate of error
 				return
 			}
-			self.updateNowPlayingInfo()
 		}
 	}
 
@@ -228,7 +227,6 @@ class AudioPlayerViewController: UIViewController {
 					print("Error in AudioViewController.playTracks(): \(error)")
 					return
 				}
-				self.updateNowPlayingInfo()
 			}
 		}
 	}
@@ -401,7 +399,6 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
 		}
 		updateUI(isPlaying: true)
-		updateNowPlayingInfo()
 	}
 
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
