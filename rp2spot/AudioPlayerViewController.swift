@@ -79,7 +79,7 @@ class AudioPlayerViewController: UIViewController {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
-			self.playTracks(self.playlist)
+			self.playTracks()
 			return
 		}
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
@@ -115,7 +115,7 @@ class AudioPlayerViewController: UIViewController {
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
 			self.playlist.incrementIndex()
-			self.playTracks(self.playlist)
+			self.playTracks()
 			return
 		}
 
@@ -145,7 +145,7 @@ class AudioPlayerViewController: UIViewController {
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
 			playlist.decrementIndex()
-			playTracks(playlist)
+			playTracks()
 			return
 		}
 
@@ -193,10 +193,12 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	func playTracks(playList: AudioPlayerPlaylist) {
-		self.playlist = playList
-		let trackURIs = spotify.URIsForTrackIds(playList.list.map({ $0.spotifyTrackId! }))
-		guard let index = self.playlist.currentIndex else {
+	func playTracks(withPlaylist: AudioPlayerPlaylist? = nil) {
+		if let newPlaylist = withPlaylist {
+			self.playlist = newPlaylist
+		}
+		let trackURIs = spotify.URIsForTrackIds(playlist.list.map({ $0.spotifyTrackId! }))
+		guard let index = playlist.currentIndex else {
 			print("playTracks: No currentIndex, so can not start playing.")
 			return
 		}
@@ -209,8 +211,11 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 			guard !willTriggerLogin else {
-				// TODO: handle case where a session-update notification will be posted, (e.g. app goes to safari / spotify and reopens with a url)
-				// Perhaps nothing should be done here - the user will simply need to tap again to start playing.
+				// Although it would be possible to listen for a spotifySessionUpdated notification and start
+				// playing audio if there's a valid session, this is not done here.
+				// The user may not immediately authorize the app (e.g. get distracted by something else),
+				// and we are not sure they want music to start blaring out after they authorize the app
+				// from Safari or the Spotify application.
 				return
 			}
 
