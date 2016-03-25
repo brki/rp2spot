@@ -14,7 +14,7 @@ class PlayedSongDataManager {
 	var fetchedResultsControllerDelegate: NSFetchedResultsControllerDelegate
 	var context: NSManagedObjectContext
 	let userSettings = UserSetting.sharedInstance
-	var isFetchingOlder = false
+	var isFetchingNewer = false
 	var _isRefreshing = false
 	var isRefreshing: Bool {
 		get {
@@ -41,7 +41,7 @@ class PlayedSongDataManager {
 		var frc: NSFetchedResultsController!
 		self.context.performBlockAndWait {
 			let fetchRequest = NSFetchRequest(entityName: "PlayedSong")
-			fetchRequest.sortDescriptors = [NSSortDescriptor(key: "playedAt", ascending: false)]
+			fetchRequest.sortDescriptors = [NSSortDescriptor(key: "playedAt", ascending: true)]
 			frc = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.context, sectionNameKeyPath: nil, cacheName: nil)
 
 		}
@@ -89,10 +89,10 @@ class PlayedSongDataManager {
 		}
 		isRefreshing = true
 
-		isFetchingOlder = !newerHistory
+		isFetchingNewer = newerHistory
 		fetchMoreHistory(newer: newerHistory) { success, fetchedCount, error in
 			if fetchedCount > 0 {
-				self.removeExcessLocalHistory(fromBottom: newerHistory)
+				self.removeExcessLocalHistory(fromBottom: !newerHistory)
 			}
 			afterFetch?(success: success)
 			if let err = error {
@@ -195,7 +195,7 @@ class PlayedSongDataManager {
 		}
 
 		isRefreshing = true
-		isFetchingOlder = false
+		isFetchingNewer = false
 
 		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
 			self.isRefreshing = false
@@ -231,7 +231,7 @@ class PlayedSongDataManager {
 			return false
 		}
 		if isNearlyLastRow(row) {
-			self.attemptHistoryFetch(newerHistory: false)
+			self.attemptHistoryFetch(newerHistory: true)
 			return true
 		}
 		return false
@@ -248,8 +248,9 @@ class PlayedSongDataManager {
 	*/
 	func removeExcessLocalHistory(fromBottom fromBottom: Bool) {
 
-		// TODO possibly: optimization: use a bulk delete action for this (bulk delete actions do not fire notifications
-		//                though, so it might require refreshing the tableview / fetchedResultsController.
+		// A possible optimiation would be to use a bulk delete action for this (bulk delete
+		// actions do not fire notifications  though, so it might require refreshing the
+		// tableview / fetchedResultsController.
 
 		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
 
@@ -295,78 +296,6 @@ class PlayedSongDataManager {
 		CoreDataStack.saveContext(self.context, waitForChildContext: true)
 	}
 
-
-	/**
-	Calls handler with a AudioPlayerPlaylist of songs that have associated Spotify tracks, centered around the given indexPath.
-	
-	If the song at indexPath does not have a Spotify track, an empty AudioPlayerPlaylist will be returned.
-	*/
-	func trackListCenteredAtIndexPath(indexPath: NSIndexPath, maxElements: Int, handler: (list: AudioPlayerPlaylist) -> Void) {
-
-		guard songCount > 0 else {
-			handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
-			return
-		}
-
-		var laterList = [PlayedSongData]()  // for songs with a playedAt date after the center song
-		var earlierList = [PlayedSongData]() // for songs with a playedAt date before the center song
-
-		context.performBlock {
-			guard let centerSong = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong where centerSong.spotifyTrackId != nil else {
-				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
-				return
-			}
-
-			var desiredElements = maxElements - 1
-			let maxRow = self.songCount - 1
-			var laterRow = indexPath.row - 1
-			var earlierRow = indexPath.row + 1
-			var hasEarlier = earlierRow <= maxRow
-			var hasLater = laterRow >= 0
-
-			// Because of the FRC's sort order, songs played at a later date come earlier in the list of objects.
-			// Not all songs have an associated Spotify track.
-			// Starting from the center song, fetch a pair of (earlier, later) songs with a Spotify track,
-			// as far as possible.  If the earliest or latest available song is reached, but there are still
-			// more songs available on the other side (earlier or later), continue fetching those songs (this
-			// may result in the "centerSong" not really being in the center).
-			while desiredElements > 0 && (hasEarlier || hasLater) {
-				var laterAdded = false
-
-				while hasLater && !laterAdded {
-					let path = NSIndexPath(forRow: laterRow, inSection: indexPath.section)
-					if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong where song.spotifyTrackId != nil {
-						laterList.append(PlayedSongData(song: song))
-						laterAdded = true
-						desiredElements -= 1
-					}
-					laterRow -= 1
-					hasLater = laterRow >= 0
-				}
-				if desiredElements == 0 {
-					continue
-				}
-
-				var earlierAdded = false
-				while hasEarlier && !earlierAdded {
-					let path = NSIndexPath(forRow: earlierRow, inSection: indexPath.section)
-					if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong where song.spotifyTrackId != nil {
-						earlierList.append(PlayedSongData(song: song))
-						earlierAdded = true
-						desiredElements -= 1
-					}
-					earlierRow += 1
-					hasEarlier = earlierRow <= maxRow
-				}
-			}
-			var playList = Array(earlierList.reverse())
-			playList.append(PlayedSongData(song: centerSong))
-			let songIndex = playList.count - 1
-			playList += laterList
-			handler(list: AudioPlayerPlaylist(list: playList, currentIndex: songIndex))
-		}
-	}
-
 	/**
 	Creates an AudioPlayerPlaylist with tracks that have a Spotify track id.
 	*/
@@ -377,7 +306,7 @@ class PlayedSongDataManager {
 		}
 
 		context.performBlock {
-			// If the selected song has no spotify track, just return an empty list.
+			// If the selected song has no Spotify track, just return an empty list.
 			guard let selectedSong = self.fetchedResultsController.objectAtIndexPath(indexPath) as? PlayedSong where selectedSong.spotifyTrackId != nil else {
 				handler(list: AudioPlayerPlaylist(list: [], currentIndex: 0))
 				return
@@ -401,27 +330,6 @@ class PlayedSongDataManager {
 	}
 
 	/**
-	Get an array of track ids, starting with the given index path, and going towards more recent objects.
-	*/
-	func trackIdsStartingAtIndexPath(indexPath: NSIndexPath, maxCount: Int = SpotifyClient.MAX_PLAYER_TRACK_COUNT) -> [String] {
-		var trackIds = [String]()
-		let section = indexPath.section
-		var trackCount = 0
-		var row = indexPath.row
-		context.performBlockAndWait {
-			repeat {
-				let path = NSIndexPath(forRow: row, inSection: section)
-				if let song = self.fetchedResultsController.objectAtIndexPath(path) as? PlayedSong, trackId = song.spotifyTrackId {
-					trackIds.append(trackId)
-					trackCount += 1
-				}
-				row -= 1
-			} while trackCount < maxCount && row >= 0
-		}
-		return trackIds
-	}
-
-	/**
 	Get the newest (or oldest) song.
 	*/
 	func extremitySong(newest newest: Bool, handler: (PlayedSong?) -> Void) {
@@ -431,22 +339,19 @@ class PlayedSongDataManager {
 		}
 		context.performBlock {
 			if newest {
-				handler(fetchedObjects[0] as? PlayedSong)
-			} else {
 				handler(fetchedObjects[fetchedObjects.count - 1] as? PlayedSong)
+			} else {
+				handler(fetchedObjects[0] as? PlayedSong)
 			}
 		}
 	}
 
-	func currentSongData(ascendingDate: Bool = true) -> [PlayedSongData] {
+	func currentSongData() -> [PlayedSongData] {
 		var songData = [PlayedSongData]()
 		context.performBlockAndWait {
 			for song in self.fetchedResultsController.fetchedObjects as! [PlayedSong] {
 				songData.append(PlayedSongData(song: song))
 			}
-		}
-		if ascendingDate {
-			return songData.reverse()
 		}
 		return songData
 	}

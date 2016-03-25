@@ -107,7 +107,7 @@ class HistoryBrowserViewController: UIViewController {
 	func setupRefreshControl() {
 		// Configure refresh control for the top of the table view.
 		// A tableViewController is required to use the UIRefreshControl.
-		refreshControl.attributedTitle = NSAttributedString(string: "Pull to refresh")
+		refreshControl.attributedTitle = NSAttributedString(string: "Go back in time")
 		refreshControl.addTarget(self, action: #selector(self.refreshRequested(_:)), forControlEvents: .ValueChanged)
 
 		addChildViewController(tableViewController)
@@ -116,7 +116,7 @@ class HistoryBrowserViewController: UIViewController {
 	}
 
 	func refreshRequested(sender: UIRefreshControl) {
-		historyData.attemptHistoryFetch(newerHistory: true) { success in
+		historyData.attemptHistoryFetch(newerHistory: false) { success in
 			async_main {
 				sender.endRefreshing()
 			}
@@ -230,7 +230,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 	Apply all changes that have been collected.
 	*/
 	func controllerDidChangeContent(controller: NSFetchedResultsController) {
-		let disableRowAnimations = historyData.isFetchingOlder
+		let disableRowAnimations = historyData.isFetchingNewer
 
 		if disableRowAnimations {
 			// When adding items to the end of the table view, there is a noticeable flicker and small jump unless
@@ -246,7 +246,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		tableView.deleteRowsAtIndexPaths(rowsToDelete, withRowAnimation: .None)
 		tableView.reloadRowsAtIndexPaths(updateIndexPaths, withRowAnimation: .None)
 
-		if historyData.isFetchingOlder {
+		if historyData.isFetchingNewer {
 			// If rows above have been deleted at the top of the table view, shift the current contenteOffset up an appropriate amount:
 			tableView.contentOffset = CGPointMake(tableView.contentOffset.x, tableView.contentOffset.y - tableView.rowHeight * CGFloat(rowsToDelete.count))
 		}
@@ -273,7 +273,7 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 			cell.configureForSong(songData, currentlyPlayingTrackId: currentlyPlayingTrackId)
 		}
 		
-		// If user has scrolled almost all the way down to the last row, try to fetch some older song history.
+		// If user has scrolled almost all the way down to the last row, try to fetch more song history.
 		historyData.loadMoreIfNearLastRow(indexPath.row)
 
 		return cell
