@@ -172,9 +172,11 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func stopPlaying(sender: AnyObject) {
+		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		// Pause music before stopping, to avoid a split second of leftover audio
 		// from the currently playing track being played when the audio player
-		// starts again.
+		// starts playing again (it could be a different song that start, or a different
+		// position in the same song).
 		spotify.player.setIsPlaying(false) { error in
 			if let pauseError = error {
 				print("stopPlaying: error while trying to pause playback: \(pauseError)")
