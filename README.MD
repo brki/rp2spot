@@ -16,7 +16,7 @@ and the availability of songs varies for different Spotify regions.
 ### Building notes
 
 #### Carthage
-Run ``carthage build --platform ios``
+Run ``carthage bootstrap --platform ios``
 
 Or, to update to the latest versions of the carthage-managed libraries: ``carthage update --platform ios``
 
