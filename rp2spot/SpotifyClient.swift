@@ -33,6 +33,17 @@ class SpotifyClient {
 		return player
 	}()
 
+	/**
+	The players current (playing or not) track ID, if any.
+	*/
+	var playerCurrentTrackId: String? {
+		let currentURI: NSURL? = player.currentTrackURI
+		guard currentURI != nil else {
+			return nil
+		}
+		return SPTTrack.identifierFromURI(currentURI)
+	}
+
 	init() {
 		// Set up shared authentication information
 		auth.clientID = Constant.SPOTIFY_CLIENT_ID;
@@ -129,7 +140,6 @@ class SpotifyClient {
 		let expirationDateMinusBuffer = NSDate(timeInterval: -refreshSessionTimeoutBuffer, sinceDate: session.expirationDate)
 		return expirationDateMinusBuffer.earlierDate(NSDate()) == expirationDateMinusBuffer
 	}
-	
 
 	func trackURI(trackId: String) -> NSURL? {
 		return NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId))

@@ -238,9 +238,7 @@ class AudioPlayerViewController: UIViewController {
 
 	func updateNowPlayingInfo(trackId: String? = nil) {
 
-		let nowPlayingTrackId = trackId ?? playlist.currentTrack?.spotifyTrackId ?? SPTTrack.identifierFromURI(spotify.player.currentTrackURI)
-
-		guard let nowPlayingId = nowPlayingTrackId else {
+		guard let nowPlayingId = trackId ?? playlist.currentTrack?.spotifyTrackId ?? spotify.playerCurrentTrackId else {
 			print("updateNowPlayingInfo(): no nowPlayingId available")
 			return
 		}
@@ -258,9 +256,10 @@ class AudioPlayerViewController: UIViewController {
 				self.playlist.setTrackMetadata(trackInfoList)
 				// It's possible that the track has changed since the original request; if so
 				// we should not set the now playing info with the old track info.
-				let sameTrackPlaying = SPTTrack.identifierFromURI(self.spotify.player.currentTrackURI) == nowPlayingId
-				if let trackInfo = self.playlist.trackMetadata[nowPlayingId] where sameTrackPlaying {
-					self.setNowPlayingInfo(trackInfo)
+				if self.spotify.playerCurrentTrackId == nowPlayingId {
+					if let trackInfo = self.playlist.trackMetadata[nowPlayingId] {
+						self.setNowPlayingInfo(trackInfo)
+					}
 				}
 				if error != nil {
 					print("updateNowPlayingInfo: error when getting track metadata: \(error!)")
@@ -375,7 +374,11 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		// The trackMetadata object *should* have the track identifier too, but 
 		// trackMetadata itself is occaionally nil, despite the method signature 
 		// indicating otherwise.  So, fetch the track id from the player.
-		let shortTrackId = SPTTrack.identifierFromURI(spotify.player.currentTrackURI)
+
+		guard let shortTrackId = spotify.playerCurrentTrackId else {
+			return
+		}
+
 		playlist.setCurrentTrack(shortTrackId)
 		updateNowPlayingInfo(shortTrackId)
 	}
