@@ -17,9 +17,14 @@ class HistoryBrowserViewController: UIViewController {
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var playerContainerViewHeightConstraint: NSLayoutConstraint!
 	@IBOutlet weak var playerContainerView: UIView!
+	@IBOutlet weak var tableViewBackgroundView: UIView!
+	@IBOutlet weak var bottomRefreshActivityIndicator: UIActivityIndicatorView!
+	@IBOutlet weak var bottomRefreshControlLabel: UILabel!
+	@IBOutlet weak var topRefreshActivityIndicator: UIActivityIndicatorView!
+	@IBOutlet weak var topRefreshControlLabel: UILabel!
 
-	let tableViewController = UITableViewController()
-	let refreshControl = UIRefreshControl()
+	var bottomRefreshControl: ScrollViewRefreshControl!
+	var topRefreshControl: ScrollViewRefreshControl!
 
 	lazy var historyData: PlayedSongDataManager = {
 		return PlayedSongDataManager(fetchedResultsControllerDelegate:self,
@@ -39,11 +44,13 @@ class HistoryBrowserViewController: UIViewController {
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
+
+		setupRefreshControls()
+
 		historyData.refresh() { error in
 			// If there is no song history yet, load the latest songs.
 			self.historyData.loadLatestIfEmpty() { success in
 				async_main {
-					self.setupRefreshControl()
 					self.tableView.reloadData()
 				}
 			}
@@ -108,25 +115,6 @@ class HistoryBrowserViewController: UIViewController {
 				popover.permittedArrowDirections = .Up
 				popover.barButtonItem = sender
 				popover.delegate = self
-			}
-		}
-	}
-
-	func setupRefreshControl() {
-		// Configure refresh control for the top of the table view.
-		// A tableViewController is required to use the UIRefreshControl.
-		refreshControl.attributedTitle = NSAttributedString(string: "Go back in time")
-		refreshControl.addTarget(self, action: #selector(self.refreshRequested(_:)), forControlEvents: .ValueChanged)
-
-		addChildViewController(tableViewController)
-		tableViewController.tableView = tableView
-		tableViewController.refreshControl = refreshControl
-	}
-
-	func refreshRequested(sender: UIRefreshControl) {
-		historyData.attemptHistoryFetch(newerHistory: false) { success in
-			async_main {
-				sender.endRefreshing()
 			}
 		}
 	}
@@ -282,7 +270,8 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 		}
 		
 		// If user has scrolled almost all the way down to the last row, try to fetch more song history.
-		historyData.loadMoreIfNearLastRow(indexPath.row)
+		// TODO: uncomment:
+		//historyData.loadMoreIfNearLastRow(indexPath.row)
 
 		return cell
 	}
@@ -314,6 +303,54 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 				self.audioPlayerVC.playTracks(playlist)
 			}
 		}
-
 	}
+
+	func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+		bottomRefreshControl.didEndDragging(scrollView)
+		topRefreshControl.didEndDragging(scrollView)
+	}
+}
+
+
+// MARK: custom top / bottom refresh controls
+
+extension HistoryBrowserViewController {
+
+	func setupRefreshControls() {
+
+		// Add the refresh control views:
+		tableView.backgroundView = tableViewBackgroundView
+		tableView.backgroundView!.translatesAutoresizingMaskIntoConstraints = true
+		// Move it down one layer so that the UIRefreshControl at the top remains visible:
+		tableView.backgroundView!.layer.zPosition -= 1
+
+		bottomRefreshControl = ScrollViewRefreshControl(
+			style: .Bottom,
+			target: self,
+			refreshAction: #selector(self.refreshWithNewerHistory),
+			activityIndicator: bottomRefreshActivityIndicator,
+			activityLabel: bottomRefreshControlLabel
+		)
+
+		topRefreshControl = ScrollViewRefreshControl(
+			style: .Top,
+			target: self,
+			refreshAction: #selector(self.refreshWithOlderHistory),
+			activityIndicator: topRefreshActivityIndicator,
+			activityLabel: topRefreshControlLabel
+		)
+	}
+
+	func refreshWithNewerHistory() {
+		historyData.attemptHistoryFetch(newerHistory: true) { success in
+			self.bottomRefreshControl.didFinishRefreshing(self.tableView)
+		}
+	}
+
+	func refreshWithOlderHistory() {
+		historyData.attemptHistoryFetch(newerHistory: false) { success in
+			self.topRefreshControl.didFinishRefreshing(self.tableView)
+		}
+	}
+
 }
