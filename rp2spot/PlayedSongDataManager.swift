@@ -220,23 +220,6 @@ class PlayedSongDataManager {
 		}
 	}
 
-	/**
-	If almost at the last row, trigger pulling more data.
-	
-	The function returns true if refresh was triggered, false otherwise
-	*/
-	func loadMoreIfNearLastRow(row: Int) -> Bool {
-		guard !isRefreshing else {
-			// Only one refresh at a time.
-			return false
-		}
-		if isNearlyLastRow(row) {
-			self.attemptHistoryFetch(newerHistory: true)
-			return true
-		}
-		return false
-	}
-
 	func isNearlyLastRow(row: Int) -> Bool {
 		return row == songCount - 8
 	}

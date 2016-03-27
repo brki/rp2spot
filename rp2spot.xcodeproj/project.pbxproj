@@ -15,6 +15,8 @@
 		D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D361C7271C90C1B9000B803E /* SongInfoViewController.swift */; };
 		D374821F1CA7D89D00193AD1 /* RefreshOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D374821E1CA7D89D00193AD1 /* RefreshOperation.swift */; };
 		D37482211CA7E1C600193AD1 /* ScrollViewRefreshControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37482201CA7E1C600193AD1 /* ScrollViewRefreshControl.swift */; };
+		D37482251CA8528500193AD1 /* ScrollViewRefreshManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37482241CA8528500193AD1 /* ScrollViewRefreshManager.swift */; };
+		D37482271CA8619100193AD1 /* RefreshControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37482261CA8619100193AD1 /* RefreshControlView.swift */; };
 		D378C5101C9D8A87006A9BF0 /* String+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D378C50F1C9D8A87006A9BF0 /* String+extension.swift */; };
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
@@ -83,6 +85,8 @@
 		D361C7271C90C1B9000B803E /* SongInfoViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SongInfoViewController.swift; sourceTree = "<group>"; };
 		D374821E1CA7D89D00193AD1 /* RefreshOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RefreshOperation.swift; sourceTree = "<group>"; };
 		D37482201CA7E1C600193AD1 /* ScrollViewRefreshControl.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrollViewRefreshControl.swift; sourceTree = "<group>"; };
+		D37482241CA8528500193AD1 /* ScrollViewRefreshManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScrollViewRefreshManager.swift; sourceTree = "<group>"; };
+		D37482261CA8619100193AD1 /* RefreshControlView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RefreshControlView.swift; sourceTree = "<group>"; };
 		D378C50F1C9D8A87006A9BF0 /* String+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "String+extension.swift"; sourceTree = "<group>"; };
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
@@ -188,8 +192,10 @@
 		D37482221CA7EFF600193AD1 /* BottomRefreshControl */ = {
 			isa = PBXGroup;
 			children = (
-				D374821E1CA7D89D00193AD1 /* RefreshOperation.swift */,
+				D37482241CA8528500193AD1 /* ScrollViewRefreshManager.swift */,
 				D37482201CA7E1C600193AD1 /* ScrollViewRefreshControl.swift */,
+				D37482261CA8619100193AD1 /* RefreshControlView.swift */,
+				D374821E1CA7D89D00193AD1 /* RefreshOperation.swift */,
 			);
 			name = BottomRefreshControl;
 			sourceTree = "<group>";
@@ -499,6 +505,7 @@
 				D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */,
 				D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */,
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
+				D37482251CA8528500193AD1 /* ScrollViewRefreshManager.swift in Sources */,
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
 				D378C5101C9D8A87006A9BF0 /* String+extension.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
@@ -508,6 +515,7 @@
 				D374821F1CA7D89D00193AD1 /* RefreshOperation.swift in Sources */,
 				D3FC5E691C6FC2BF00443F68 /* Secrets.swift in Sources */,
 				D39992641C81E500008AECD4 /* UserSetting.swift in Sources */,
+				D37482271CA8619100193AD1 /* RefreshControlView.swift in Sources */,
 				D37482211CA7E1C600193AD1 /* ScrollViewRefreshControl.swift in Sources */,
 				D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */,
 				D38839FD1C9749AA001C4FE3 /* PlaylistViewController.swift in Sources */,

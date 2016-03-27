@@ -17,14 +17,8 @@ class HistoryBrowserViewController: UIViewController {
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var playerContainerViewHeightConstraint: NSLayoutConstraint!
 	@IBOutlet weak var playerContainerView: UIView!
-	@IBOutlet weak var tableViewBackgroundView: UIView!
-	@IBOutlet weak var bottomRefreshActivityIndicator: UIActivityIndicatorView!
-	@IBOutlet weak var bottomRefreshControlLabel: UILabel!
-	@IBOutlet weak var topRefreshActivityIndicator: UIActivityIndicatorView!
-	@IBOutlet weak var topRefreshControlLabel: UILabel!
 
-	var bottomRefreshControl: ScrollViewRefreshControl!
-	var topRefreshControl: ScrollViewRefreshControl!
+	var refreshManager: ScrollViewRefreshManager!
 
 	lazy var historyData: PlayedSongDataManager = {
 		return PlayedSongDataManager(fetchedResultsControllerDelegate:self,
@@ -270,8 +264,12 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 		}
 		
 		// If user has scrolled almost all the way down to the last row, try to fetch more song history.
-		// TODO: uncomment:
-		//historyData.loadMoreIfNearLastRow(indexPath.row)
+		if !historyData.isRefreshing && historyData.isNearlyLastRow(indexPath.row) {
+			refreshManager.bottomRefreshControl!.enabled = false
+			historyData.attemptHistoryFetch(newerHistory: true) { success in
+				self.refreshManager.bottomRefreshControl!.enabled = true
+			}
+		}
 
 		return cell
 	}
@@ -306,8 +304,7 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 	}
 
 	func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-		bottomRefreshControl.didEndDragging(scrollView)
-		topRefreshControl.didEndDragging(scrollView)
+		refreshManager.didEndDragging(scrollView)
 	}
 }
 
@@ -317,39 +314,20 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 extension HistoryBrowserViewController {
 
 	func setupRefreshControls() {
-
-		// Add the refresh control views:
-		tableView.backgroundView = tableViewBackgroundView
-		tableView.backgroundView!.translatesAutoresizingMaskIntoConstraints = true
-		// Move it down one layer so that the UIRefreshControl at the top remains visible:
-		tableView.backgroundView!.layer.zPosition -= 1
-
-		bottomRefreshControl = ScrollViewRefreshControl(
-			style: .Bottom,
-			target: self,
-			refreshAction: #selector(self.refreshWithNewerHistory),
-			activityIndicator: bottomRefreshActivityIndicator,
-			activityLabel: bottomRefreshControlLabel
-		)
-
-		topRefreshControl = ScrollViewRefreshControl(
-			style: .Top,
-			target: self,
-			refreshAction: #selector(self.refreshWithOlderHistory),
-			activityIndicator: topRefreshActivityIndicator,
-			activityLabel: topRefreshControlLabel
-		)
+		refreshManager = ScrollViewRefreshManager(tableView: tableView)
+		refreshManager.addRefreshControl(.Top, target: self, refreshAction: #selector(self.refreshWithOlderHistory))
+		refreshManager.addRefreshControl(.Bottom, target: self, refreshAction: #selector(self.refreshWithNewerHistory))
 	}
 
 	func refreshWithNewerHistory() {
 		historyData.attemptHistoryFetch(newerHistory: true) { success in
-			self.bottomRefreshControl.didFinishRefreshing(self.tableView)
+			self.refreshManager.bottomRefreshControl!.didFinishRefreshing(self.tableView)
 		}
 	}
 
 	func refreshWithOlderHistory() {
 		historyData.attemptHistoryFetch(newerHistory: false) { success in
-			self.topRefreshControl.didFinishRefreshing(self.tableView)
+			self.refreshManager.topRefreshControl!.didFinishRefreshing(self.tableView)
 		}
 	}
 

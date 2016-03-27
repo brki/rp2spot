@@ -6,50 +6,21 @@
 //  Copyright © 2016 truckin'. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 class ScrollViewRefreshControl {
 
-	enum Style {
-		case Bottom, Top
-	}
-
-	var style: Style
+	var view: RefreshControlView!
+	var position: RefreshControlView.Position
 	weak var target: AnyObject?
 	var refreshAction: Selector
-	weak var activityIndicator: UIActivityIndicatorView?
-	weak var activityLabel: UILabel?
-
 	var activityLabelReadyToRefreshText: String?
 	var activityLabelCurrentlyRefreshingText: String?
-
 	// How far beyond the table view limit must the first / last cell be pulled before the refresh operation is triggered:
-	var overPullTriggerHeight = CGFloat(125)
-	var refreshingViewHeight = CGFloat(100)
+	lazy var overPullTriggerHeight: CGFloat = self.refreshingViewHeight + 25
+	lazy var refreshingViewHeight: CGFloat = self.view.bounds.height
 	var refreshViewAnimationDuration = 0.3
-
-	var refreshing: Bool {
-		return operationQueue.operations.count > 0
-	}
-
-	init(style: Style,
-	     target: AnyObject,
-	     refreshAction: Selector,
-	     activityIndicator: UIActivityIndicatorView? = nil,
-	     activityLabel: UILabel? = nil,
-	     readyToRefreshText: String? = "Pull to refresh",
-	     currentlyRefreshingText: String? = "Refreshing" ) {
-
-		self.style = style
-		self.target = target
-		self.refreshAction = refreshAction
-		self.activityIndicator = activityIndicator
-		self.activityLabel = activityLabel
-		self.activityLabelReadyToRefreshText = readyToRefreshText
-		self.activityLabelCurrentlyRefreshingText = currentlyRefreshingText
-
-		self.activityLabel?.text = self.activityLabelReadyToRefreshText
-	}
+	var enabled = true
 
 	lazy var operationQueue: NSOperationQueue = {
 		let queue = NSOperationQueue()
@@ -57,9 +28,31 @@ class ScrollViewRefreshControl {
 		return queue
 	}()
 
+	var refreshing: Bool {
+		return operationQueue.operations.count > 0
+	}
+
+	init(position: RefreshControlView.Position,
+	     view: RefreshControlView,
+	     target: AnyObject,
+	     refreshAction: Selector,
+	     readyToRefreshText: String? = "Pull to refresh",
+	     currentlyRefreshingText: String? = "Refreshing" ) {
+
+		self.position = position
+		self.view = view
+		self.target = target
+		self.refreshAction = refreshAction
+		self.activityLabelReadyToRefreshText = readyToRefreshText
+		self.activityLabelCurrentlyRefreshingText = currentlyRefreshingText
+
+		self.view.activityLabel?.text = self.activityLabelReadyToRefreshText
+	}
+
+
 	func didEndDragging(scrollView: UIScrollView) {
-		// Ignore if a refresh operation is already in progress.
-		guard !refreshing else {
+		// Ignore if not enabled or refresh operation is already in progress.
+		guard enabled && !refreshing else {
 			return
 		}
 
@@ -79,17 +72,17 @@ class ScrollViewRefreshControl {
 
 		let inset = adjustedContentInset(scrollView)
 		async_main {
-			self.activityIndicator?.startAnimating()
+			self.view.activityIndicator?.startAnimating()
 			UIView.animateWithDuration(self.refreshViewAnimationDuration) {
 				scrollView.contentInset = inset
-				self.activityLabel?.text = self.activityLabelCurrentlyRefreshingText
+				self.view.activityLabel?.text = self.activityLabelCurrentlyRefreshingText
 			}
 		}
 
 	}
 
 	func refreshShouldBeTriggered(scrollView: UIScrollView) -> Bool {
-		let pullHeight = style == .Bottom ? bottomPullHeight(scrollView) : topPullHeight(scrollView)
+		let pullHeight = position == .Bottom ? bottomPullHeight(scrollView) : topPullHeight(scrollView)
 		return pullHeight >= overPullTriggerHeight
 	}
 
@@ -105,13 +98,12 @@ class ScrollViewRefreshControl {
 		let adjustment = refreshing ? refreshingViewHeight : -refreshingViewHeight
 
 		return UIEdgeInsetsMake(
-			style == .Top ? scrollView.contentInset.top + adjustment : scrollView.contentInset.top,
+			position == .Top ? scrollView.contentInset.top + adjustment : scrollView.contentInset.top,
 			scrollView.contentInset.left,
-			style == .Bottom ? scrollView.contentInset.bottom + adjustment : scrollView.contentInset.bottom,
+			position == .Bottom ? scrollView.contentInset.bottom + adjustment : scrollView.contentInset.bottom,
 			scrollView.contentInset.right
 		)
 	}
-
 
 	func didFinishRefreshing(scrollView: UIScrollView) {
 		guard refreshing else {
@@ -122,10 +114,10 @@ class ScrollViewRefreshControl {
 
 		let inset = adjustedContentInset(scrollView)
 		async_main {
-			self.activityIndicator?.stopAnimating()
+			self.view.activityIndicator?.stopAnimating()
 			UIView.animateWithDuration(self.refreshViewAnimationDuration) {
 				scrollView.contentInset = inset
-				self.activityLabel?.text = self.activityLabelReadyToRefreshText
+				self.view.activityLabel?.text = self.activityLabelReadyToRefreshText
 			}
 		}
 	}
