@@ -1,4 +1,4 @@
-## rp2pot
+## rp2spot
 
 This is an application that shows a history of the songs that have been played on
 [Radio Paradise](http://www.radioparadise.com/) and allows streaming these songs
