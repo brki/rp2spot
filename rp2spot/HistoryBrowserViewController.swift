@@ -302,10 +302,6 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 			}
 		}
 	}
-
-	func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-		refreshManager.didEndDragging(scrollView)
-	}
 }
 
 
@@ -331,4 +327,17 @@ extension HistoryBrowserViewController {
 		}
 	}
 
+	// MARK: UITableViewDelegate actions that need to be communicated to the refresh manager:
+
+	func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+		refreshManager.didEndDragging(scrollView)
+	}
+
+	func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+		refreshManager.willBeginDragging(scrollView)
+	}
+
+	func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+		refreshManager.didEndDecelerating(scrollView)
+	}
 }

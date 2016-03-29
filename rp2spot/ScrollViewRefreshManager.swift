@@ -36,6 +36,10 @@ class ScrollViewRefreshManager {
 			currentlyRefreshingText: currentlyRefreshingText
 		)
 
+		// Make the control initially hidden, so that it won't be visible underneath
+		// a table view cell when the cell is selected.
+		refreshControl.hidden = true
+
 		if position == .Top {
 			topRefreshControl = refreshControl
 		} else {
@@ -61,8 +65,55 @@ class ScrollViewRefreshManager {
 		return refreshControlView
 	}
 
+	/**
+	This is the decision point for whether or not a refresh operation
+	should be started (e.g. if the pull past the limits has exceeded
+	the threshoold).
+
+	If a refresh was not started, then the control should be hidden.
+	*/
 	func didEndDragging(scrollView: UIScrollView) {
-		topRefreshControl?.didEndDragging(scrollView)
-		bottomRefreshControl?.didEndDragging(scrollView)
+		if let topControl = topRefreshControl {
+			topControl.didEndDragging(scrollView)
+			if !topControl.refreshing {
+				topControl.hidden = true
+			}
+		}
+		if let bottomControl = bottomRefreshControl {
+			bottomControl.didEndDragging(scrollView)
+			if !bottomControl.refreshing {
+				bottomControl.hidden = true
+			}
+		}
+	}
+
+	/**
+	Dragging has started; the controls should be visible if
+	the user pulls the table view beyond it's end.
+	*/
+	func willBeginDragging(scrollView: UIScrollView) {
+		topRefreshControl?.hidden = false
+		bottomRefreshControl?.hidden = false
+	}
+
+	/**
+	Scrolling has stopped.  This can be one of the following situations:
+
+	- The user has started a refresh.  In this case the control should remain
+	  visible.
+	- The user has simply stopped scrolling.  The control should be hidden so
+	  that it is not visible underneath a table view cell when it is selected.
+	*/
+	func didEndDecelerating(scrollView: UIScrollView) {
+		if let topControl = topRefreshControl {
+			if !topControl.refreshing {
+				topControl.hidden = true
+			}
+		}
+		if let bottomControl = bottomRefreshControl {
+			if !bottomControl.refreshing {
+				bottomControl.hidden = true
+			}
+		}
 	}
 }
