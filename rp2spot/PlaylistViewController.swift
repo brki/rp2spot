@@ -40,6 +40,11 @@ class PlaylistViewController: UIViewController {
 		}
 	}
 
+	override func viewDidAppear(animated: Bool) {
+		super.viewDidAppear(animated)
+		instructionsHidden = false
+	}
+
 	@IBAction func cancel(sender: AnyObject) {
 		dismissViewControllerAnimated(true, completion: nil)
 	}
