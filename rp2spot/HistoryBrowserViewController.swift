@@ -311,6 +311,7 @@ extension HistoryBrowserViewController {
 
 	func setupRefreshControls() {
 		refreshManager = ScrollViewRefreshManager(tableView: tableView)
+		refreshManager.backgroundView.backgroundColor = Constant.Color.LightGrey.color()
 		refreshManager.addRefreshControl(.Top, target: self, refreshAction: #selector(self.refreshWithOlderHistory))
 		refreshManager.addRefreshControl(.Bottom, target: self, refreshAction: #selector(self.refreshWithNewerHistory))
 	}
