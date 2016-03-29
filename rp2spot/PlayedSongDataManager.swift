@@ -110,7 +110,7 @@ class PlayedSongDataManager {
 	/**
 	Get newer (or older) song history.
 
-	- Parameters:
+	Parameters:
 	- newer: If true, fetch newer history, else fetch older history
 	- forDate: base date from which newer or older history will be fetched
 	- completionHandler: handler to call after history fetched (or in case of failure)
