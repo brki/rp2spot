@@ -218,6 +218,9 @@ class AudioPlayerViewController: UIViewController {
 				// The user may not immediately authorize the app (e.g. get distracted by something else),
 				// and we are not sure they want music to start blaring out after they authorize the app
 				// from Safari or the Spotify application.
+
+				// Let the presenter hide the player:
+				self.status = .Disabled
 				return
 			}
 
