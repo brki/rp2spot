@@ -26,6 +26,8 @@ class AudioPlayerViewController: UIViewController {
 
 	var spotify = SpotifyClient.sharedInstance
 
+	var sessionUpdateRequestTime: NSDate?
+
 	// ``nowPlayingCenter`` is used to set current song information, this will
 	// be displayed in the control center.
 	var nowPlayingCenter = MPNowPlayingInfoCenter.defaultCenter()
@@ -213,11 +215,10 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 			guard !willTriggerLogin else {
-				// Although it would be possible to listen for a spotifySessionUpdated notification and start
-				// playing audio if there's a valid session, this is not done here.
-				// The user may not immediately authorize the app (e.g. get distracted by something else),
-				// and we are not sure they want music to start blaring out after they authorize the app
-				// from Safari or the Spotify application.
+
+				// Register to be notified when the session is updated.
+				self.sessionUpdateRequestTime = NSDate()
+				NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
 
 				// Let the presenter hide the player:
 				self.status = .Disabled
@@ -232,6 +233,30 @@ class AudioPlayerViewController: UIViewController {
 				}
 			}
 		}
+	}
+
+	/**
+	Handles notification that the spotify session was updated (when user logs in).
+	*/
+	func spotifySessionUpdated(notification: NSNotification) {
+
+		// Do not keep listening for the notification.
+		NSNotificationCenter.defaultCenter().removeObserver(self, name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: spotify)
+		let loginRequestTime = sessionUpdateRequestTime
+		sessionUpdateRequestTime = nil
+
+		// No valid session ... nothing to do.
+		guard let session = spotify.auth.session where session.isValid() else {
+			return
+		}
+
+		// Request was made a long time (> 30 seconds) ago ... do not surprise user by blasting music now.
+		guard let requestTime = loginRequestTime where NSDate().timeIntervalSinceDate(requestTime) < 30.0 else {
+			return
+		}
+
+		// The request was made no more than 30 seconds ago, start playing requested tracks.
+		playTracks()
 	}
 
 	func updateUI(isPlaying isPlaying: Bool) {
