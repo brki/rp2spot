@@ -32,8 +32,17 @@ class UserSettingsViewController: UITableViewController {
 		switch indexPath.section {
 		case SECTION_SPOTIFY_STREAMING_QUALITY:
 			let (quality, _) = streamingQualityMap[indexPath.row]
-			settings.spotifyStreamingQuality = quality
-			configureSpotifyStreamingQualityCells()
+			let previousQuality = settings.spotifyStreamingQuality
+			if quality != previousQuality {
+				settings.spotifyStreamingQuality = quality
+				configureSpotifyStreamingQualityCells()
+				SpotifyClient.sharedInstance.player.setTargetBitrate(quality) { error in
+					if error != nil {
+						self.settings.spotifyStreamingQuality = previousQuality
+						self.configureSpotifyStreamingQualityCells()
+					}
+				}
+			}
 		default:
 			break
 		}
