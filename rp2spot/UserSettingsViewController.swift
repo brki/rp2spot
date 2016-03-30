@@ -11,6 +11,8 @@ class UserSettingsViewController: UITableViewController {
 	@IBOutlet weak var SpotifyStreamingQualityLowCell: UITableViewCell!
 	@IBOutlet weak var SpotifyStreamingQualityNormalCell: UITableViewCell!
 	@IBOutlet weak var SpotifyStreamingQualityHighCell: UITableViewCell!
+	@IBOutlet weak var maximumSongHistoryLabel: UILabel!
+	@IBOutlet weak var maximumSongHistoryStepper: UIStepper!
 
 	let SECTION_SPOTIFY_STREAMING_QUALITY = 0
 
@@ -25,7 +27,16 @@ class UserSettingsViewController: UITableViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		tableView.backgroundColor = Constant.Color.LightGrey.color()
+
 		configureSpotifyStreamingQualityCells()
+
+		configureSongHistoryListControls()
+
+	}
+
+	@IBAction func maximumSongHistoryValueChanged(sender: AnyObject) {
+		settings.maxLocalSongHistoryCount = Int(maximumSongHistoryStepper.value)
+		maximumSongHistoryLabel.text = String(settings.maxLocalSongHistoryCount)
 	}
 
 	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -57,5 +68,11 @@ class UserSettingsViewController: UITableViewController {
 				cell.accessoryType = .None
 			}
 		}
+	}
+
+	func configureSongHistoryListControls() {
+		let maxSongHistoryCount = settings.maxLocalSongHistoryCount
+		maximumSongHistoryStepper.value = Double(maxSongHistoryCount)
+		maximumSongHistoryLabel.text = String(maxSongHistoryCount)
 	}
 }

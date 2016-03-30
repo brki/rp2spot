@@ -52,14 +52,14 @@ class UserSetting {
 		get {
 			let count = settings.integerForKey("maxLocalSongHistoryCount")
 			guard count != 0 else {
-				settings.setInteger(100, forKey: "maxLocalSongHistoryCount")
-				return 100
+				settings.setInteger(200, forKey: "maxLocalSongHistoryCount")
+				return 200
 			}
 			return count
 		}
 		set {
-			guard newValue < historyFetchSongCount else {
-				// Enforce that historyFetchSongCount < maxLocalSongHistoryCount
+			guard newValue >= historyFetchSongCount else {
+				// Enforce that maxLocalSongHistoryCount >= historyFetchSongCount
 				return
 			}
 			settings.setInteger(newValue, forKey: "maxLocalSongHistoryCount")

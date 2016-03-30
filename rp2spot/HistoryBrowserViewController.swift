@@ -51,6 +51,14 @@ class HistoryBrowserViewController: UIViewController {
 		}
 	}
 
+	override func viewWillAppear(animated: Bool) {
+		if !historyData.isRefreshing {
+
+			// If the maximum local history count has been reduced, discard extra rows.
+			historyData.removeExcessLocalHistory(fromBottom: false)
+		}
+	}
+
 	override func didReceiveMemoryWarning() {
 		super.didReceiveMemoryWarning()
 		// Dispose of any resources that can be recreated.
