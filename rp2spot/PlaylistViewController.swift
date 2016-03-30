@@ -26,7 +26,9 @@ class PlaylistViewController: UIViewController {
 		tableView.rowHeight = 64
 		tableView.dataSource = self
 		tableView.delegate = self
-		instructionsLabel.backgroundColor = Constant.Color.LightGrey.color()
+		let lightGrey = Constant.Color.LightGrey.color()
+		tableView.backgroundColor = lightGrey
+		instructionsLabel.backgroundColor = lightGrey
 	}
 
 	override func viewWillAppear(animated: Bool) {

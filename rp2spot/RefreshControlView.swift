@@ -24,6 +24,15 @@ class RefreshControlView: UIView {
 		commonInit()
 	}
 
+	required init?(coder aDecoder: NSCoder) {
+		guard let position = Position.init(rawValue: aDecoder.decodeIntegerForKey("refreshControlPosition")) else {
+			return nil
+		}
+		refreshControlPosition = position
+		super.init(coder: aDecoder)
+		commonInit()
+	}
+
 	func commonInit() {
 		setupActivityIndicator()
 		setupLabel()
@@ -57,14 +66,5 @@ class RefreshControlView: UIView {
 		activityLabel.autoresizingMask = .FlexibleWidth
 		activityLabel.text = "Pull to refresh"
 		self.addSubview(activityLabel)
-	}
-
-	required init?(coder aDecoder: NSCoder) {
-		guard let position = Position.init(rawValue: aDecoder.decodeIntegerForKey("refreshControlPosition")) else {
-			return nil
-		}
-		refreshControlPosition = position
-		super.init(coder: aDecoder)
-		commonInit()
 	}
 }

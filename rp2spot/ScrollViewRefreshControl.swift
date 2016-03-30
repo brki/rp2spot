@@ -21,6 +21,13 @@ class ScrollViewRefreshControl {
 	lazy var refreshingViewHeight: CGFloat = self.view.bounds.height
 	var refreshViewAnimationDuration = 0.3
 	var enabled = true
+	var hidden = false {
+		didSet {
+			if hidden != oldValue {
+				view.hidden = hidden
+			}
+		}
+	}
 
 	lazy var operationQueue: NSOperationQueue = {
 		let queue = NSOperationQueue()
@@ -78,7 +85,6 @@ class ScrollViewRefreshControl {
 				self.view.activityLabel?.text = self.activityLabelCurrentlyRefreshingText
 			}
 		}
-
 	}
 
 	func refreshShouldBeTriggered(scrollView: UIScrollView) -> Bool {
@@ -115,10 +121,13 @@ class ScrollViewRefreshControl {
 		let inset = adjustedContentInset(scrollView)
 		async_main {
 			self.view.activityIndicator?.stopAnimating()
-			UIView.animateWithDuration(self.refreshViewAnimationDuration) {
-				scrollView.contentInset = inset
-				self.view.activityLabel?.text = self.activityLabelReadyToRefreshText
-			}
+			UIView.animateWithDuration(self.refreshViewAnimationDuration,
+				animations: {
+					scrollView.contentInset = inset
+				},
+				completion: { finished in
+					self.view.activityLabel?.text = self.activityLabelReadyToRefreshText
+			})
 		}
 	}
 }
