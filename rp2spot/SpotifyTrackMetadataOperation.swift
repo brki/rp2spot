@@ -32,7 +32,6 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 
 		let infoManager = SpotifyClient.sharedInstance.trackInfo
 		let (found, missing) = infoManager.getCachedTrackInfo(trackURIs)
-		print("Found count: \(found.count), missing count: \(missing.count)")
 		guard missing.count > 0 else {
 			handler?(nil, found)
 			self.state = .Finished
@@ -53,7 +52,7 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 			}
 
 			guard let infos = trackInfoList as? [SPTTrack] else {
-				print("trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
+				print("When trying to fetch metadata for \(missing.count) tracks: trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
 				let err = NSError(domain: "SpotifyTrackMetadataOperation", code: 1,
 				                  userInfo: [NSLocalizedDescriptionKey: "Error processing track metadata"])
 				self.handler?(err, nil)

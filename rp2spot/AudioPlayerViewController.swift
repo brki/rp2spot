@@ -111,7 +111,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func skipToNextTrack(sender: AnyObject) {
-		guard status == .Active else {
+		guard status == .Active && !playlist.windowNeedsAdjustment() else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
@@ -141,7 +141,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 	
 	@IBAction func skipToPreviousTrack(sender: AnyObject) {
-		guard status == .Active else {
+		guard status == .Active && !playlist.windowNeedsAdjustment() else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
@@ -201,11 +201,12 @@ class AudioPlayerViewController: UIViewController {
 			let (cachedMetadata, _) = spotify.trackInfo.getCachedTrackInfo(playlist.trackURIs())
 			playlist.setTrackMetadata(cachedMetadata)
 		}
-		let trackURIs = spotify.URIsForTrackIds(playlist.list.map({ $0.spotifyTrackId! }))
-		guard let index = playlist.currentIndex else {
+
+		guard let (index, trackURIs) = playlist.currentWindowTrackURIs() else {
 			print("playTracks: No currentIndex, so can not start playing.")
 			return
 		}
+
 		status = .Active
 
 		spotify.loginOrRenewSession() { willTriggerLogin, sessionValid, error in
@@ -409,6 +410,17 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 		playlist.setCurrentTrack(shortTrackId)
 		updateNowPlayingInfo(shortTrackId)
+
+		if playlist.windowNeedsAdjustment() {
+			playlist.setCurrentWindow()
+			if let (index, trackURIs) = playlist.currentWindowTrackURIs() {
+				// TODO?: for consistency, move this to SpotifyClient:
+				spotify.player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
+					// TODO: handle error if necessary
+					print("Replacing playlist URIs: error: \(error)")
+				}
+			}
+		}
 	}
 
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
@@ -432,6 +444,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if let interested = delegate {
 			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
 		}
+
 		updateUI(isPlaying: true)
 	}
 

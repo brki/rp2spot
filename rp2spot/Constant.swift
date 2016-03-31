@@ -19,6 +19,9 @@ struct Constant {
 	// The maximum number of tracks that can be added to a playlist in one API call:
 	static let SPOTIFY_MAX_PLAYLIST_ADD_TRACKS = 100
 
+	// The maximum number of tracks that the Spotify player accepts as it's current playlist:
+	static let SPOTIFY_MAX_PLAYER_TRACKS = 100
+
 	// The Spotify web service limits to a maximum of 50 URIs when fetching track information.
 	static let SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH = 50
 
@@ -28,8 +31,6 @@ struct Constant {
 	static let RADIO_PARADISE_IMAGE_URL_BASE = "https://www.radioparadise.com/graphics/covers/"
 	static let RADIO_PARADISE_MINIMUM_HISTORY_DATE = Date.sharedInstance.dateFromRPDateString("2015-02-24T16:45:00+00:00")!
 	static let RADIO_PARADISE_SONG_INFO_URL_TEMPLATE="https://www.radioparadise.com/mx-content.php?name=Music&file=songinfo&song_id={songid}"
-
-
 
 	enum Color: UInt {
 		case SageGreen = 0xEEFFEC

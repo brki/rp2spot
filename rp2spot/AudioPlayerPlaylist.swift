@@ -9,6 +9,15 @@
 import Foundation
 
 struct AudioPlayerPlaylist {
+
+	struct PlaylistWindow {
+		let startIndex: Int
+		let endIndex: Int
+	}
+	let maxWindowSize = Constant.SPOTIFY_MAX_PLAYER_TRACKS
+	// Provides a window of ``maxWindowSize`` onto the larger playlist.
+	var currentWindow: PlaylistWindow?
+
 	let list: [PlayedSongData]
 	var currentIndex: Int?
 	var trackPosition: NSTimeInterval = 0.0 // point in the track at which playback should start.
@@ -28,6 +37,39 @@ struct AudioPlayerPlaylist {
 		for (index, song) in list.enumerate() {
 			trackToIndexMap[song.spotifyTrackId!] = index
 		}
+		setCurrentWindow()
+	}
+
+	mutating func setCurrentWindow() {
+		guard let index = currentIndex else {
+			currentWindow = nil
+			return
+		}
+		currentWindow = windowAroundIndex(index, maxCount: maxWindowSize)
+	}
+
+	func windowAroundIndex(index: Int, maxCount: Int) -> PlaylistWindow {
+		if list.count <= maxCount {
+			return PlaylistWindow(startIndex: 0, endIndex: max(0, list.count - 1))
+		}
+		let halfOfRange = maxCount / 2
+		let startIndex = max(0, index - halfOfRange + 1) // +1 to keep final count <= maxCount; assumption: browsing into older history is less likely.
+		let endIndex = min(list.count - 1, index + halfOfRange)
+		return PlaylistWindow(startIndex: startIndex, endIndex: endIndex)
+	}
+
+	func windowNeedsAdjustment() -> Bool {
+		guard let index = currentIndex, window = currentWindow else {
+			return false
+		}
+
+		// If the current index is the first or last track, no adjustment necessary.
+		guard !(index == 0 || index == list.count - 1) else {
+			return false
+		}
+
+		// If the index is at either edge of the window, it should be adjusted.
+		return index - window.startIndex == 0 || index == window.endIndex
 	}
 
 	func isLastTrack(spotifyTrackId: String) -> Bool {
@@ -85,13 +127,11 @@ struct AudioPlayerPlaylist {
 	*/
 	func trackURIsCenteredOnIndex(index: Int, maxCount: Int) -> [NSURL] {
 		var selected: [PlayedSongData]
-		if list.count <= maxCount {
+		if list.count < maxCount {
 			selected = list
 		} else {
-			let halfOfRange = maxCount / 2
-			let startIndex = max(0, index - halfOfRange + 1) // +1 to keep final count <= maxCount; assumption: browsing into older history is less likely.
-			let endIndex = min(list.count - 1, index + halfOfRange)
-			selected = Array(list[startIndex ... endIndex])
+			let window = windowAroundIndex(index, maxCount: maxCount)
+			selected = Array(list[window.startIndex ... window.endIndex])
 		}
 
 		return SpotifyClient.sharedInstance.URIsForTrackIds(selected.map({ $0.spotifyTrackId! }))
@@ -103,6 +143,23 @@ struct AudioPlayerPlaylist {
 			return [NSURL]()
 		}
 		return trackURIsCenteredOnIndex(index, maxCount: maxCount)
+	}
+
+	/**
+	Gets the tracks of the current window, and the index with reference to that
+	window of the current track.  
+	
+	For example, if the playlist has 200 tracks, and the window is tracks
+	51 - 150, and the playlist's currentIndex is 71, indexInWindow will be 20.
+	*/
+	func currentWindowTrackURIs() -> (indexInWindow: Int, tracks: [NSURL])? {
+		guard let index = currentIndex, window = currentWindow else {
+			return nil
+		}
+		let trackIds = list[window.startIndex ... window.endIndex].map({ $0.spotifyTrackId! })
+		let trackURIs = SpotifyClient.sharedInstance.URIsForTrackIds(trackIds)
+		let indexInWindow = index - window.startIndex
+		return (indexInWindow: indexInWindow, tracks: trackURIs)
 	}
 
 	/**
