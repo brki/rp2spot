@@ -198,7 +198,6 @@ class PlayedSongDataManager {
 		isFetchingNewer = false
 
 		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
-			self.isRefreshing = false
 			guard error == nil else {
 				let title = "Unable to get song history for selected data"
 				var message: String?
@@ -207,15 +206,18 @@ class PlayedSongDataManager {
 				}
 				Utility.presentAlert(title, message: message)
 				handler(success: false)
+				self.isRefreshing = false
 				return
 			}
 			self.refresh() { error in
 				guard error == nil else {
 					print("replaceLocalHistory: error refreshing fetch request: \(error)")
 					handler(success: false)
+					self.isRefreshing = false
 					return
 				}
 				handler(success: success)
+				self.isRefreshing = false
 			}
 		}
 	}
