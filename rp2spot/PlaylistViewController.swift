@@ -11,8 +11,10 @@ import UIKit
 class PlaylistViewController: UIViewController {
 	var localPlaylist: LocalPlaylistSongs!
 	var firstVisibleDate: NSDate?
+
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var instructionsLabel: UILabel!
+	@IBOutlet weak var nextButton: UIBarButtonItem!
 
 	var instructionsHidden: Bool = false {
 		didSet {
@@ -32,12 +34,20 @@ class PlaylistViewController: UIViewController {
 	}
 
 	override func viewWillAppear(animated: Bool) {
+		// Scroll to a song with the date firstVisibleDate, if set:
 		if let date = firstVisibleDate,
 			index = localPlaylist.songs.indexOf({ date.earlierDate($0.playedAt) == date }) {
+
+			// Unset the variable, so the table won't get scrolled back
+			// to this point if it the view re-appears (e.g. user
+			// taps the back button from the next view controller).
+			firstVisibleDate = nil
 
 			let indexPath = NSIndexPath(forRow: index, inSection: 0)
 			tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Top, animated: false)
 		}
+
+		nextButton.enabled = localPlaylist.selected.count > 0
 	}
 
 	override func viewDidAppear(animated: Bool) {
@@ -87,11 +97,13 @@ extension PlaylistViewController: UITableViewDelegate {
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		localPlaylist.toggleSelection(indexPath.row)
 		tableView.cellForRowAtIndexPath(indexPath)?.accessoryType = .Checkmark
+		nextButton.enabled = true
 	}
 
 	func tableView(tableView: UITableView, didDeselectRowAtIndexPath indexPath: NSIndexPath) {
 		localPlaylist.toggleSelection(indexPath.row)
 		tableView.cellForRowAtIndexPath(indexPath)?.accessoryType = .None
+		nextButton.enabled = localPlaylist.selected.count > 0
 	}
 
 	func scrollViewDidScroll(scrollView: UIScrollView) {

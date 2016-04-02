@@ -8,7 +8,8 @@
 
 import Foundation
 
-struct LocalPlaylistSongs {
+class LocalPlaylistSongs {
+	var playlistTitle: String?
 	let songs: [PlayedSongData]
 	var selected = [Int: Bool]()
 	var maxSelected = Constant.SPOTIFY_AUTH_CALLBACK_URL
@@ -18,7 +19,7 @@ struct LocalPlaylistSongs {
 		self.songs = songs
 	}
 
-	mutating func toggleSelection(index: Int) {
+	func toggleSelection(index: Int) {
 		guard index < songs.count else {
 			print("LocalPlaylistSongs:toggleSelection: warning: index out of bounds")
 			return
@@ -28,6 +29,10 @@ struct LocalPlaylistSongs {
 		} else {
 			selected[index] = true
 		}
+	}
+
+	func setPlaylistTitle(title: String?) {
+		playlistTitle = title
 	}
 
 	func songAtIndex(index: Int) -> (song: PlayedSongData, selected: Bool) {

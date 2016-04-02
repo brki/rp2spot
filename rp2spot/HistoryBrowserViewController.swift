@@ -123,6 +123,10 @@ class HistoryBrowserViewController: UIViewController {
 		}
 	}
 
+	@IBAction func prepareForUnwind(segue: UIStoryboardSegue) {
+		// Nothing to do here, but this method needs to exist so that the exit segues can be created from other View controllers.
+	}
+
 	func hidePlayer() {
 		self.playerContainerViewHeightConstraint.constant = 0
 	}

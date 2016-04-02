@@ -21,16 +21,16 @@ class PlaylistCreationViewController: UIViewController {
 	@IBOutlet weak var bottomToolbar: UIToolbar!
 	@IBOutlet weak var scrollView: UIScrollView!
 	@IBOutlet weak var controlsViewHeightConstraint: NSLayoutConstraint!
+	@IBOutlet weak var backButton: UIBarButtonItem!
+	@IBOutlet weak var cancelDoneButton: UIBarButtonItem!
 
 	var localPlaylist: LocalPlaylistSongs!
 	var playlistURI: NSURL?
 	let spotify = SpotifyClient.sharedInstance
 	var postLoginBlock: (() -> Void)?
 
-
 	var isRotating = false				// Will be true during rotation
 	var activeTextField: UITextField?	// Keeps track of the active text field.
-
 
 	override func viewDidLoad() {
 		let sageGreen = Constant.Color.SageGreen.color()
@@ -38,6 +38,14 @@ class PlaylistCreationViewController: UIViewController {
 		scrollView.backgroundColor = sageGreen
 		playlistTitle.backgroundColor = Constant.Color.LightGrey.color()
 		playlistTitle.delegate = self
+
+		let count = localPlaylist.selected.count
+		instructionsLabel.text = "Create Spotify playlist (\(count) \(count > 1 ? "songs" : "song"))"
+
+		if let title = localPlaylist.playlistTitle {
+			playlistTitle.text = title
+		}
+		enableCreatePlaylistButtonIfValidTitlePresent(playlistTitle.text)
 
 		// Add a tap recognizer so that keyboard will be dismissed when user taps view outisde of text field:
 		let tapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.viewTapped(_:)))
@@ -98,12 +106,17 @@ class PlaylistCreationViewController: UIViewController {
 	can be executed on sucessful login, and register to get notified when the session is updated.
 	*/
 	func tryCreatePlaylist(title: String, selectedTrackIds: [String]) {
-		createPlaylistButton.enabled = false
+		enableEditingControls(false)
+		activityIndicator.startAnimating()
 
 		spotify.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.selected) { playlistSnapshot, willTriggerLogin, error in
+
+			self.activityIndicator.stopAnimating()
+
 			guard error == nil else {
 				let info = error!.localizedDescription
 				Utility.presentAlert("Failed to create playlist", message: "Playlist '\(title)' could not be created: \(info)")
+				self.enableEditingControls(true)
 				return
 			}
 
@@ -118,6 +131,7 @@ class PlaylistCreationViewController: UIViewController {
 
 			guard let playlist = playlistSnapshot else {
 				Utility.presentAlert("Failed to create playlist", message: "Playlist '\(title)' could not be created: no error information available")
+				self.enableEditingControls(true)
 				return
 			}
 
@@ -127,10 +141,22 @@ class PlaylistCreationViewController: UIViewController {
 				self.creationStatusLabel.hidden = false
 				self.creationStatusLabel.alpha = 0
 				UIView.animateWithDuration(0.4) {
+					self.cancelDoneButton.title = "Done"
+					self.cancelDoneButton.enabled = true
 					self.creationStatusLabel.alpha = 1.0
 					self.showOpenInSpotify()
 				}
 			}
+		}
+	}
+
+	func enableEditingControls(enabled: Bool) {
+		async_main {
+			self.createPlaylistButton.enabled = enabled
+			self.playlistTitle.enabled = enabled
+			self.publicPlaylistSwitch.enabled = enabled
+			self.backButton.enabled = enabled
+			self.cancelDoneButton.enabled = enabled
 		}
 	}
 
@@ -177,6 +203,7 @@ extension PlaylistCreationViewController: UITextFieldDelegate {
 			let newString = (text as NSString).stringByReplacingCharactersInRange(range, withString: string)
 			enableCreatePlaylistButtonIfValidTitlePresent(newString)
 		}
+		localPlaylist.playlistTitle = textField.text
 		return true
 	}
 
@@ -234,6 +261,9 @@ extension PlaylistCreationViewController {
 	func textFieldDidEndEditing(textField: UITextField) {
 		if activeTextField == textField {
 			activeTextField = nil
+		}
+		if textField == playlistTitle {
+			localPlaylist.playlistTitle = textField.text
 		}
 	}
 
@@ -345,5 +375,4 @@ extension PlaylistCreationViewController {
 				completion: nil)			
 		}
 	}
-
 }
