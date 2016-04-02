@@ -36,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		let navBarAppearance = UINavigationBar.appearance()
 		navBarAppearance.barTintColor = black
 		navBarAppearance.opaque = true
+		navBarAppearance.translucent = false
 		navBarAppearance.tintColor = brightGreen
 
 		let buttonAppearance = UIButton.appearance()

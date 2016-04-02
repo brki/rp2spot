@@ -710,14 +710,14 @@
             <objects>
                 <tableViewController id="Orz-Z2-xW9" customClass="UserSettingsViewController" customModule="rp2spot" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="plain" separatorStyle="default" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" id="slO-lj-Gaf">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <sections>
                             <tableViewSection headerTitle="Spotify Streaming Quality" id="jA4-6J-gD3">
                                 <cells>
                                     <tableViewCell opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" textLabel="obe-lF-q8z" style="IBUITableViewCellStyleDefault" id="Hph-Zj-Fbw" userLabel="Low Qual Table View Cell">
-                                        <rect key="frame" x="0.0" y="92" width="600" height="44"/>
+                                        <rect key="frame" x="0.0" y="28" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="Hph-Zj-Fbw" id="d1c-AW-jy3">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
@@ -735,7 +735,7 @@
                                         <color key="backgroundColor" red="0.91764705879999997" green="1" blue="0.90588235289999997" alpha="1" colorSpace="calibratedRGB"/>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" textLabel="Sdr-pe-tG7" style="IBUITableViewCellStyleDefault" id="b0F-c8-jKY" userLabel="Normal Qual Table View Cell">
-                                        <rect key="frame" x="0.0" y="136" width="600" height="44"/>
+                                        <rect key="frame" x="0.0" y="72" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="b0F-c8-jKY" id="HE6-if-g8Y">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
@@ -753,7 +753,7 @@
                                         <color key="backgroundColor" red="0.91764705879999997" green="1" blue="0.90588235289999997" alpha="1" colorSpace="calibratedRGB"/>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" textLabel="8Fj-6a-jt7" style="IBUITableViewCellStyleDefault" id="XDl-E0-jbq" userLabel="High Qual Table View Cell">
-                                        <rect key="frame" x="0.0" y="180" width="600" height="44"/>
+                                        <rect key="frame" x="0.0" y="116" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="XDl-E0-jbq" id="foM-Dw-JPB">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
@@ -775,7 +775,7 @@
                             <tableViewSection headerTitle="Song history list" id="SHR-xe-tad">
                                 <cells>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="JWn-Wh-lcj">
-                                        <rect key="frame" x="0.0" y="252" width="600" height="44"/>
+                                        <rect key="frame" x="0.0" y="188" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="JWn-Wh-lcj" id="kQU-2k-32j">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
@@ -813,7 +813,7 @@
                                         <color key="backgroundColor" red="0.93333333330000001" green="1" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
                                     </tableViewCell>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" indentationWidth="10" id="6OZ-Ts-5wl">
-                                        <rect key="frame" x="0.0" y="296" width="600" height="44"/>
+                                        <rect key="frame" x="0.0" y="232" width="600" height="44"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6OZ-Ts-5wl" id="DsC-e0-wVL">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
@@ -858,6 +858,7 @@
                             <outlet property="delegate" destination="Orz-Z2-xW9" id="wew-BI-QXY"/>
                         </connections>
                     </tableView>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" translucent="NO" prompted="NO"/>
                     <connections>
                         <outlet property="SpotifyStreamingQualityHighCell" destination="XDl-E0-jbq" id="73S-s2-Pj5"/>
                         <outlet property="SpotifyStreamingQualityLowCell" destination="Hph-Zj-Fbw" id="fUI-41-Zay"/>
