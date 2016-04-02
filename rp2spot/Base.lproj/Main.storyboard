@@ -6,7 +6,6 @@
         <capability name="Alignment constraints with different attributes" minToolsVersion="5.1"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
         <capability name="Constraints with non-1.0 multipliers" minToolsVersion="5.1"/>
-        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--Navigation Controller-->
@@ -40,7 +39,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="tVS-BF-iOI" userLabel="Player Container View">
-                                <rect key="frame" x="0.0" y="536" width="600" height="0.0"/>
+                                <rect key="frame" x="0.0" y="492" width="600" height="0.0"/>
                                 <constraints>
                                     <constraint firstAttribute="height" id="z4R-9n-jVq"/>
                                     <constraint firstAttribute="height" constant="100" id="zlN-dT-Cel"/>
@@ -54,8 +53,26 @@
                                     <segue destination="xRB-17-Bnb" kind="embed" id="Agz-z1-4Cn"/>
                                 </connections>
                             </containerView>
+                            <toolbar clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="black" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="H4q-Ys-Yd6">
+                                <rect key="frame" x="0.0" y="492" width="600" height="44"/>
+                                <color key="backgroundColor" red="0.1215686275" green="0.12941176469999999" blue="0.14117647059999999" alpha="1" colorSpace="calibratedRGB"/>
+                                <items>
+                                    <barButtonItem title="Settings" id="cgs-LF-C01">
+                                        <connections>
+                                            <segue destination="Orz-Z2-xW9" kind="show" id="pyn-Wp-dJm"/>
+                                        </connections>
+                                    </barButtonItem>
+                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="X9k-jN-NCn"/>
+                                    <barButtonItem image="clock-bar-icon" id="YhH-TW-Vaf">
+                                        <connections>
+                                            <action selector="selectDate:" destination="1UC-q6-Puc" id="cYH-kK-KCy"/>
+                                        </connections>
+                                    </barButtonItem>
+                                </items>
+                                <color key="tintColor" red="0.066621767240000004" green="0.63235452589999996" blue="0.1122306034" alpha="1" colorSpace="calibratedRGB"/>
+                            </toolbar>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" showsSelectionImmediatelyOnTouchBegin="NO" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="L6k-QP-5ZW">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="492"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" accessoryType="detailButton" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="HistoryBrowserCell" rowHeight="64" id="Zpf-6a-3k3" customClass="PlainHistoryTableViewCell" customModule="rp2spot" customModuleProvider="target">
@@ -124,33 +141,24 @@
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
                             <constraint firstItem="L6k-QP-5ZW" firstAttribute="trailing" secondItem="KSm-vK-hzQ" secondAttribute="trailing" id="16P-NP-KG2"/>
-                            <constraint firstItem="tVS-BF-iOI" firstAttribute="bottom" secondItem="Tc9-nh-lDh" secondAttribute="top" id="4Lv-wk-ojs"/>
                             <constraint firstAttribute="trailing" secondItem="tVS-BF-iOI" secondAttribute="trailing" id="Dap-fA-EOh"/>
+                            <constraint firstItem="H4q-Ys-Yd6" firstAttribute="leading" secondItem="KSm-vK-hzQ" secondAttribute="leading" id="DqD-ja-KON"/>
                             <constraint firstItem="L6k-QP-5ZW" firstAttribute="top" secondItem="697-VE-sb5" secondAttribute="bottom" id="O04-tE-TJW"/>
+                            <constraint firstAttribute="trailing" secondItem="H4q-Ys-Yd6" secondAttribute="trailing" id="OUO-Il-r6g"/>
+                            <constraint firstItem="Tc9-nh-lDh" firstAttribute="top" secondItem="H4q-Ys-Yd6" secondAttribute="bottom" id="WEr-KF-3v8"/>
                             <constraint firstItem="tVS-BF-iOI" firstAttribute="leading" secondItem="KSm-vK-hzQ" secondAttribute="leading" id="Y0Y-fp-eSX"/>
+                            <constraint firstItem="tVS-BF-iOI" firstAttribute="bottom" secondItem="H4q-Ys-Yd6" secondAttribute="top" id="Z5B-ax-UTa"/>
                             <constraint firstItem="L6k-QP-5ZW" firstAttribute="leading" secondItem="KSm-vK-hzQ" secondAttribute="leading" id="axx-qN-fLD"/>
                             <constraint firstItem="L6k-QP-5ZW" firstAttribute="bottom" secondItem="tVS-BF-iOI" secondAttribute="top" id="uII-KO-x2g"/>
                         </constraints>
                     </view>
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
                     <navigationItem key="navigationItem" id="eoS-O3-9vu">
-                        <rightBarButtonItems>
-                            <barButtonItem image="clock-bar-icon" id="YhH-TW-Vaf">
-                                <connections>
-                                    <action selector="selectDate:" destination="1UC-q6-Puc" id="cYH-kK-KCy"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem systemItem="action" id="VtV-LV-oLt">
-                                <connections>
-                                    <segue destination="K5y-os-kfh" kind="presentation" id="Owx-Gt-2F1"/>
-                                </connections>
-                            </barButtonItem>
-                            <barButtonItem title="Settings" id="cgs-LF-C01">
-                                <connections>
-                                    <segue destination="Orz-Z2-xW9" kind="show" id="pyn-Wp-dJm"/>
-                                </connections>
-                            </barButtonItem>
-                        </rightBarButtonItems>
+                        <barButtonItem key="rightBarButtonItem" title="Create Playlist" id="VtV-LV-oLt">
+                            <connections>
+                                <segue destination="K5y-os-kfh" kind="presentation" id="Owx-Gt-2F1"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
                         <outlet property="playerContainerView" destination="tVS-BF-iOI" id="HlF-8x-5Fl"/>
