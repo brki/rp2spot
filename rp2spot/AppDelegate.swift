@@ -23,6 +23,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 	func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
 		setStatusBarBackgroundColor(UIColor.blackColor())
+
+		let toolBarAppearance = UIToolbar.appearance()
+		toolBarAppearance.opaque = true
+		toolBarAppearance.backgroundColor = UIColor.blackColor()
+
+		let barButtonAppearance = UIBarButtonItem.appearance()
+		barButtonAppearance.tintColor = Constant.Color.SpotifyGreen.color()
+
 		return true
 	}
 
