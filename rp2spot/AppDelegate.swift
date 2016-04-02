@@ -22,14 +22,27 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	}
 
 	func application(application: UIApplication, didFinishLaunchingWithOptions launchOptions: [NSObject: AnyObject]?) -> Bool {
-		setStatusBarBackgroundColor(UIColor.blackColor())
+		let black = UIColor.blackColor()
+		let brightGreen = Constant.Color.SpotifyGreen.color()
+		setStatusBarBackgroundColor(black)
 
 		let toolBarAppearance = UIToolbar.appearance()
 		toolBarAppearance.opaque = true
-		toolBarAppearance.backgroundColor = UIColor.blackColor()
+		toolBarAppearance.backgroundColor = black
 
 		let barButtonAppearance = UIBarButtonItem.appearance()
-		barButtonAppearance.tintColor = Constant.Color.SpotifyGreen.color()
+		barButtonAppearance.tintColor = brightGreen
+
+		let navBarAppearance = UINavigationBar.appearance()
+		navBarAppearance.barTintColor = black
+		navBarAppearance.opaque = true
+		navBarAppearance.tintColor = brightGreen
+
+		let buttonAppearance = UIButton.appearance()
+		buttonAppearance.tintColor = brightGreen
+
+		let spinnerAppearance = UIActivityIndicatorView.appearance()
+		spinnerAppearance.color = brightGreen
 
 		return true
 	}
