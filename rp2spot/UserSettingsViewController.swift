@@ -13,6 +13,8 @@ class UserSettingsViewController: UITableViewController {
 	@IBOutlet weak var SpotifyStreamingQualityHighCell: UITableViewCell!
 	@IBOutlet weak var maximumSongHistoryLabel: UILabel!
 	@IBOutlet weak var maximumSongHistoryStepper: UIStepper!
+	@IBOutlet weak var fetchSizeLabel: UILabel!
+	@IBOutlet weak var fetchSizeStepper: UIStepper!
 
 	let SECTION_SPOTIFY_STREAMING_QUALITY = 0
 
@@ -31,12 +33,16 @@ class UserSettingsViewController: UITableViewController {
 		configureSpotifyStreamingQualityCells()
 
 		configureSongHistoryListControls()
-
 	}
 
 	@IBAction func maximumSongHistoryValueChanged(sender: AnyObject) {
 		settings.maxLocalSongHistoryCount = Int(maximumSongHistoryStepper.value)
 		maximumSongHistoryLabel.text = String(settings.maxLocalSongHistoryCount)
+	}
+
+	@IBAction func fetchSizeValueChanged(sender: AnyObject) {
+		settings.historyFetchSongCount = Int(fetchSizeStepper.value)
+		fetchSizeLabel.text = String(settings.historyFetchSongCount)
 	}
 
 	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
@@ -74,5 +80,9 @@ class UserSettingsViewController: UITableViewController {
 		let maxSongHistoryCount = settings.maxLocalSongHistoryCount
 		maximumSongHistoryStepper.value = Double(maxSongHistoryCount)
 		maximumSongHistoryLabel.text = String(maxSongHistoryCount)
+
+		let fetchSize = settings.historyFetchSongCount
+		fetchSizeStepper.value = Double(fetchSize)
+		fetchSizeLabel.text = String(fetchSize)
 	}
 }

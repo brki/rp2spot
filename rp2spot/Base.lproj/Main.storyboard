@@ -180,10 +180,10 @@
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="zLw-nt-U18">
                                 <rect key="frame" x="0.0" y="272" width="600" height="264"/>
                                 <subviews>
-                                    <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" distribution="fillEqually" alignment="center" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="fgm-W9-7vh">
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" spacing="15" translatesAutoresizingMaskIntoConstraints="NO" id="fgm-W9-7vh">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="165"/>
                                         <subviews>
-                                            <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" distribution="fillEqually" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="oOr-pN-zBR" userLabel="Song Info Stack View">
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="6" translatesAutoresizingMaskIntoConstraints="NO" id="oOr-pN-zBR" userLabel="Song Info Stack View">
                                                 <rect key="frame" x="150" y="0.0" width="300" height="75"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="HxH-jb-6MI" userLabel="Song Title">
@@ -198,7 +198,7 @@
                                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
-                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Album" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LWI-sc-fnX" userLabel="Album">
+                                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Album" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LWI-sc-fnX" userLabel="Album">
                                                         <rect key="frame" x="0.0" y="54" width="300" height="21"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
@@ -209,17 +209,17 @@
                                                     <constraint firstAttribute="width" constant="300" placeholder="YES" id="mlE-0a-ZgW"/>
                                                 </constraints>
                                             </stackView>
-                                            <stackView opaque="NO" contentMode="scaleToFill" misplaced="YES" axis="vertical" distribution="fillEqually" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="TCV-jm-Xt9">
+                                            <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="TCV-jm-Xt9">
                                                 <rect key="frame" x="206" y="90" width="189" height="75"/>
                                                 <subviews>
-                                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="500" verticalCompressionResistancePriority="500" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYu-Vy-Ci3" userLabel="Radio Paradise Info button">
+                                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="500" verticalCompressionResistancePriority="500" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="uYu-Vy-Ci3" userLabel="Radio Paradise Info button">
                                                         <rect key="frame" x="0.0" y="0.0" width="189" height="38"/>
                                                         <state key="normal" title="Radio Paradise song details"/>
                                                         <connections>
                                                             <action selector="showRadioParadiseInfoPage:" destination="zEv-KC-qin" eventType="touchUpInside" id="ffh-FL-gKu"/>
                                                         </connections>
                                                     </button>
-                                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="500" verticalCompressionResistancePriority="250" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lSr-HA-fQs" userLabel="Open in Spotify button">
+                                                    <button opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="500" verticalCompressionResistancePriority="250" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lSr-HA-fQs" userLabel="Open in Spotify button">
                                                         <rect key="frame" x="41" y="38" width="106" height="37"/>
                                                         <state key="normal" title="Open in Spotify"/>
                                                         <connections>
@@ -773,20 +773,21 @@
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="Song limit" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="n6e-D9-UCZ">
-                                                    <rect key="frame" x="8" y="11" width="208" height="21"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Song limit" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.69999999999999996" translatesAutoresizingMaskIntoConstraints="NO" id="n6e-D9-UCZ">
+                                                    <rect key="frame" x="8" y="11" width="76" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kze-dF-jT0" userLabel="StepperValue">
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="100" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kze-dF-jT0" userLabel="Song limit value label">
                                                     <rect key="frame" x="449" y="11" width="29" height="21"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
                                                 </label>
-                                                <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="100" minimumValue="100" maximumValue="1500" stepValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="7NL-9O-Xja">
+                                                <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="200" minimumValue="200" maximumValue="2000" stepValue="100" translatesAutoresizingMaskIntoConstraints="NO" id="7NL-9O-Xja">
                                                     <rect key="frame" x="498" y="7" width="94" height="29"/>
+                                                    <color key="tintColor" red="0.066621767240000004" green="0.63235452589999996" blue="0.1122306034" alpha="1" colorSpace="calibratedRGB"/>
                                                     <connections>
                                                         <action selector="maximumSongHistoryValueChanged:" destination="Orz-Z2-xW9" eventType="valueChanged" id="kPV-GJ-K6n"/>
                                                     </connections>
@@ -809,15 +810,37 @@
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="6OZ-Ts-5wl" id="DsC-e0-wVL">
                                             <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
                                             <autoresizingMask key="autoresizingMask"/>
+                                            <subviews>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Fetch size" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="PS5-38-eG5">
+                                                    <rect key="frame" x="8" y="11" width="78" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="30" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ps2-lt-sQv" userLabel="Fetch size value label">
+                                                    <rect key="frame" x="457" y="11" width="21" height="21"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <stepper opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="50" minimumValue="10" maximumValue="50" stepValue="10" translatesAutoresizingMaskIntoConstraints="NO" id="uej-8q-K0G" userLabel="Fetch size stepper">
+                                                    <rect key="frame" x="498" y="7" width="94" height="29"/>
+                                                    <color key="tintColor" red="0.066621767240000004" green="0.63235452589999996" blue="0.1122306034" alpha="1" colorSpace="calibratedRGB"/>
+                                                    <connections>
+                                                        <action selector="fetchSizeValueChanged:" destination="Orz-Z2-xW9" eventType="valueChanged" id="okU-4u-zkl"/>
+                                                    </connections>
+                                                </stepper>
+                                            </subviews>
+                                            <constraints>
+                                                <constraint firstItem="uej-8q-K0G" firstAttribute="leading" secondItem="Ps2-lt-sQv" secondAttribute="trailing" constant="20" id="7dF-7T-uu4"/>
+                                                <constraint firstAttribute="trailingMargin" secondItem="uej-8q-K0G" secondAttribute="trailing" id="O98-yj-gIl"/>
+                                                <constraint firstItem="PS5-38-eG5" firstAttribute="leading" secondItem="DsC-e0-wVL" secondAttribute="leadingMargin" id="SEY-OZ-ofu"/>
+                                                <constraint firstItem="PS5-38-eG5" firstAttribute="centerY" secondItem="DsC-e0-wVL" secondAttribute="centerY" id="bV5-XM-hK0"/>
+                                                <constraint firstItem="Ps2-lt-sQv" firstAttribute="centerY" secondItem="DsC-e0-wVL" secondAttribute="centerY" id="cuq-Xb-N33"/>
+                                                <constraint firstItem="uej-8q-K0G" firstAttribute="centerY" secondItem="DsC-e0-wVL" secondAttribute="centerY" id="kIj-gv-TNE"/>
+                                            </constraints>
                                         </tableViewCellContentView>
-                                    </tableViewCell>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="default" indentationWidth="10" id="D9Z-Yp-a1w">
-                                        <rect key="frame" x="0.0" y="340" width="600" height="44"/>
-                                        <autoresizingMask key="autoresizingMask"/>
-                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="D9Z-Yp-a1w" id="AON-Ve-eHt">
-                                            <rect key="frame" x="0.0" y="0.0" width="600" height="43"/>
-                                            <autoresizingMask key="autoresizingMask"/>
-                                        </tableViewCellContentView>
+                                        <color key="backgroundColor" red="0.93333333330000001" green="1" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
@@ -831,6 +854,8 @@
                         <outlet property="SpotifyStreamingQualityHighCell" destination="XDl-E0-jbq" id="73S-s2-Pj5"/>
                         <outlet property="SpotifyStreamingQualityLowCell" destination="Hph-Zj-Fbw" id="fUI-41-Zay"/>
                         <outlet property="SpotifyStreamingQualityNormalCell" destination="b0F-c8-jKY" id="utO-ZY-3AB"/>
+                        <outlet property="fetchSizeLabel" destination="Ps2-lt-sQv" id="L0e-7C-TTW"/>
+                        <outlet property="fetchSizeStepper" destination="uej-8q-K0G" id="Shr-Ge-lfX"/>
                         <outlet property="maximumSongHistoryLabel" destination="Kze-dF-jT0" id="xvV-fy-K7M"/>
                         <outlet property="maximumSongHistoryStepper" destination="7NL-9O-Xja" id="J9v-K6-wde"/>
                     </connections>
