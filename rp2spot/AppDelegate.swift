@@ -39,8 +39,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		navBarAppearance.translucent = false
 		navBarAppearance.tintColor = brightGreen
 
-		let buttonAppearance = UIButton.appearance()
-		buttonAppearance.tintColor = brightGreen
+		// The button tint color should be set everyplace except for in the HistoryBrowserViewController (there
+		// it should not be set, because the disclosure indicator buttons dissapear when the cell is highlighted
+		// in the same tint color (e.g. when a song is playing)).
+		UIButton.appearanceWhenContainedInInstancesOfClasses([HistoryDateSelectorViewController.self]).tintColor = brightGreen
+		UIButton.appearanceWhenContainedInInstancesOfClasses([SongInfoViewController.self]).tintColor = brightGreen
+		UIButton.appearanceWhenContainedInInstancesOfClasses([PlaylistViewController.self]).tintColor = brightGreen
+		UIButton.appearanceWhenContainedInInstancesOfClasses([PlaylistCreationViewController.self]).tintColor = brightGreen
+		UIButton.appearanceWhenContainedInInstancesOfClasses([UserSettingsViewController.self]).tintColor = brightGreen
 
 		let spinnerAppearance = UIActivityIndicatorView.appearance()
 		spinnerAppearance.color = brightGreen

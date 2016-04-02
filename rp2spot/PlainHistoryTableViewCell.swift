@@ -44,10 +44,13 @@ class PlainHistoryTableViewCell: UITableViewCell {
 	func assignBackgroundColor(currentlyPlayingTrackId currentlyPlayingTrackId: String?) {
 		if spotifyTrackId == nil {
 			self.backgroundColor = Constant.Color.LightOrange.color()
+			self.tintColor = Constant.Color.SpotifyGreen.color()
 		} else if let current = currentlyPlayingTrackId where current == spotifyTrackId {
 			self.backgroundColor = Constant.Color.SpotifyGreen.color()
+			self.tintColor = UIColor.whiteColor()
 		} else {
 			self.backgroundColor = Constant.Color.SageGreen.color()
+			self.tintColor = Constant.Color.SpotifyGreen.color()
 		}
 	}
 }
