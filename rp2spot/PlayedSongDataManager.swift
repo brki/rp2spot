@@ -239,13 +239,15 @@ class PlayedSongDataManager {
 
 		let maxHistoryCount = userSettings.maxLocalSongHistoryCount
 
-		let currentSongCount = songCount
-		guard currentSongCount > maxHistoryCount else {
-			// No need to do anything.
-			return
-		}
-
 		context.performBlock {
+
+			let currentSongCount = self.songCount
+
+			guard currentSongCount > maxHistoryCount else {
+				// No need to do anything.
+				return
+			}
+			
 			guard let songs = self.fetchedResultsController.fetchedObjects as? [PlayedSong] else {
 				print("removeExcessLocalHistory: unable to get PlayedSong objects")
 				return
