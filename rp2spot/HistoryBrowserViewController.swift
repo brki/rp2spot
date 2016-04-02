@@ -31,6 +31,8 @@ class HistoryBrowserViewController: UIViewController {
 
 	var currentlyPlayingTrackId: String?
 
+	var shouldScrollPlayingSongCellToVisible = false
+
 	var audioPlayerVC: AudioPlayerViewController!
 
 	override func viewDidLoad() {
@@ -157,7 +159,9 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 	func playerStatusChanged(newStatus: AudioPlayerViewController.PlayerStatus) {
 		if newStatus == .Active {
 			async_main {
+				self.shouldScrollPlayingSongCellToVisible = true
 				self.showPlayer()
+
 			}
 		} else {
 			async_main {
@@ -182,7 +186,10 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 	*/
 	func updatePlayingStatusOfVisibleCell(trackId: String, isPlaying: Bool) {
 		async_main {
-			guard let indexPaths = self.tableView.indexPathsForVisibleRows else {
+			let ensurePlayingCellVisible = self.shouldScrollPlayingSongCellToVisible
+			self.shouldScrollPlayingSongCellToVisible = false
+
+			guard let indexPaths = self.tableView.indexPathsForVisibleRows where indexPaths.count > 0 else {
 				return
 			}
 
@@ -191,6 +198,21 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 					self.tableView.reloadRowsAtIndexPaths([path], withRowAnimation: .Fade)
 					return
 				}
+			}
+
+			guard ensurePlayingCellVisible else {
+				return
+			}
+
+			// No visible cell found.
+			// If the player just appeared, it may have covered the visible cell.  Try to find the playing cell and scroll it into view.
+			let lastVisibleRow = indexPaths.last!.row
+			let section = indexPaths.last!.section
+			// The height of the player is 100, the cell can be at most 3 cells
+			let maxRowToTry = min(lastVisibleRow + 3, self.historyData.songCount - 1)
+			let searchIndexPaths = Array(lastVisibleRow + 1 ... maxRowToTry).map({ NSIndexPath(forRow: $0, inSection: section) })
+			if let indexPath = self.historyData.indexPathWithMatchingTrackId(trackId, inIndexPaths: searchIndexPaths) {
+				self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
 			}
 		}
 	}

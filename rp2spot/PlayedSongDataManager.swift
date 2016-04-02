@@ -379,4 +379,22 @@ extension PlayedSongDataManager {
 		}
 		return songData
 	}
+
+	/**
+	Gets the index path with the matching spotify track id.
+
+	This method uses the context's performBlockAndWait method.
+	*/
+	func indexPathWithMatchingTrackId(trackId: String, inIndexPaths indexPaths: [NSIndexPath]) -> NSIndexPath? {
+		var matchingPath: NSIndexPath?
+		context.performBlockAndWait {
+			for indexPath in indexPaths {
+				if let song = self.objectAtIndexPath(indexPath) where song.spotifyTrackId == trackId {
+					matchingPath = indexPath
+					break
+				}
+			}
+		}
+		return matchingPath
+	}
 }
