@@ -181,7 +181,7 @@ class PlayedSongDataManager {
 			completionHandler?(success: true, fetchedCount: songHistory.count, error: nil)
 		}
 
-		RadioParadise.fetchHistory(userSettings.spotifyRegion, date: date, vectorCount: vectorCount, handler: songProcessingHandler)
+		RadioParadise.fetchHistory(userSettings.spotifyRegionValue, date: date, vectorCount: vectorCount, handler: songProcessingHandler)
 	}
 
 	/**

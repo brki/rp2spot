@@ -67,16 +67,25 @@ class UserSetting {
 	}
 
 	// User's spotifyRegion (autodetected, but configurable?)
-	var spotifyRegion: String {
+	var spotifyRegion: String? {
 		get {
 			// TODO: figure out how best to get the initial value, which is important for showing the
 			//       correct available songs.  Or, don't worry about it too much, and just show US
 			//       market songs until first spotify connection, at which time the user's spotify
 			//       region can be detected.
-			return settings.stringForKey("spotifyRegion") ?? "CH"
+			return settings.stringForKey("spotifyRegion")
 		}
 		set {
 			settings.setObject(newValue, forKey: "spotifyRegion")
+		}
+	}
+
+	var defaultSpotifyRegion = "US"
+
+	// Non-optional value that can be used when fetching RP history.
+	var spotifyRegionValue: String {
+		get {
+			return spotifyRegion ?? defaultSpotifyRegion
 		}
 	}
 

@@ -95,9 +95,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 				}
 
 				auth.session = session
-				SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
-			}
 
+				// Send the session update notification.
+				SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
+
+				// If the user's Spotify region is not yet known, grab that info.
+				if UserSetting.sharedInstance.spotifyRegion == nil {
+					SpotifyClient.sharedInstance.getUserTerritory { territory in
+						guard let userTerritory = territory else {
+							return
+						}
+						UserSetting.sharedInstance.spotifyRegion = userTerritory
+					}
+				}
+			}
 			return true
 		}
 

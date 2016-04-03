@@ -223,7 +223,6 @@ class SpotifyClient {
 					}
 					handler(playlistSnapshot: playlist, willTriggerLogin: false, error: error)
 				}
-
 			})
 
 		}
@@ -258,6 +257,38 @@ class SpotifyClient {
 
 			// Otherwise, continue processing tracks:
 			self.addTracksToPlaylist(playlist, trackURIs: tracks, processedCount: alreadyProcessedCount, handler: handler)
+		}
+	}
+
+	func getUserTerritory(handler: (territory: String?) -> Void) {
+
+		guard auth.session != nil else {
+			print("getUserTerritory: No valid session, can not get user territory")
+			handler(territory: nil)
+			return
+		}
+
+		SPTUser.requestCurrentUserWithAccessToken(auth.session.accessToken) { userInfoError, user in
+
+			guard userInfoError == nil else {
+				print("getUserTerritory: Error when trying to get user information: \(userInfoError!)")
+				handler(territory: nil)
+				return
+			}
+
+			guard let userInfo = user as? SPTUser else {
+				print("getUserTerritory: no userInfo present in handler for SPTUser.requestCurrentUserWithAccessToken")
+				handler(territory: nil)
+				return
+			}
+
+			guard userInfo.territory.characters.count == 2 else {
+				print("getUserTerritory: unexpected territory value in handler for SPTUser.requestCurrentUserWithAccessToken: \(userInfo.territory)")
+				handler(territory: nil)
+				return
+			}
+
+			handler(territory: userInfo.territory)
 		}
 	}
 }
