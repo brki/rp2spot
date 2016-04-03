@@ -20,6 +20,23 @@ class SongInfoViewController: UIViewController {
 	@IBOutlet weak var spotifyOpenButton: UIButton!
 
 	var songInfo: PlayedSongData!
+	var canOpenSpotifyAppStoreURL = UIApplication.sharedApplication().canOpenURL(Constant.SPOTIFY_APPSTORE_URL)
+	lazy var spotifyTrackURL: NSURL? = {
+		guard let trackId = self.songInfo.spotifyTrackId,
+			url = NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId)) else {
+
+			return nil
+		}
+		return url
+	}()
+
+	lazy var canOpenTrackInSpotify: Bool = {
+		guard let url = self.spotifyTrackURL else {
+			return false
+		}
+		return UIApplication.sharedApplication().canOpenURL(url)
+	}()
+
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -38,7 +55,7 @@ class SongInfoViewController: UIViewController {
 		artistNameLabel.text = songInfo.artistName
 		albumNameLabel.text = songInfo.albumTitle
 
-		if songInfo.spotifyTrackId == nil || !UserSetting.sharedInstance.useSpotify {
+		if !UserSetting.sharedInstance.useSpotify || !(canOpenTrackInSpotify || canOpenSpotifyAppStoreURL) {
 			spotifyOpenButton.enabled = false
 		}
 		updateSpotifyTrackInfo()
@@ -54,22 +71,13 @@ class SongInfoViewController: UIViewController {
 	}
 
 	@IBAction func openInSpotify(sender: AnyObject) {
-		if let trackId = songInfo.spotifyTrackId {
-			guard let url = NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId)) else {
-				print("Unable to create URL for track with identifier: \(trackId)")
-				return
-			}
 
-			let app = UIApplication.sharedApplication()
-			if app.canOpenURL(url) {
-				app.openURL(url)
-			} else {
-				guard app.canOpenURL(Constant.SPOTIFY_APPSTORE_URL) else {
-					print("Not allowed to open the spotify app store url: \(Constant.SPOTIFY_APPSTORE_URL)")
-					return
-				}
-				app.openURL(Constant.SPOTIFY_APPSTORE_URL)
-			}
+		let app = UIApplication.sharedApplication()
+
+		if canOpenTrackInSpotify {
+			app.openURL(spotifyTrackURL!)
+		} else {
+			app.openURL(Constant.SPOTIFY_APPSTORE_URL)
 		}
 	}
 
