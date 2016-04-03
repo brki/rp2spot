@@ -79,7 +79,7 @@ class PlaylistCreationViewController: UIViewController {
 	}
 
 	@IBAction func back(sender: UIBarButtonItem) {
-		dismissViewControllerAnimated(true, completion: nil)
+		dismissViewControllerAnimated(false, completion: nil)
 	}
 
 

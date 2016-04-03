@@ -389,7 +389,7 @@
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="2on-N3-OXS"/>
                                     <barButtonItem title="Next" id="Bs7-Ex-7lF">
                                         <connections>
-                                            <segue destination="iEH-ei-cDa" kind="showDetail" identifier="PlaylistSelectionToCreation" id="1pq-BO-rco"/>
+                                            <segue destination="iEH-ei-cDa" kind="showDetail" identifier="PlaylistSelectionToCreation" animates="NO" id="1pq-BO-rco"/>
                                         </connections>
                                     </barButtonItem>
                                 </items>
