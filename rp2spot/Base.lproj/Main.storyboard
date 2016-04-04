@@ -639,30 +639,30 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="8eV-iR-cgP" userLabel="Background for stack view">
-                                <rect key="frame" x="140" y="50" width="320" height="246"/>
+                                <rect key="frame" x="160" y="319" width="400" height="246"/>
                                 <color key="backgroundColor" red="0.93333333330000001" green="1" blue="0.92549019610000005" alpha="1" colorSpace="calibratedRGB"/>
                             </view>
                             <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" translatesAutoresizingMaskIntoConstraints="NO" id="NA2-bk-fUo" userLabel="Vertical Stack View">
-                                <rect key="frame" x="140" y="50" width="320" height="246"/>
+                                <rect key="frame" x="160" y="319" width="400" height="246"/>
                                 <subviews>
                                     <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="dateAndTime" minuteInterval="10" translatesAutoresizingMaskIntoConstraints="NO" id="9FE-78-ZNf">
-                                        <rect key="frame" x="0.0" y="0.0" width="320" height="216"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="400" height="216"/>
                                         <date key="date" timeIntervalSinceReferenceDate="478601173.116368">
                                             <!--2016-03-02 08:46:13 +0000-->
                                         </date>
                                     </datePicker>
                                     <stackView opaque="NO" contentMode="scaleToFill" distribution="fillEqually" alignment="center" spacing="3" translatesAutoresizingMaskIntoConstraints="NO" id="Vxf-uP-rGA" userLabel="Horizontal Bottom Stack View">
-                                        <rect key="frame" x="0.0" y="216" width="320" height="30"/>
+                                        <rect key="frame" x="0.0" y="216" width="400" height="30"/>
                                         <subviews>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="i80-db-MZQ" userLabel="Cancel">
-                                                <rect key="frame" x="0.0" y="0.0" width="159" height="30"/>
+                                                <rect key="frame" x="0.0" y="0.0" width="199" height="30"/>
                                                 <state key="normal" title="Cancel"/>
                                                 <connections>
                                                     <action selector="cancel:" destination="2kz-67-UVE" eventType="touchUpInside" id="0kK-39-ujW"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="lny-dq-rc6" userLabel="Now">
-                                                <rect key="frame" x="162" y="0.0" width="158" height="30"/>
+                                                <rect key="frame" x="202" y="0.0" width="198" height="30"/>
                                                 <state key="normal" title="Now"/>
                                                 <connections>
                                                     <action selector="setDateToToday:" destination="2kz-67-UVE" eventType="touchUpInside" id="gzU-7V-rvC"/>
@@ -672,15 +672,19 @@
                                     </stackView>
                                 </subviews>
                                 <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" relation="lessThanOrEqual" priority="900" constant="400" id="3oQ-Fx-jum"/>
+                                </constraints>
                             </stackView>
                         </subviews>
                         <gestureRecognizers/>
                         <constraints>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="width" secondItem="NA2-bk-fUo" secondAttribute="width" id="O1J-Im-3cf"/>
-                            <constraint firstItem="NA2-bk-fUo" firstAttribute="centerX" secondItem="I0G-1e-0oF" secondAttribute="centerX" id="UcU-pY-y5q"/>
+                            <constraint firstItem="NA2-bk-fUo" firstAttribute="centerX" secondItem="I0G-1e-0oF" secondAttribute="centerX" priority="500" id="eyT-Uu-nYq"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="trailing" secondItem="NA2-bk-fUo" secondAttribute="trailingMargin" id="gkD-5j-70u"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="height" secondItem="NA2-bk-fUo" secondAttribute="height" id="khQ-BD-YZZ"/>
-                            <constraint firstItem="NA2-bk-fUo" firstAttribute="top" secondItem="NqY-W0-zPP" secondAttribute="bottom" constant="30" id="uQt-2N-MGR"/>
+                            <constraint firstItem="81x-hv-VDH" firstAttribute="top" secondItem="NA2-bk-fUo" secondAttribute="bottom" constant="35" id="sS2-fH-1o4"/>
+                            <constraint firstAttribute="trailingMargin" relation="lessThanOrEqual" secondItem="NA2-bk-fUo" secondAttribute="trailing" constant="20" id="v5l-6E-svl"/>
                             <constraint firstItem="8eV-iR-cgP" firstAttribute="top" secondItem="NA2-bk-fUo" secondAttribute="top" id="ywR-sP-wKf"/>
                         </constraints>
                         <connections>
