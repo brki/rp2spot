@@ -59,7 +59,7 @@
                                 <items>
                                     <barButtonItem title="Settings" id="cgs-LF-C01">
                                         <connections>
-                                            <segue destination="Orz-Z2-xW9" kind="show" id="pyn-Wp-dJm"/>
+                                            <segue destination="KBT-PC-AfK" kind="presentation" id="6Mv-li-Lmx"/>
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="X9k-jN-NCn"/>
@@ -154,9 +154,9 @@
                     </view>
                     <extendedEdge key="edgesForExtendedLayout" bottom="YES"/>
                     <navigationItem key="navigationItem" id="eoS-O3-9vu">
-                        <barButtonItem key="rightBarButtonItem" title="Create Playlist" id="VtV-LV-oLt">
+                        <barButtonItem key="rightBarButtonItem" title="Spotify Playlist" id="VtV-LV-oLt">
                             <connections>
-                                <segue destination="K5y-os-kfh" kind="presentation" id="Owx-Gt-2F1"/>
+                                <segue destination="e46-wt-Ss3" kind="presentation" identifier="BrowserToPlaylistCreation" id="e2i-BU-HdT"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
@@ -273,7 +273,7 @@
             </objects>
             <point key="canvasLocation" x="461" y="-149"/>
         </scene>
-        <!--Playlist View Controller-->
+        <!--Select songs-->
         <scene sceneID="QAJ-fi-dWh">
             <objects>
                 <viewController id="K5y-os-kfh" customClass="PlaylistViewController" customModule="rp2spot" customModuleProvider="target" sceneMemberID="viewController">
@@ -282,21 +282,21 @@
                         <viewControllerLayoutGuide type="bottom" id="7ZX-Fs-jbc"/>
                     </layoutGuides>
                     <view key="view" clipsSubviews="YES" contentMode="scaleToFill" id="QN6-NI-NY4">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="gjA-9z-Gzy">
-                                <rect key="frame" x="0.0" y="0.0" width="600" height="556"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                                 <subviews>
-                                    <containerView opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="0vF-Gv-tJR" userLabel="Player Container View">
-                                        <rect key="frame" x="0.0" y="556" width="600" height="0.0"/>
+                                    <containerView opaque="NO" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="0vF-Gv-tJR" userLabel="Player Container View">
+                                        <rect key="frame" x="0.0" y="462" width="600" height="0.0"/>
                                         <constraints>
                                             <constraint firstAttribute="height" constant="100" placeholder="YES" id="G9l-Ga-m75"/>
                                             <constraint firstAttribute="height" id="cNY-7S-srJ"/>
                                         </constraints>
                                     </containerView>
                                     <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="plain" separatorStyle="default" allowsMultipleSelection="YES" rowHeight="44" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="Vmc-ek-QqW">
-                                        <rect key="frame" x="0.0" y="20" width="600" height="536"/>
+                                        <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                         <prototypes>
                                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="none" accessoryType="checkmark" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="PlaylistCell" rowHeight="64" id="TT5-Vm-6ax" customClass="PlaylistTableViewCell" customModule="rp2spot" customModuleProvider="target">
@@ -371,54 +371,37 @@
                                     <constraint firstItem="0vF-Gv-tJR" firstAttribute="leading" secondItem="gjA-9z-Gzy" secondAttribute="leading" id="sVN-2K-JgC"/>
                                 </constraints>
                             </view>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Select songs to include in Spotify playlist" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oi7-v2-c4Q" userLabel="Instructions">
-                                <rect key="frame" x="0.0" y="535" width="600" height="21"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="black" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="qe0-We-c0b">
-                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <items>
-                                    <barButtonItem systemItem="cancel" id="ef9-eu-bLq">
-                                        <connections>
-                                            <action selector="cancel:" destination="K5y-os-kfh" id="tgH-c0-DQg"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="2on-N3-OXS"/>
-                                    <barButtonItem title="Next" id="Bs7-Ex-7lF">
-                                        <connections>
-                                            <segue destination="iEH-ei-cDa" kind="showDetail" identifier="PlaylistSelectionToCreation" animates="NO" id="1pq-BO-rco"/>
-                                        </connections>
-                                    </barButtonItem>
-                                </items>
-                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstAttribute="trailing" secondItem="oi7-v2-c4Q" secondAttribute="trailing" id="44N-Ue-2yH"/>
-                            <constraint firstItem="7ZX-Fs-jbc" firstAttribute="top" secondItem="qe0-We-c0b" secondAttribute="bottom" id="Ch1-Fe-1Id"/>
+                            <constraint firstItem="7ZX-Fs-jbc" firstAttribute="top" secondItem="gjA-9z-Gzy" secondAttribute="bottom" id="2Rl-pn-JCh"/>
                             <constraint firstAttribute="trailing" secondItem="gjA-9z-Gzy" secondAttribute="trailing" id="Ncl-fm-Q05"/>
-                            <constraint firstItem="qe0-We-c0b" firstAttribute="leading" secondItem="QN6-NI-NY4" secondAttribute="leading" id="NjK-Nl-8Xj"/>
                             <constraint firstItem="gjA-9z-Gzy" firstAttribute="leading" secondItem="QN6-NI-NY4" secondAttribute="leading" id="XOD-3z-4U9"/>
-                            <constraint firstItem="qe0-We-c0b" firstAttribute="top" secondItem="oi7-v2-c4Q" secondAttribute="bottom" id="Zfk-Yu-jnz"/>
-                            <constraint firstItem="qe0-We-c0b" firstAttribute="top" secondItem="gjA-9z-Gzy" secondAttribute="bottom" id="d8I-zS-ZZ7"/>
-                            <constraint firstAttribute="trailing" secondItem="qe0-We-c0b" secondAttribute="trailing" id="l8Q-kA-W0t"/>
                             <constraint firstItem="Vmc-ek-QqW" firstAttribute="top" secondItem="EZW-nH-lLJ" secondAttribute="bottom" id="nKB-19-eKC"/>
-                            <constraint firstItem="oi7-v2-c4Q" firstAttribute="leading" secondItem="QN6-NI-NY4" secondAttribute="leading" id="tX5-H2-ebi"/>
                             <constraint firstItem="gjA-9z-Gzy" firstAttribute="top" secondItem="QN6-NI-NY4" secondAttribute="top" id="uJD-M4-Tiq"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" title="Select songs" id="9vO-XI-bGf">
+                        <barButtonItem key="leftBarButtonItem" systemItem="cancel" id="ef9-eu-bLq">
+                            <connections>
+                                <action selector="cancel:" destination="K5y-os-kfh" id="tgH-c0-DQg"/>
+                            </connections>
+                        </barButtonItem>
+                        <barButtonItem key="rightBarButtonItem" title="Next" id="Bs7-Ex-7lF">
+                            <connections>
+                                <segue destination="iEH-ei-cDa" kind="show" identifier="PlaylistSelectionToCreation" id="1pq-BO-rco"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" translucent="NO" prompted="NO"/>
                     <connections>
-                        <outlet property="instructionsLabel" destination="oi7-v2-c4Q" id="yle-HD-APC"/>
                         <outlet property="nextButton" destination="Bs7-Ex-7lF" id="jkh-v3-ukz"/>
                         <outlet property="tableView" destination="Vmc-ek-QqW" id="Mcj-VR-auX"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="6HS-Za-mC9" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="346" y="563"/>
+            <point key="canvasLocation" x="1172" y="552"/>
         </scene>
         <!--Playlist Creation View Controller-->
         <scene sceneID="abt-TZ-H0t">
@@ -429,11 +412,11 @@
                         <viewControllerLayoutGuide type="bottom" id="N76-w1-SUK"/>
                     </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="9aq-VN-fYU">
-                        <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
+                        <rect key="frame" x="0.0" y="64" width="600" height="536"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" bounces="NO" translatesAutoresizingMaskIntoConstraints="NO" id="DMi-ly-rpP">
-                                <rect key="frame" x="0.0" y="20" width="600" height="536"/>
+                                <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
                                 <subviews>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="NHE-WE-mwp">
                                         <rect key="frame" x="0.0" y="0.0" width="600" height="536"/>
@@ -512,40 +495,27 @@
                                     <constraint firstItem="NHE-WE-mwp" firstAttribute="leading" secondItem="DMi-ly-rpP" secondAttribute="leading" id="pVi-AN-yDL"/>
                                 </constraints>
                             </scrollView>
-                            <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" barStyle="black" translucent="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xVK-Z6-UWW">
-                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
-                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
-                                <items>
-                                    <barButtonItem title="Back" id="Yno-BK-8mg">
-                                        <connections>
-                                            <action selector="back:" destination="iEH-ei-cDa" id="fUZ-6d-ofc"/>
-                                        </connections>
-                                    </barButtonItem>
-                                    <barButtonItem style="plain" systemItem="flexibleSpace" id="qh3-1V-6ap"/>
-                                    <barButtonItem title="Cancel" id="B58-03-SdC" userLabel="Cancel">
-                                        <connections>
-                                            <segue destination="rWy-Yt-zkL" kind="unwind" unwindAction="prepareForUnwind:" id="JCF-jA-EKX"/>
-                                        </connections>
-                                    </barButtonItem>
-                                </items>
-                            </toolbar>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="xVK-Z6-UWW" firstAttribute="leading" secondItem="9aq-VN-fYU" secondAttribute="leading" id="2ay-b3-sF3"/>
                             <constraint firstItem="DMi-ly-rpP" firstAttribute="top" secondItem="ip8-Kn-Xli" secondAttribute="bottom" id="5dq-Zg-tnD"/>
                             <constraint firstItem="NHE-WE-mwp" firstAttribute="width" secondItem="9aq-VN-fYU" secondAttribute="width" id="D3O-ls-gyG"/>
-                            <constraint firstItem="DMi-ly-rpP" firstAttribute="bottom" secondItem="xVK-Z6-UWW" secondAttribute="top" id="FcQ-SV-jAW"/>
                             <constraint firstItem="DMi-ly-rpP" firstAttribute="trailing" secondItem="9aq-VN-fYU" secondAttribute="trailing" id="NlY-xd-TSu"/>
                             <constraint firstItem="DMi-ly-rpP" firstAttribute="leading" secondItem="9aq-VN-fYU" secondAttribute="leading" id="Ybf-f7-Nbf"/>
-                            <constraint firstItem="N76-w1-SUK" firstAttribute="top" secondItem="xVK-Z6-UWW" secondAttribute="bottom" id="pMA-s4-c5A"/>
-                            <constraint firstAttribute="trailing" secondItem="xVK-Z6-UWW" secondAttribute="trailing" id="szv-J2-wQr"/>
+                            <constraint firstItem="N76-w1-SUK" firstAttribute="top" secondItem="DMi-ly-rpP" secondAttribute="bottom" id="ua3-Me-V9y"/>
                         </constraints>
                     </view>
+                    <navigationItem key="navigationItem" id="XXu-dE-EBo">
+                        <barButtonItem key="rightBarButtonItem" title="Cancel" id="B58-03-SdC" userLabel="Cancel">
+                            <connections>
+                                <action selector="cancelTapped:" destination="iEH-ei-cDa" id="BZJ-jy-OoZ"/>
+                                <segue destination="rWy-Yt-zkL" kind="unwind" identifier="PlaylistCreationExit" unwindAction="prepareForUnwind:" id="JCF-jA-EKX"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" translucent="NO" prompted="NO"/>
                     <connections>
                         <outlet property="activityIndicator" destination="U2V-3B-L8C" id="mJM-fU-dji"/>
-                        <outlet property="backButton" destination="Yno-BK-8mg" id="zvV-bC-tcu"/>
-                        <outlet property="bottomToolbar" destination="xVK-Z6-UWW" id="kGK-Nx-oRq"/>
                         <outlet property="cancelDoneButton" destination="B58-03-SdC" id="BiO-UL-6B2"/>
                         <outlet property="controlsView" destination="NHE-WE-mwp" id="5kz-aB-cPh"/>
                         <outlet property="controlsViewHeightConstraint" destination="wO8-3s-6rr" id="Zul-JL-t8w"/>
@@ -561,7 +531,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="m8Q-EI-6Gk" userLabel="First Responder" sceneMemberID="firstResponder"/>
                 <exit id="rWy-Yt-zkL" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="1084" y="563"/>
+            <point key="canvasLocation" x="1862" y="552"/>
         </scene>
         <!--Audio Player View Controller-->
         <scene sceneID="DXA-dz-3KY">
@@ -639,6 +609,23 @@
             </objects>
             <point key="canvasLocation" x="-461" y="671"/>
         </scene>
+        <!--Playlist creation navigation controller-->
+        <scene sceneID="fbM-Uj-MFs">
+            <objects>
+                <navigationController id="e46-wt-Ss3" userLabel="Playlist creation navigation controller" sceneMemberID="viewController">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" translucent="NO" id="HRZ-6t-3Za">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                        <color key="tintColor" white="0.90105216730000004" alpha="1" colorSpace="calibratedWhite"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="K5y-os-kfh" kind="relationship" relationship="rootViewController" id="6bY-Yx-rP6"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="sve-GF-IOC" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="461" y="552"/>
+        </scene>
         <!--History Date Selector View Controller-->
         <scene sceneID="Guu-16-TRO">
             <objects>
@@ -713,6 +700,23 @@
                 </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="-460" y="-561"/>
+        </scene>
+        <!--Settings Navigation Controller-->
+        <scene sceneID="hRe-gy-yRc">
+            <objects>
+                <navigationController id="KBT-PC-AfK" userLabel="Settings Navigation Controller" sceneMemberID="viewController">
+                    <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" translucent="NO" prompted="NO"/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" translucent="NO" id="gvh-mW-cD0">
+                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <connections>
+                        <segue destination="Orz-Z2-xW9" kind="relationship" relationship="rootViewController" id="gqJ-vJ-CUC"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="u8z-GO-uhJ" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="461" y="-867"/>
         </scene>
         <!--User Settings View Controller-->
         <scene sceneID="0Zf-py-Umw">
@@ -867,6 +871,13 @@
                             <outlet property="delegate" destination="Orz-Z2-xW9" id="wew-BI-QXY"/>
                         </connections>
                     </tableView>
+                    <navigationItem key="navigationItem" id="WI7-Br-91y">
+                        <barButtonItem key="leftBarButtonItem" systemItem="done" id="LYI-Qx-uMW">
+                            <connections>
+                                <action selector="doneButtonPressed:" destination="Orz-Z2-xW9" id="Hzw-zY-8ui"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                     <simulatedNavigationBarMetrics key="simulatedTopBarMetrics" barStyle="black" translucent="NO" prompted="NO"/>
                     <connections>
                         <outlet property="SpotifyStreamingQualityHighCell" destination="XDl-E0-jbq" id="73S-s2-Pj5"/>
@@ -880,7 +891,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Bd6-rf-nqb" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="461" y="-884"/>
+            <point key="canvasLocation" x="1218" y="-867"/>
         </scene>
     </scenes>
     <resources>

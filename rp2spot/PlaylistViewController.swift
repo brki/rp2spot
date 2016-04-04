@@ -13,16 +13,7 @@ class PlaylistViewController: UIViewController {
 	var firstVisibleDate: NSDate?
 
 	@IBOutlet weak var tableView: UITableView!
-	@IBOutlet weak var instructionsLabel: UILabel!
 	@IBOutlet weak var nextButton: UIBarButtonItem!
-
-	var instructionsHidden: Bool = false {
-		didSet {
-			if oldValue != instructionsHidden {
-				showOrHideInstructions(instructionsHidden)
-			}
-		}
-	}
 
 	override func viewDidLoad() {
 		tableView.rowHeight = 64
@@ -30,7 +21,6 @@ class PlaylistViewController: UIViewController {
 		tableView.delegate = self
 		let lightGrey = Constant.Color.LightGrey.color()
 		tableView.backgroundColor = lightGrey
-		instructionsLabel.backgroundColor = lightGrey
 	}
 
 	override func viewWillAppear(animated: Bool) {
@@ -50,11 +40,6 @@ class PlaylistViewController: UIViewController {
 		nextButton.enabled = localPlaylist.selected.count > 0
 	}
 
-	override func viewDidAppear(animated: Bool) {
-		super.viewDidAppear(animated)
-		instructionsHidden = false
-	}
-
 	@IBAction func cancel(sender: AnyObject) {
 		dismissViewControllerAnimated(true, completion: nil)
 	}
@@ -64,13 +49,6 @@ class PlaylistViewController: UIViewController {
 		let destinationVC = segue.destinationViewController
 		if let vc = destinationVC as? PlaylistCreationViewController {
 			vc.localPlaylist = localPlaylist
-		}
-	}
-
-	func showOrHideInstructions(hide: Bool) {
-		let targetAlpha = hide ? 0.0 : 1.0
-		UIView.animateWithDuration(0.5) {
-			self.instructionsLabel.alpha = CGFloat(targetAlpha)
 		}
 	}
 }
@@ -104,9 +82,5 @@ extension PlaylistViewController: UITableViewDelegate {
 		localPlaylist.toggleSelection(indexPath.row)
 		tableView.cellForRowAtIndexPath(indexPath)?.accessoryType = .None
 		nextButton.enabled = localPlaylist.selected.count > 0
-	}
-
-	func scrollViewDidScroll(scrollView: UIScrollView) {
-		instructionsHidden = tableView.contentOffset.y > 0
 	}
 }

@@ -45,6 +45,10 @@ class UserSettingsViewController: UITableViewController {
 		fetchSizeLabel.text = String(settings.historyFetchSongCount)
 	}
 
+	@IBAction func doneButtonPressed(sender: AnyObject) {
+		dismissViewControllerAnimated(true, completion: nil)
+	}
+
 	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		switch indexPath.section {
 		case SECTION_SPOTIFY_STREAMING_QUALITY:

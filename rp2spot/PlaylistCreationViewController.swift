@@ -18,10 +18,8 @@ class PlaylistCreationViewController: UIViewController {
 	@IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 	@IBOutlet weak var creationStatusLabel: UILabel!
 	@IBOutlet weak var openInSpotifyButton: UIButton!
-	@IBOutlet weak var bottomToolbar: UIToolbar!
 	@IBOutlet weak var scrollView: UIScrollView!
 	@IBOutlet weak var controlsViewHeightConstraint: NSLayoutConstraint!
-	@IBOutlet weak var backButton: UIBarButtonItem!
 	@IBOutlet weak var cancelDoneButton: UIBarButtonItem!
 
 	var localPlaylist: LocalPlaylistSongs!
@@ -55,8 +53,6 @@ class PlaylistCreationViewController: UIViewController {
 
 	override func viewWillAppear(animated: Bool) {
 		super.viewWillAppear(animated)
-		// Make the toolbar resize itself appropriately for the current orientation:
-		bottomToolbar.invalidateIntrinsicContentSize()
 		registerForKeyboardAndStatusBarNotifications()
 	}
 
@@ -70,6 +66,12 @@ class PlaylistCreationViewController: UIViewController {
 		unregisterForKeyboardAndStatusBarNotifications()
 	}
 
+	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
+		if let id = segue.identifier where id == "PlaylistCreationExit" {
+			view.endEditing(true)
+		}
+	}
+
 	@IBAction func openInSpotify(sender: UIButton) {
 		guard let uri = playlistURI else {
 			print("Open in Spotify tapped, but no playlist URI available")
@@ -77,11 +79,6 @@ class PlaylistCreationViewController: UIViewController {
 		}
 		UIApplication.sharedApplication().openURL(uri)
 	}
-
-	@IBAction func back(sender: UIBarButtonItem) {
-		dismissViewControllerAnimated(false, completion: nil)
-	}
-
 
 	@IBAction func createPlaylist(sender: UIButton) {
 		view.endEditing(true)
@@ -155,7 +152,7 @@ class PlaylistCreationViewController: UIViewController {
 			self.createPlaylistButton.enabled = enabled
 			self.playlistTitle.enabled = enabled
 			self.publicPlaylistSwitch.enabled = enabled
-			self.backButton.enabled = enabled
+			self.navigationItem.hidesBackButton = !enabled
 			self.cancelDoneButton.enabled = enabled
 		}
 	}
@@ -237,7 +234,6 @@ extension PlaylistCreationViewController {
 		super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
 		// Before the animation is a good time to call invalidateIntrinsicContentSize() on a toolbar.
 		// This makes it's new height available during the animation.
-		bottomToolbar.invalidateIntrinsicContentSize()
 		isRotating = true
 		coordinator.animateAlongsideTransition(
 			{ context in
@@ -282,18 +278,20 @@ extension PlaylistCreationViewController {
 	*/
 	var contentViewHeight: CGFloat {
 		let windowHeight = UIScreen.mainScreen().bounds.size.height
-		return windowHeight - topBarHeight - bottomBarHeight
+		return windowHeight - topBarHeight - bottomBarHeight - (windowHeight - creationStatusLabel.frame.maxY)
 	}
 
 	// This may need some adjustment if a navigation bar / tab bar / tool bar is present.
 	var topBarHeight: CGFloat {
-		return UIApplication.sharedApplication().statusBarFrame.size.height
+		let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
+		let navBarHeight = navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
+		return  statusBarHeight + navBarHeight
 	}
 
 	// This may need some adjustment if a tab bar / tool bar is present.
 	// Note that a toolbar may have a different height in landscape / portrait mode.
 	var bottomBarHeight: CGFloat {
-		return bottomToolbar.frame.height
+		return 0
 	}
 
 	/**

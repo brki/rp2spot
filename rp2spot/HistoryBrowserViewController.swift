@@ -69,7 +69,22 @@ class HistoryBrowserViewController: UIViewController {
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
 		let destinationVC = segue.destinationViewController
 
-		if let vc = destinationVC as? AudioPlayerViewController {
+		if let identifier = segue.identifier where identifier == "BrowserToPlaylistCreation",
+			let navController = destinationVC as? UINavigationController,
+			vc = navController.topViewController as? PlaylistViewController {
+
+			let songData = historyData.dataForSpotifyTracks()
+			vc.localPlaylist = LocalPlaylistSongs(songs: songData)
+
+			for cell in tableView.visibleCells as! [PlainHistoryTableViewCell] {
+				if let _ = cell.spotifyTrackId, indexPath = tableView.indexPathForCell(cell) {
+					let song = historyData.songDataForObjectAtIndexPath(indexPath)
+					vc.firstVisibleDate = song?.playedAt
+					break
+				}
+			}
+
+		} else if let vc = destinationVC as? AudioPlayerViewController {
 
 			audioPlayerVC = vc
 			audioPlayerVC.delegate = self
@@ -83,18 +98,6 @@ class HistoryBrowserViewController: UIViewController {
 					return
 			}
 			vc.songInfo = songData
-
-		} else if let vc = destinationVC as? PlaylistViewController {
-			let songData = historyData.dataForSpotifyTracks()
-			vc.localPlaylist = LocalPlaylistSongs(songs: songData)
-
-			for cell in tableView.visibleCells as! [PlainHistoryTableViewCell] {
-				if let _ = cell.spotifyTrackId, indexPath = tableView.indexPathForCell(cell) {
-					let song = historyData.songDataForObjectAtIndexPath(indexPath)
-					vc.firstVisibleDate = song?.playedAt
-					break
-				}
-			}
 		}
 	}
 
