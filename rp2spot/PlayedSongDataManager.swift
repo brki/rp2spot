@@ -98,9 +98,12 @@ class PlayedSongDataManager {
 			if let err = error {
 				let title = "Unable to get \(newerHistory ? "newer" : "older") song history"
 				var message: String?
-				if ErrorInfo.isRequestTimedOut(err) {
-					message = "The request timed out - check your network connection"
+
+				// If it's a network error, include the problem description:
+				if err.domain == NSURLErrorDomain {
+					message = err.localizedDescription
 				}
+
 				Utility.presentAlert(title, message: message)
 			}
 			self.isRefreshing = false

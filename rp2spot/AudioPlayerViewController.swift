@@ -21,6 +21,7 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var playPauseButton: UIButton!
 	@IBOutlet weak var nextTrackButton: UIButton!
 	@IBOutlet weak var previousTrackButton: UIButton!
+	@IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
 	var playlist = AudioPlayerPlaylist(list:[])
 
@@ -84,12 +85,15 @@ class AudioPlayerViewController: UIViewController {
 			self.playTracks()
 			return
 		}
+		showActivityIndicator()
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
 			guard sessionValid else {
 				print("Unable to renew session in startPlaying(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				self.hideActivityIndicator()
 				return
 			}
 			self.spotify.player.setIsPlaying(true) { error in
+				self.hideActivityIndicator()
 				if let err = error {
 					// TODO: notify delegate of error
 					print("startPlaying(): error trying to setIsPlaying() on player: \(err)")
@@ -104,7 +108,6 @@ class AudioPlayerViewController: UIViewController {
 		spotify.player.setIsPlaying(false) { error in
 			if let err = error {
 				print("pausePlaying: error while trying to pause player: \(err)")
-				// TODO: notify delegate of error
 				return
 			}
 		}
@@ -129,12 +132,15 @@ class AudioPlayerViewController: UIViewController {
 		}
 
 		// This is normal case, when the player is active and we're not at the first track.
+		showActivityIndicator()
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
 			guard sessionValid else {
 				print("Unable to renew session in skipToNextTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				self.hideActivityIndicator()
 				return
 			}
 			self.spotify.player.skipNext() { error in
+				self.hideActivityIndicator()
 				// TODO: notify delegate of error
 			}
 		}
@@ -163,9 +169,11 @@ class AudioPlayerViewController: UIViewController {
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
 			guard sessionValid else {
 				print("Unable to renew session in skipToPreviousTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				self.hideActivityIndicator()
 				return
 			}
 			self.spotify.player.skipPrevious() { error in
+				self.hideActivityIndicator()
 				// TODO: notify delegate of error
 				self.updateNowPlayingInfo()
 			}
@@ -189,7 +197,6 @@ class AudioPlayerViewController: UIViewController {
 			self.spotify.player.stop() { error in
 				guard error == nil else {
 					print("stopPlaying: error while trying to stop player: \(error!)")
-					// TODO: notify delegate of error
 					return
 				}
 				self.updateNowPlayingInfo()
@@ -213,11 +220,17 @@ class AudioPlayerViewController: UIViewController {
 		}
 
 		status = .Active
+		showActivityIndicator()
 
 		spotify.loginOrRenewSession() { willTriggerLogin, sessionValid, error in
 			guard error == nil else {
-				print("error while trying to renew session: \(error)")
-				// TODO: notify delegate of error
+				// TODO: investigate what happens here without spotify premium account.
+				Utility.presentAlert(
+					"Unable to start playing",
+					message: error!.localizedDescription
+				)
+				self.status = .Disabled
+				self.hideActivityIndicator()
 				return
 			}
 			guard !willTriggerLogin else {
@@ -227,6 +240,7 @@ class AudioPlayerViewController: UIViewController {
 				NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
 
 				// Let the presenter hide the player:
+				self.hideActivityIndicator()
 				self.status = .Disabled
 				return
 			}
@@ -234,16 +248,17 @@ class AudioPlayerViewController: UIViewController {
 			guard self.status == .Active else {
 				// On a slow network when a session needed to be renewed,
 				// it's possible that the stop button was already pressed.
+				self.hideActivityIndicator()
 				return
 			}
 
 			self.spotify.playTracks(trackURIs, fromIndex:index, trackStartTime: self.playlist.trackPosition) { error in
+				self.hideActivityIndicator()
 				guard error == nil else {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					print("Error in AudioViewController.playTracks(): \(error)")
 					return
 				}
-
 			}
 		}
 	}
@@ -303,6 +318,7 @@ class AudioPlayerViewController: UIViewController {
 					}
 				}
 				if error != nil {
+					// This is non-critical, so do not show the user any error message.
 					print("updateNowPlayingInfo: error when getting track metadata: \(error!)")
 				}
 			}
@@ -333,6 +349,14 @@ class AudioPlayerViewController: UIViewController {
 		}
 
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
+	}
+
+	func showActivityIndicator() {
+		activityIndicator.startAnimating()
+	}
+
+	func hideActivityIndicator() {
+		activityIndicator.stopAnimating()
 	}
 }
 
