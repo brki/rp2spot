@@ -173,6 +173,10 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func stopPlaying(sender: AnyObject) {
+		guard spotify.player.isPlaying || status == .Active else {
+			return
+		}
+
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		// Pause music before stopping, to avoid a split second of leftover audio
 		// from the currently playing track being played when the audio player
@@ -195,6 +199,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func playTracks(withPlaylist: AudioPlayerPlaylist? = nil) {
+
 		if let newPlaylist = withPlaylist {
 			playlist = newPlaylist
 			// Set any already cached metadata for the playlist.
@@ -226,12 +231,19 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 
+			guard self.status == .Active else {
+				// On a slow network when a session needed to be renewed,
+				// it's possible that the stop button was already pressed.
+				return
+			}
+
 			self.spotify.playTracks(trackURIs, fromIndex:index, trackStartTime: self.playlist.trackPosition) { error in
 				guard error == nil else {
 					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
 					print("Error in AudioViewController.playTracks(): \(error)")
 					return
 				}
+
 			}
 		}
 	}
@@ -452,8 +464,15 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	@param audioStreaming The object that sent the message.
 	*/
 	func audioStreamingDidBecomeActivePlaybackDevice(audioStreaming: SPTAudioStreamingController!) {
-		// Probably do nothing here.
-		print("audioStreamingDidBecomeActivePlaybackDevice")
+		// print("audioStreamingDidBecomeActivePlaybackDevice")
+
+		// If the user taps on a track before this device is the active playback device,
+		// and then hits the stop button to close the audio player before playback has
+		// started, do not start playing.
+		guard status == .Active else {
+			spotify.player.stop(nil)
+			return
+		}
 	}
 
 	/** Called when the audio streaming object becomes an inactive playback device on the user's account.
