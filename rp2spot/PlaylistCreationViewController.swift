@@ -27,7 +27,6 @@ class PlaylistCreationViewController: UIViewController {
 	let spotify = SpotifyClient.sharedInstance
 	var postLoginBlock: (() -> Void)?
 
-	var isRotating = false				// Will be true during rotation
 	var activeTextField: UITextField?	// Keeps track of the active text field.
 
 	override func viewDidLoad() {
@@ -63,7 +62,7 @@ class PlaylistCreationViewController: UIViewController {
 
 	override func viewWillDisappear(animated: Bool) {
 		super.viewWillDisappear(animated)
-		unregisterForKeyboardAndStatusBarNotifications()
+		unregisterForNotifications()
 	}
 
 	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
@@ -227,21 +226,17 @@ extension PlaylistCreationViewController {
 
 	/**
 	The status bar may or may not be visible in the new orientation.
-	Keep track of the rotation status.  When the keyboard is present, some UIKeyboardWillChangeFrameNotification
-	notifications are sent during rotation, but we can ignore those.
 	*/
 	override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
 		super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
 		// Before the animation is a good time to call invalidateIntrinsicContentSize() on a toolbar.
 		// This makes it's new height available during the animation.
-		isRotating = true
 		coordinator.animateAlongsideTransition(
 			{ context in
 				self.setHeightConstraintIfNeeded()
 			},
-			completion: { context in
-				self.isRotating = false
-		})
+			completion: nil
+		)
 	}
 
 	/**
@@ -265,33 +260,21 @@ extension PlaylistCreationViewController {
 
 	func registerForKeyboardAndStatusBarNotifications() {
 		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.keyboardChangingSize(_:)), name: UIKeyboardWillChangeFrameNotification, object: nil)
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.statusBarChangingSize(_:)), name: UIApplicationWillChangeStatusBarFrameNotification, object: nil)
-
 	}
 
-	func unregisterForKeyboardAndStatusBarNotifications() {
+	func unregisterForNotifications() {
 		NSNotificationCenter.defaultCenter().removeObserver(self)
 	}
 
 	/**
 	The content view height.
+
+	The lowest element that can be interacted with while the text field
+	is editable is the createPlaylistButton, use it's bottom for the
+	content view height.
 	*/
 	var contentViewHeight: CGFloat {
-		let windowHeight = UIScreen.mainScreen().bounds.size.height
-		return windowHeight - topBarHeight - bottomBarHeight - (windowHeight - creationStatusLabel.frame.maxY)
-	}
-
-	// This may need some adjustment if a navigation bar / tab bar / tool bar is present.
-	var topBarHeight: CGFloat {
-		let statusBarHeight = UIApplication.sharedApplication().statusBarFrame.size.height
-		let navBarHeight = navigationController?.navigationBar.frame.size.height ?? CGFloat(0)
-		return  statusBarHeight + navBarHeight
-	}
-
-	// This may need some adjustment if a tab bar / tool bar is present.
-	// Note that a toolbar may have a different height in landscape / portrait mode.
-	var bottomBarHeight: CGFloat {
-		return 0
+		return createPlaylistButton.frame.maxY
 	}
 
 	/**
@@ -307,23 +290,10 @@ extension PlaylistCreationViewController {
 	}
 
 	/**
-	Reset the content view's height when the status bar changes size.
-	*/
-	func statusBarChangingSize(notification: NSNotification) {
-		if !isRotating {
-			setHeightConstraintIfNeeded()
-		}
-	}
-
-	/**
 	Change the UIScrollView's contentInset when the keyboard appears / disappears / changes size.
 	If necessary, scroll so that the currently active text field is visible.
 	*/
 	func keyboardChangingSize(notification: NSNotification) {
-		if isRotating {
-			// No need to handle notifications during rotation
-			return
-		}
 
 		guard let userInfo = notification.userInfo as [NSObject: AnyObject]?,
 			endFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.CGRectValue() else {
@@ -346,14 +316,7 @@ extension PlaylistCreationViewController {
 				return
 			}
 
-			let keyboardTop = convertedEndFrame.origin.y
 			let textFieldRect = textField.convertRect(textField.bounds, toView: view)
-			let textFieldBottom = textFieldRect.origin.y + textFieldRect.height
-			let offset = textFieldBottom - keyboardTop
-			guard offset > 0 else {
-				// Text field is already above the top of the keyboard.
-				return
-			}
 
 			// Adjust the scroll view content inset.
 			let contentInset = UIEdgeInsets(top:0.0, left:0.0, bottom:convertedEndFrame.height, right:0.0)
