@@ -152,7 +152,6 @@ class PlaylistCreationViewController: UIViewController {
 			self.playlistTitle.enabled = enabled
 			self.publicPlaylistSwitch.enabled = enabled
 			self.navigationItem.hidesBackButton = !enabled
-			self.cancelDoneButton.enabled = enabled
 		}
 	}
 
