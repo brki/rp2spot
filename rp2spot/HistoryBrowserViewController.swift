@@ -299,14 +299,19 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 		if let songData = historyData.songDataForObjectAtIndexPath(indexPath) {
 			cell.configureForSong(songData, currentlyPlayingTrackId: currentlyPlayingTrackId)
 		}
-		
+
+
+		// The following code is currently commented out because I'm unsure that it makes for a better user experience,
+		// but am not ready to throw it away yet.  Perhaps it should be an option for the user to enable / disable
+		// this behaviour for the top / bottom / both ends of the history table.
+
 		// If user has scrolled almost all the way down to the last row, try to fetch more song history.
-		if !historyData.isRefreshing && historyData.isNearlyLastRow(indexPath.row) {
-			refreshManager.bottomRefreshControl!.enabled = false
-			historyData.attemptHistoryFetch(newerHistory: true) { success in
-				self.refreshManager.bottomRefreshControl!.enabled = true
-			}
-		}
+//		if !historyData.isRefreshing && historyData.isNearlyLastRow(indexPath.row) {
+//			refreshManager.bottomRefreshControl!.enabled = false
+//			historyData.attemptHistoryFetch(newerHistory: true) { success in
+//				self.refreshManager.bottomRefreshControl!.enabled = true
+//			}
+//		}
 
 		return cell
 	}
