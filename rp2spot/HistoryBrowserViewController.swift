@@ -271,7 +271,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		let rowsToDelete = deleteIndexPaths.removeAllReturningValues()
 		tableView.insertRowsAtIndexPaths(insertIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
 		tableView.deleteRowsAtIndexPaths(rowsToDelete, withRowAnimation: .None)
-		tableView.reloadRowsAtIndexPaths(updateIndexPaths, withRowAnimation: .None)
+		tableView.reloadRowsAtIndexPaths(updateIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
 
 		if historyData.isFetchingNewer {
 			// If rows above have been deleted at the top of the table view, shift the current contenteOffset up an appropriate amount:
@@ -284,7 +284,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 			CATransaction.commit()
 		}
 
-		self.historyData.saveContext()
+		historyData.saveContext()
 	}
 }
 
