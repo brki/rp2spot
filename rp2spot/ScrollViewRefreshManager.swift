@@ -19,6 +19,17 @@ class ScrollViewRefreshManager {
 		return topRefreshControl?.refreshing == true || bottomRefreshControl?.refreshing == true || false
 	}
 
+	var inactiveControlsEnabled = true {
+		didSet {
+			if let topControl = topRefreshControl where !topControl.refreshing {
+				topControl.enabled = inactiveControlsEnabled
+			}
+			if let bottomControl = bottomRefreshControl where !bottomControl.refreshing {
+				bottomControl.enabled = inactiveControlsEnabled
+			}
+		}
+	}
+
 	init(tableView: UITableView) {
 		tableView.backgroundView = backgroundView
 	}
@@ -39,6 +50,7 @@ class ScrollViewRefreshManager {
 			readyToRefreshText: readyToRefreshText,
 			currentlyRefreshingText: currentlyRefreshingText
 		)
+		refreshControl.view.activityLabel.textColor = Constant.Color.SpotifyGreen.color()
 
 		// Make the control initially hidden, so that it won't be visible underneath
 		// a table view cell when the cell is selected.

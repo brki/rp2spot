@@ -17,6 +17,8 @@ class HistoryBrowserViewController: UIViewController {
 	@IBOutlet weak var tableView: UITableView!
 	@IBOutlet weak var playerContainerViewHeightConstraint: NSLayoutConstraint!
 	@IBOutlet weak var playerContainerView: UIView!
+	@IBOutlet weak var dateSelectionButton: UIBarButtonItem!
+	@IBOutlet weak var dateSelectorActivityIndicator: UIActivityIndicatorView!
 
 	var refreshManager: ScrollViewRefreshManager!
 
@@ -34,6 +36,16 @@ class HistoryBrowserViewController: UIViewController {
 	var shouldScrollPlayingSongCellToVisible = false
 
 	var audioPlayerVC: AudioPlayerViewController!
+
+	var refreshControlsEnabled = true {
+		didSet {
+			let enabled = refreshControlsEnabled
+			async_main {
+				self.refreshManager.inactiveControlsEnabled = enabled
+				self.dateSelectionButton.enabled = enabled
+			}
+		}
+	}
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
@@ -142,13 +154,35 @@ class HistoryBrowserViewController: UIViewController {
 
 extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 	func dateSelected(date: NSDate) {
-		historyData.replaceLocalHistory(date) { success in
-			if success {
-				async_main {
-					self.tableView.reloadData()
-					self.tableView.contentOffset = CGPointMake(0, 0 - self.tableView.contentInset.top)
-				}
 
+		// Disable refresh controls while refresh running
+		refreshControlsEnabled = false
+
+		dateSelectorActivityIndicator.startAnimating()
+
+		historyData.replaceLocalHistory(date) { success in
+			async_main {
+
+				// Re-enable refresh controls.
+				self.refreshControlsEnabled = true
+
+				self.dateSelectorActivityIndicator.stopAnimating()
+
+				// If there is new data, reload it.
+
+				if success {
+					self.tableView.reloadData()
+					let rowCount = self.historyData.songCount
+					if rowCount > 0 {
+						self.tableView.scrollToRowAtIndexPath(
+							NSIndexPath(forRow: rowCount - 1, inSection: 0),
+							atScrollPosition: .Bottom,
+							animated: true
+						)
+					}
+					// Reposition at the bottom of the table, where the selected date is.
+					//self.tableView.contentOffset = CGPointMake(0, self.tableView. self.tableView.contentInset.bottom)
+				}
 			}
 		}
 	}
@@ -359,13 +393,17 @@ extension HistoryBrowserViewController {
 	}
 
 	func refreshWithNewerHistory() {
+		refreshControlsEnabled = false
 		historyData.attemptHistoryFetch(newerHistory: true) { success in
+			self.refreshControlsEnabled = true
 			self.refreshManager.bottomRefreshControl!.didFinishRefreshing(self.tableView)
 		}
 	}
 
 	func refreshWithOlderHistory() {
+		self.refreshControlsEnabled = false
 		historyData.attemptHistoryFetch(newerHistory: false) { success in
+			self.refreshControlsEnabled = true
 			self.refreshManager.topRefreshControl!.didFinishRefreshing(self.tableView)
 		}
 	}

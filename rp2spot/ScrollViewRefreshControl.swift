@@ -20,7 +20,16 @@ class ScrollViewRefreshControl {
 	lazy var overPullTriggerHeight: CGFloat = self.refreshingViewHeight + 25
 	lazy var refreshingViewHeight: CGFloat = self.view.bounds.height
 	var refreshViewAnimationDuration = 0.3
-	var enabled = true
+	var enabled = true {
+		didSet {
+			if enabled {
+				view.activityIndicator.color = Constant.Color.SpotifyGreen.color()
+			} else {
+				view.activityIndicator.color = Constant.Color.LightGrey.color()
+			}
+			view.activityLabel.hidden = !enabled
+		}
+	}
 	var hidden = false {
 		didSet {
 			if hidden != oldValue {
