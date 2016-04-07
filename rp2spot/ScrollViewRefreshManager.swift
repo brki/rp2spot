@@ -15,6 +15,10 @@ class ScrollViewRefreshManager {
 	var bottomRefreshControl: ScrollViewRefreshControl?
 	var refreshControlViewHeight = CGFloat(100)
 
+	var currentlyRefreshing: Bool {
+		return topRefreshControl?.refreshing == true || bottomRefreshControl?.refreshing == true || false
+	}
+
 	init(tableView: UITableView) {
 		tableView.backgroundView = backgroundView
 	}
@@ -73,6 +77,10 @@ class ScrollViewRefreshManager {
 	If a refresh was not started, then the control should be hidden.
 	*/
 	func didEndDragging(scrollView: UIScrollView) {
+		// If either control is currently refreshing, do not pass the message through to them.
+		guard !currentlyRefreshing else {
+			return
+		}
 		if let topControl = topRefreshControl {
 			topControl.didEndDragging(scrollView)
 			if !topControl.refreshing {
