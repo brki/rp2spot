@@ -62,17 +62,39 @@ class HistoryBrowserViewController: UIViewController {
 			self.historyData.loadLatestIfEmpty() { success in
 				async_main {
 					self.tableView.reloadData()
+
+					// Try to restore the history view that the user had when they left the app.
+					let topRow = self.userSettings.historyBrowserTopVisibleRow
+					if  topRow != 0  && topRow < self.historyData.songCount {
+						self.tableView.scrollToRowAtIndexPath(
+							NSIndexPath(forRow: topRow, inSection: 0),
+							atScrollPosition: .Top,
+							animated: false
+						)
+					}
+
 				}
 			}
 		}
+
 	}
 
 	override func viewWillAppear(animated: Bool) {
+		super.viewWillAppear(animated)
+
 		if !historyData.isRefreshing {
 
 			// If the maximum local history count has been reduced, discard extra rows.
 			historyData.removeExcessLocalHistory(fromBottom: false)
 		}
+
+		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.willResignActive(_:)), name: UIApplicationWillResignActiveNotification, object: nil)
+	}
+
+	override func viewWillDisappear(animated: Bool) {
+		super.viewWillDisappear(animated)
+		saveTopVisibleRow()
+		NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationWillResignActiveNotification, object: nil)
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -150,6 +172,21 @@ class HistoryBrowserViewController: UIViewController {
 
 	func showPlayer() {
 		self.playerContainerViewHeightConstraint.constant = 100
+	}
+
+	func willResignActive(notification: NSNotification) {
+		saveTopVisibleRow()
+	}
+
+	/**
+	Save the index of the topmost visible row, so that it can be restored when the app restarts.
+	*/
+	func saveTopVisibleRow() {
+		if let indexPaths = tableView.indexPathsForVisibleRows where indexPaths.count > 0 {
+			userSettings.historyBrowserTopVisibleRow = indexPaths[0].row
+		} else {
+			userSettings.historyBrowserTopVisibleRow = 0
+		}
 	}
 }
 

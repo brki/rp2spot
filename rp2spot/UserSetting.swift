@@ -98,5 +98,14 @@ class UserSetting {
 		}
 	}
 
+	var historyBrowserTopVisibleRow: Int {
+		get {
+			return settings.integerForKey("historyBrowserTopVisibleRow")
+		}
+		set {
+			settings.setInteger(newValue, forKey: "historyBrowserTopVisibleRow")
+		}
+	}
+
 	var useSpotify = true
 }
