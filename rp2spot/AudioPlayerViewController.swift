@@ -454,9 +454,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if playlist.windowNeedsAdjustment() {
 			playlist.setCurrentWindow()
 			if let (index, trackURIs) = playlist.currentWindowTrackURIs() {
-				// TODO?: for consistency, move this to SpotifyClient:
 				spotify.player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
-					// TODO: handle error if necessary
 					print("Replacing playlist URIs: error: \(error)")
 				}
 			}
