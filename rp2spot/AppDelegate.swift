@@ -88,7 +88,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		if auth.canHandleURL(url) {
 			auth.handleAuthCallbackWithTriggeredAuthURL(url) { error, session in
 				guard error == nil else {
-					// TODO: revisit how to handle this in running app:
 					print("Auth error: \(error)")
 					SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
 					return
@@ -96,17 +95,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 				auth.session = session
 
-				// Send the session update notification.
-				SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
-
 				// If the user's Spotify region is not yet known, grab that info.
-				if UserSetting.sharedInstance.spotifyRegion == nil {
-					SpotifyClient.sharedInstance.getUserTerritory { territory in
-						guard let userTerritory = territory else {
-							return
+				let oldCanStreamTracks = UserSetting.sharedInstance.canStreamSpotifyTracks
+				if UserSetting.sharedInstance.spotifyRegion == nil || oldCanStreamTracks == nil {
+					SpotifyClient.sharedInstance.getUserInfo { territory, canStream in
+
+						UserSetting.sharedInstance.canStreamSpotifyTracks = canStream
+
+						if oldCanStreamTracks == nil && canStream == false {
+							Utility.presentAlert(
+								"Can not stream music",
+								message: "You can browse the song history and create Spotify playlists, but you won't be able to stream music.  Spotify only allows streaming music in third-party apps like this one for \"Premium\" Spotify accounts."
+							)
 						}
-						UserSetting.sharedInstance.spotifyRegion = userTerritory
+
+						
+						if let userTerritory = territory {
+							UserSetting.sharedInstance.spotifyRegion = userTerritory
+						}
+
+						// Send the session update notification.
+						SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
 					}
+				} else {
+					// Send the session update notification.
+					SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
 				}
 			}
 			return true

@@ -37,6 +37,8 @@ class HistoryBrowserViewController: UIViewController {
 
 	var audioPlayerVC: AudioPlayerViewController!
 
+	var userSettings = UserSetting.sharedInstance
+
 	var refreshControlsEnabled = true {
 		didSet {
 			let enabled = refreshControlsEnabled
@@ -363,6 +365,12 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
 		// If selected row has no spotify track, do not start playing
 		historyData.context.performBlock {
+
+			// Only Spotify Premium accounts can stream music.
+			guard self.userSettings.canStreamSpotifyTracks != false else {
+				return
+			}
+
 			guard self.historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
 				return
 			}

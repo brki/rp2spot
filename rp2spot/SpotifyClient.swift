@@ -57,6 +57,7 @@ class SpotifyClient {
 			SPTAuthPlaylistReadPrivateScope,		// Allow reading user's private plalists
 			SPTAuthPlaylistModifyPublicScope,		// Allow creating / modifying user's public playlists
 			SPTAuthPlaylistModifyPrivateScope,		// Allow creating / modifying user's private playlists
+			SPTAuthUserReadPrivateScope,			// Needed to know territory for non-premium Spotify accounts
 		]
 	}
 
@@ -260,11 +261,11 @@ class SpotifyClient {
 		}
 	}
 
-	func getUserTerritory(handler: (territory: String?) -> Void) {
+	func getUserInfo(handler: (territory: String?, canStream: Bool?) -> Void) {
 
 		guard auth.session != nil else {
 			print("getUserTerritory: No valid session, can not get user territory")
-			handler(territory: nil)
+			handler(territory: nil, canStream: nil)
 			return
 		}
 
@@ -272,23 +273,31 @@ class SpotifyClient {
 
 			guard userInfoError == nil else {
 				print("getUserTerritory: Error when trying to get user information: \(userInfoError!)")
-				handler(territory: nil)
+				handler(territory: nil, canStream: nil)
 				return
 			}
 
 			guard let userInfo = user as? SPTUser else {
 				print("getUserTerritory: no userInfo present in handler for SPTUser.requestCurrentUserWithAccessToken")
-				handler(territory: nil)
+				handler(territory: nil, canStream: nil)
+				return
+			}
+
+			let canStream = (userInfo.product == SPTProduct.Premium)
+
+			guard userInfo.territory != nil else {
+				print("getUserTerritory: no userInfo.territory present in handler for SPTUser.requestCurrentUserWithAccessToken")
+				handler(territory: nil, canStream: canStream)
 				return
 			}
 
 			guard userInfo.territory.characters.count == 2 else {
 				print("getUserTerritory: unexpected territory value in handler for SPTUser.requestCurrentUserWithAccessToken: \(userInfo.territory)")
-				handler(territory: nil)
+				handler(territory: nil, canStream: canStream)
 				return
 			}
 
-			handler(territory: userInfo.territory)
+			handler(territory: userInfo.territory, canStream: canStream)
 		}
 	}
 }

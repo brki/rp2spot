@@ -224,7 +224,6 @@ class AudioPlayerViewController: UIViewController {
 
 		spotify.loginOrRenewSession() { willTriggerLogin, sessionValid, error in
 			guard error == nil else {
-				// TODO: investigate what happens here without spotify premium account.
 				Utility.presentAlert(
 					"Unable to start playing",
 					message: error!.localizedDescription
@@ -275,6 +274,11 @@ class AudioPlayerViewController: UIViewController {
 
 		// No valid session ... nothing to do.
 		guard let session = spotify.auth.session where session.isValid() else {
+			return
+		}
+
+		guard UserSetting.sharedInstance.canStreamSpotifyTracks != false else {
+			self.status = .Disabled
 			return
 		}
 
