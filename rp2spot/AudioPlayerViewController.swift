@@ -456,8 +456,17 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if playlist.windowNeedsAdjustment() {
 			playlist.setCurrentWindow()
 			if let (index, trackURIs) = playlist.currentWindowTrackURIs() {
-				spotify.player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
-					print("Replacing playlist URIs: error: \(error)")
+
+				spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
+
+					guard sessionValid else {
+						print("Unable to renew session before replacing track URIS: willTriggerLogin: \(willTriggerLogin), error: \(error)")
+						return
+					}
+					self.spotify.player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
+						print("Replacing playlist URIs: error: \(error)")
+					}
+
 				}
 			}
 		}
