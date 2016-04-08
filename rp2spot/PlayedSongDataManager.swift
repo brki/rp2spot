@@ -202,10 +202,10 @@ class PlayedSongDataManager {
 
 		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
 			guard error == nil else {
-				let title = "Unable to get song history for selected data"
+				let title = "Unable to get song history for selected time"
 				var message: String?
-				if ErrorInfo.isRequestTimedOut(error!) {
-					message = "The request timed out - check your network connection"
+				if error!.domain == NSURLErrorDomain {
+					message = error!.localizedDescription
 				}
 				Utility.presentAlert(title, message: message)
 				handler(success: false)
