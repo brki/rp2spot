@@ -293,11 +293,11 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 	Apply all changes that have been collected.
 	*/
 	func controllerDidChangeContent(controller: NSFetchedResultsController) {
+		// When adding items to the end of the table view, there is a noticeable flicker and small jump unless
+		// the table view insert / delete animations are suppressed.
 		let disableRowAnimations = historyData.isFetchingNewer
 
 		if disableRowAnimations {
-			// When adding items to the end of the table view, there is a noticeable flicker and small jump unless
-			// the table view insert / delete animations are suppressed.
 			CATransaction.begin()
 			CATransaction.setDisableActions(true)
 		}
