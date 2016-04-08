@@ -95,8 +95,7 @@ class AudioPlayerViewController: UIViewController {
 			self.spotify.player.setIsPlaying(true) { error in
 				self.hideActivityIndicator()
 				if let err = error {
-					// TODO: notify delegate of error
-					print("startPlaying(): error trying to setIsPlaying() on player: \(err)")
+					Utility.presentAlert("Unable to start playing", message: err.localizedDescription)
 					return
 				}
 			}
@@ -141,7 +140,8 @@ class AudioPlayerViewController: UIViewController {
 			}
 			self.spotify.player.skipNext() { error in
 				self.hideActivityIndicator()
-				// TODO: notify delegate of error
+				self.updateNowPlayingInfo()
+				print("Error when trying to skip to next track: \(error)")
 			}
 		}
 	}
@@ -174,8 +174,8 @@ class AudioPlayerViewController: UIViewController {
 			}
 			self.spotify.player.skipPrevious() { error in
 				self.hideActivityIndicator()
-				// TODO: notify delegate of error
 				self.updateNowPlayingInfo()
+				print("Error when trying to skip to previous track: \(error)")
 			}
 		}
 	}
@@ -254,8 +254,10 @@ class AudioPlayerViewController: UIViewController {
 			self.spotify.playTracks(trackURIs, fromIndex:index, trackStartTime: self.playlist.trackPosition) { error in
 				self.hideActivityIndicator()
 				guard error == nil else {
-					// TODO: if error, call delegate method playbackError() (HistoryBrowserVC, etc)
-					print("Error in AudioViewController.playTracks(): \(error)")
+					Utility.presentAlert(
+						"Unable to start playing",
+						message: error!.localizedDescription
+					)
 					return
 				}
 			}
@@ -516,9 +518,12 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	@param audioStreaming The object that sent the message.
 	*/
 	func audioStreamingDidLosePermissionForPlayback(audioStreaming: SPTAudioStreamingController!) {
-		// TODO: record last track time position, if possible.
-		// TODO: notify user.
-		print("audioStreamingDidLosePermissionForPlayback")
+		playlist.trackPosition = spotify.player.currentPlaybackPosition
+
+		Utility.presentAlert(
+			"Lost playback permission",
+			message: "This usually happens if your Spotify account is being used on another device."
+		)
 	}
 
 
@@ -550,8 +555,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param audioStreaming The object that sent the message.
 	*/
 	func audioStreamingDidDisconnect(audioStreaming: SPTAudioStreamingController!) {
-		// TODO: record last track time position, if possible.
-		// TODO: notify user.
+		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		print("audioStreamingDidDisconnect")
 	}
 
@@ -572,9 +576,12 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param error The error that occurred.
 	*/
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didEncounterError error: NSError!) {
-		// TODO: record last track time position, if possible.
-		// TODO: notify user.
-		print("didEncountError: \(error)")
+		playlist.trackPosition = spotify.player.currentPlaybackPosition
+
+		Utility.presentAlert(
+			"Error during playback",
+			message: error.localizedDescription
+		)
 	}
 
 	/** Called when the streaming controller recieved a message for the end user from the Spotify service.
@@ -585,7 +592,9 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param message The message to display to the user.
 	*/
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didReceiveMessage message: String!) {
-		// TODO: notify user (not sure what these messages are, yet).
-		print("didReceiveMessage: \(message)")
+		Utility.presentAlert(
+			"Message for you from Spotify",
+			message: message
+		)
 	}
 }
