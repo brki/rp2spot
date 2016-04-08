@@ -55,7 +55,7 @@ class SongInfoViewController: UIViewController {
 		artistNameLabel.text = songInfo.artistName
 		albumNameLabel.text = songInfo.albumTitle
 
-		if !UserSetting.sharedInstance.useSpotify || !(canOpenTrackInSpotify || canOpenSpotifyAppStoreURL) {
+		if !(canOpenTrackInSpotify || canOpenSpotifyAppStoreURL) {
 			spotifyOpenButton.enabled = false
 		}
 		updateSpotifyTrackInfo()

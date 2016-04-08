@@ -106,6 +106,4 @@ class UserSetting {
 			settings.setInteger(newValue, forKey: "historyBrowserTopVisibleRow")
 		}
 	}
-
-	var useSpotify = true
 }
