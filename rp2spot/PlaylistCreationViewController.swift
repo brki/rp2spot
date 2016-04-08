@@ -105,7 +105,7 @@ class PlaylistCreationViewController: UIViewController {
 		enableEditingControls(false)
 		activityIndicator.startAnimating()
 
-		spotify.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.selected) { playlistSnapshot, willTriggerLogin, error in
+		spotify.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.on) { playlistSnapshot, willTriggerLogin, error in
 
 			self.activityIndicator.stopAnimating()
 
