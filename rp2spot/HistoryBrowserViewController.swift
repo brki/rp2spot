@@ -19,6 +19,7 @@ class HistoryBrowserViewController: UIViewController {
 	@IBOutlet weak var playerContainerView: UIView!
 	@IBOutlet weak var dateSelectionButton: UIBarButtonItem!
 	@IBOutlet weak var dateSelectorActivityIndicator: UIActivityIndicatorView!
+	@IBOutlet weak var centerActivityIndicator: UIActivityIndicatorView!
 
 	var refreshManager: ScrollViewRefreshManager!
 
@@ -44,6 +45,8 @@ class HistoryBrowserViewController: UIViewController {
 			let enabled = refreshControlsEnabled
 			async_main {
 				self.refreshManager.inactiveControlsEnabled = enabled
+				// The top control should be disabled if there is no earlier history:
+				self.refreshManager.topRefreshControl?.enabled = enabled && self.historyData.hasEarlierHistory()
 				self.dateSelectionButton.enabled = enabled
 			}
 		}
@@ -58,9 +61,15 @@ class HistoryBrowserViewController: UIViewController {
 		setupRefreshControls()
 
 		historyData.refresh() { error in
+
 			// If there is no song history yet, load the latest songs.
+			self.centerActivityIndicator.startAnimating()
+
 			self.historyData.loadLatestIfEmpty() { success in
 				async_main {
+
+					self.centerActivityIndicator.stopAnimating()
+
 					self.tableView.reloadData()
 
 					// Try to restore the history view that the user had when they left the app.
@@ -143,22 +152,19 @@ class HistoryBrowserViewController: UIViewController {
 		}
 
 		datePickerVC.modalPresentationStyle = .OverCurrentContext
+		let displayDate = historyData.extremityDateInList(newest: true) ?? NSDate()
+		datePickerVC.startingDate = displayDate
+		datePickerVC.delegate = self
 
-		historyData.extremitySong(newest: true) { newestSong in
-			let displayDate = newestSong?.playedAt ?? NSDate()
-			datePickerVC.startingDate = displayDate
-			datePickerVC.delegate = self
+		async_main {
+			self.presentViewController(datePickerVC, animated: true, completion: nil)
 
-			async_main {
-				self.presentViewController(datePickerVC, animated: true, completion: nil)
-
-				guard let popover = datePickerVC.popoverPresentationController else {
-					return
-				}
-				popover.permittedArrowDirections = .Up
-				popover.barButtonItem = sender
-				popover.delegate = self
+			guard let popover = datePickerVC.popoverPresentationController else {
+				return
 			}
+			popover.permittedArrowDirections = .Up
+			popover.barButtonItem = sender
+			popover.delegate = self
 		}
 	}
 
@@ -451,6 +457,10 @@ extension HistoryBrowserViewController {
 			self.refreshControlsEnabled = true
 			self.refreshManager.topRefreshControl!.didFinishRefreshing(self.tableView)
 		}
+	}
+
+	func enableTopControlIfEarlierHistoryExists() {
+		refreshManager.topRefreshControl!.enabled = historyData.hasEarlierHistory()
 	}
 
 	// MARK: UITableViewDelegate actions that need to be communicated to the refresh manager:

@@ -115,31 +115,40 @@ class PlayedSongDataManager {
 
 	Parameters:
 	- newer: If true, fetch newer history, else fetch older history
-	- forDate: base date from which newer or older history will be fetched
 	- completionHandler: handler to call after history fetched (or in case of failure)
 	*/
-	func fetchMoreHistory(newer newer: Bool, forDate: NSDate? = nil, completionHandler: RPFetchResultHandler? = nil) {
+	func fetchMoreHistory(newer newer: Bool, completionHandler: RPFetchResultHandler? = nil) {
 
-		extremitySong(newest: newer) { limitSong in
-			var baseDate: NSDate
-			if let song = limitSong {
-				baseDate = song.playedAt
-			} else {
-				baseDate = NSDate()
-			}
+		let now = NSDate()
+		let baseDate = extremityDateInList(newest: newer) ?? now
 
-			// Avoid trying to fetch history earlier than the known limit:
-			guard baseDate.earlierDate(Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE) != baseDate else {
-				completionHandler?(success: true, fetchedCount: 0, error: nil)
-				return
-			}
-
-			var vectorCount = self.userSettings.historyFetchSongCount
-			if !newer || limitSong == nil {
-				vectorCount = -vectorCount
-			}
-			self.updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
+		// Avoid trying to fetch history earlier than the known limit:
+		guard !isDateEarlierThanLimit(baseDate) else {
+			completionHandler?(success: true, fetchedCount: 0, error: nil)
+			return
 		}
+
+		var vectorCount = self.userSettings.historyFetchSongCount
+
+		// baseDate will be equal to now if there are no songs in the list.
+		if !newer || baseDate == now {
+			vectorCount = -vectorCount
+		}
+
+		self.updateWithHistoryFromDate(baseDate, vectorCount: vectorCount, purgeBeforeUpdating: false, completionHandler: completionHandler)
+	}
+
+	func extremityDateInList(newest newest: Bool = true) -> NSDate? {
+		return extremitySongData(newest: newest)?.playedAt
+	}
+
+	func hasEarlierHistory() -> Bool {
+		let earliestDateInList = extremityDateInList(newest: false) ?? NSDate()
+		return !isDateEarlierThanLimit(earliestDateInList)
+	}
+
+	func isDateEarlierThanLimit(date: NSDate) -> Bool {
+		return date.earlierDate(Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE) == date
 	}
 
 	/**
@@ -200,7 +209,7 @@ class PlayedSongDataManager {
 		isRefreshing = true
 		isFetchingNewer = false
 
-		updateWithHistoryFromDate(newDate, vectorCount: -userSettings.historyFetchSongCount, purgeBeforeUpdating: true) { success, fetchedCount, error in
+		updateWithHistoryFromDate(newDate, vectorCount: -Constant.RADIO_PARADISE_REFRESH_SONG_COUNT, purgeBeforeUpdating: true) { success, fetchedCount, error in
 			guard error == nil else {
 				let title = "Unable to get song history for selected time"
 				var message: String?
@@ -322,18 +331,26 @@ class PlayedSongDataManager {
 	/**
 	Get the newest (or oldest) song.
 	*/
-	func extremitySong(newest newest: Bool, handler: (PlayedSong?) -> Void) {
+	func extremitySongData(newest newest: Bool) -> PlayedSongData? {
+		var song: PlayedSongData?
+
 		guard let fetchedObjects = self.fetchedResultsController.fetchedObjects where fetchedObjects.count > 0 else {
-			handler(nil)
-			return
+			return nil
 		}
-		context.performBlock {
+
+		context.performBlockAndWait {
+			var selectedSong: PlayedSong?
 			if newest {
-				handler(fetchedObjects[fetchedObjects.count - 1] as? PlayedSong)
+				selectedSong = fetchedObjects[fetchedObjects.count - 1] as? PlayedSong
 			} else {
-				handler(fetchedObjects[0] as? PlayedSong)
+				selectedSong = fetchedObjects[0] as? PlayedSong
+			}
+
+			if let selected = selectedSong {
+				song = PlayedSongData.init(song: selected)
 			}
 		}
+		return song
 	}
 
 	func dataForSpotifyTracks() -> [PlayedSongData] {

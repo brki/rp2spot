@@ -19,7 +19,7 @@ class HistoryDateSelectorViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		datePicker.date = startingDate
-		datePicker.minimumDate = Constant.RADIO_PARADISE_MINIMUM_HISTORY_DATE
+		datePicker.minimumDate = Constant.RADIO_PARADISE_MINIMUM_SELECTABLE_HISTORY_DATE
 		datePicker.maximumDate = NSDate()
 
 		// Make the control have rounded edges and a border:
