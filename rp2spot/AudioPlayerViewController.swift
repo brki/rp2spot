@@ -534,25 +534,6 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			message: "This usually happens if your Spotify account is being used on another device."
 		)
 	}
-
-
-	/** Called when the streaming controller popped a new item from the playqueue.
-
- @param audioStreaming The object that sent the message.
- */
-	//	-(void)audioStreamingDidPopQueue:(SPTAudioStreamingController *)audioStreaming;
-
-
- /** Called when the streaming controller fails to play a track.
-
- This typically happens when the track is not available in the current users' region, if you're playing
- multiple tracks the playback will start playing the next track automatically
-
- @param audioStreaming The object that sent the message.
- @param trackUri The URI of the track that failed to play.
- */
-	//	-(void)audioStreaming:(SPTAudioStreamingController *)audioStreaming didFailToPlayTrack:(NSURL *)trackUri;
-
 }
 
 
