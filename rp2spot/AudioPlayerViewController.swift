@@ -29,6 +29,8 @@ class AudioPlayerViewController: UIViewController {
 
 	var sessionUpdateRequestTime: NSDate?
 
+	var pausedDueToAudioInterruption = false
+
 	// ``nowPlayingCenter`` is used to set current song information, this will
 	// be displayed in the control center.
 	var nowPlayingCenter = MPNowPlayingInfoCenter.defaultCenter()
@@ -56,7 +58,41 @@ class AudioPlayerViewController: UIViewController {
 			name: AVAudioSessionRouteChangeNotification,
 			object: nil)
 
+		// Listen for Audio Session Interruptions (e.g. incoming phone calls),
+		// so that the player can pause playing.
+		NSNotificationCenter.defaultCenter().addObserver(
+			self,
+			selector: #selector(self.audioSessionInterruption(_:)),
+			name: AVAudioSessionInterruptionNotification,
+			object: nil)
+
 		registerForRemoteEvents()
+	}
+
+	/**
+	If an incoming call interrupts the audio, put the player into the paused state.
+	When the interruption is over, start playing audio again.  Or at least try to ...
+	some people report that the audio fails to resume after an interruption when
+	the app is in the background, but it seems to work fine in ios 9.3.
+	*/
+	func audioSessionInterruption(notification: NSNotification) {
+		guard notification.name == AVAudioSessionInterruptionNotification else {
+			return
+		}
+
+		guard let rawTypeValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt else {
+			return
+		}
+
+		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .Began {
+			pausePlaying()
+			pausedDueToAudioInterruption = true
+		} else {
+			if pausedDueToAudioInterruption && status == .Active {
+				pausedDueToAudioInterruption = false
+				startPlaying()
+			}
+		}
 	}
 
 	override func viewWillAppear(animated: Bool) {
@@ -184,6 +220,9 @@ class AudioPlayerViewController: UIViewController {
 		guard spotify.player.isPlaying || status == .Active else {
 			return
 		}
+
+		// Do not start playing audio after interruption if user has pressed the stop button.
+		pausedDueToAudioInterruption = false
 
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		// Pause music before stopping, to avoid a split second of leftover audio
