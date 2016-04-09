@@ -90,6 +90,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 				guard error == nil else {
 					print("Auth error: \(error)")
 					SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
+
+					// Handle a weird 'unknown error' in the authentication that's probably a bug in Spotify's ios-sdk (or in their Spotify application?).
+					// Refs: * https://github.com/spotify/ios-sdk/issues/631
+					//       * https://github.com/spotify/ios-sdk/issues/505
+					if error!.code == 0 {
+						Utility.presentAlert(
+							"Spotify authentication error",
+							message: "You may be able to work around this by opening the Spotify application and start playing any track that is not locally saved, and then come back to this app and try again."
+						)
+					}
 					return
 				}
 
