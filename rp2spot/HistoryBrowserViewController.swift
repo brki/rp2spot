@@ -45,8 +45,10 @@ class HistoryBrowserViewController: UIViewController {
 			let enabled = refreshControlsEnabled
 			async_main {
 				self.refreshManager.inactiveControlsEnabled = enabled
-				// The top control should be disabled if there is no earlier history:
-				self.refreshManager.topRefreshControl?.enabled = enabled && self.historyData.hasEarlierHistory()
+				// The top control should remain disabled if there is no earlier history:
+				if enabled {
+					self.refreshManager.topRefreshControl?.enabled = self.historyData.hasEarlierHistory()
+				}
 				self.dateSelectionButton.enabled = enabled
 			}
 		}
