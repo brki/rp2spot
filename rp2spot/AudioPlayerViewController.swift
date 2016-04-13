@@ -69,32 +69,6 @@ class AudioPlayerViewController: UIViewController {
 		registerForRemoteEvents()
 	}
 
-	/**
-	If an incoming call interrupts the audio, put the player into the paused state.
-	When the interruption is over, start playing audio again.  Or at least try to ...
-	some people report that the audio fails to resume after an interruption when
-	the app is in the background, but it seems to work fine in ios 9.3.
-	*/
-	func audioSessionInterruption(notification: NSNotification) {
-		guard notification.name == AVAudioSessionInterruptionNotification else {
-			return
-		}
-
-		guard let rawTypeValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt else {
-			return
-		}
-
-		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .Began {
-			pausePlaying()
-			pausedDueToAudioInterruption = true
-		} else {
-			if pausedDueToAudioInterruption && status == .Active {
-				pausedDueToAudioInterruption = false
-				startPlaying()
-			}
-		}
-	}
-
 	override func viewWillAppear(animated: Bool) {
 		super.viewWillAppear(animated)
 		updateUI(isPlaying: spotify.player.isPlaying)
@@ -439,6 +413,32 @@ extension AudioPlayerViewController {
 		}
 	}
 
+	/**
+	If an incoming call interrupts the audio, put the player into the paused state.
+	When the interruption is over, start playing audio again.  Or at least try to ...
+	some people report that the audio fails to resume after an interruption when
+	the app is in the background, but it seems to work fine in ios 9.3.
+	*/
+	func audioSessionInterruption(notification: NSNotification) {
+		guard notification.name == AVAudioSessionInterruptionNotification else {
+			return
+		}
+
+		guard let rawTypeValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt else {
+			return
+		}
+
+		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .Began {
+			pausePlaying()
+			pausedDueToAudioInterruption = true
+		} else {
+			if pausedDueToAudioInterruption && status == .Active {
+				pausedDueToAudioInterruption = false
+				startPlaying()
+			}
+		}
+	}
+	
 	/**
 	Configure handling for events triggered by remote hardware (e.g. headphones, bluetooth speakers, etc.).
 	*/

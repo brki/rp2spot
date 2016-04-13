@@ -219,6 +219,8 @@ extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 
 				if success {
 					self.tableView.reloadData()
+
+					// Reposition at the bottom of the table, where the selected date is.
 					let rowCount = self.historyData.songCount
 					if rowCount > 0 {
 						self.tableView.scrollToRowAtIndexPath(
@@ -227,8 +229,6 @@ extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 							animated: true
 						)
 					}
-					// Reposition at the bottom of the table, where the selected date is.
-					//self.tableView.contentOffset = CGPointMake(0, self.tableView. self.tableView.contentInset.bottom)
 				}
 			}
 		}
@@ -408,13 +408,13 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 extension HistoryBrowserViewController: UITableViewDelegate {
 
 	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+		// Only Spotify Premium accounts can stream music.
+		guard userSettings.canStreamSpotifyTracks != false else {
+			return
+		}
+
 		// If selected row has no spotify track, do not start playing
 		historyData.context.performBlock {
-
-			// Only Spotify Premium accounts can stream music.
-			guard self.userSettings.canStreamSpotifyTracks != false else {
-				return
-			}
 
 			guard self.historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
 				return
