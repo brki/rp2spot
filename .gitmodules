@@ -1,0 +1,3 @@
+[submodule "third-party-manual/TGPControls"]
+	path = third-party-manual/TGPControls
+	url = https://github.com/SwiftArchitect/TGPControls.git

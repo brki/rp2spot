@@ -179,7 +179,7 @@ class HistoryBrowserViewController: UIViewController {
 	}
 
 	func showPlayer() {
-		self.playerContainerViewHeightConstraint.constant = 100
+		self.playerContainerViewHeightConstraint.constant = 120
 	}
 
 	func willResignActive(notification: NSNotification) {
@@ -296,7 +296,7 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 			// If the player just appeared, it may have covered the visible cell.  Try to find the playing cell and scroll it into view.
 			let lastVisibleRow = indexPaths.last!.row
 			let section = indexPaths.last!.section
-			// The height of the player is 100, the cell can be at most 3 cells
+			// The height of the player is 120, the playing cell can be at most 3 cells beyond the last visible cell.
 			let maxRowToTry = min(lastVisibleRow + 3, self.historyData.songCount - 1)
 			let searchIndexPaths = Array(lastVisibleRow + 1 ... maxRowToTry).map({ NSIndexPath(forRow: $0, inSection: section) })
 			if let indexPath = self.historyData.indexPathWithMatchingTrackId(trackId, inIndexPaths: searchIndexPaths) {
