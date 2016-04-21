@@ -308,7 +308,7 @@ class AudioPlayerViewController: UIViewController {
 
 	func updateUI(isPlaying isPlaying: Bool) {
 		let imageName = isPlaying ? "Pause" : "Play"
-		playPauseButton.imageView!.image = UIImage(named: imageName)!
+		playPauseButton.setImage(UIImage(named: imageName), forState: .Normal)
 	}
 
 	func updateNowPlayingInfo(trackId: String? = nil) {
