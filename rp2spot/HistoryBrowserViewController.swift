@@ -249,11 +249,17 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 			async_main {
 				self.shouldScrollPlayingSongCellToVisible = true
 				self.showPlayer()
-
 			}
 		} else {
 			async_main {
 				self.hidePlayer()
+				// trackStoppedPlaying() was already called, but the track that was
+				// playing might have been hidden underneath the player at that time,
+				// and might still be highlighted as the currently playing track.
+				// Reload all visible rows to ensure that no row remains highlighted as playing.
+				if let visibleIndexPaths = self.tableView.indexPathsForVisibleRows {
+					self.tableView.reloadRowsAtIndexPaths(visibleIndexPaths, withRowAnimation: .Automatic)
+				}
 			}
 		}
 	}
