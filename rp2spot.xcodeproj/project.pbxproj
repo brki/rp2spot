@@ -85,7 +85,6 @@
 		D31D8E1F1CBE7A5D00E3D5FC /* TGPDiscreteSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TGPDiscreteSlider.m; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider.m"; sourceTree = SOURCE_ROOT; };
 		D31D8E201CBE7A5D00E3D5FC /* TGPDiscreteSlider7.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TGPDiscreteSlider7.h; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider7.h"; sourceTree = SOURCE_ROOT; };
 		D31D8E211CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TGPDiscreteSlider7.m; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider7.m"; sourceTree = SOURCE_ROOT; };
-		D31D8E241CBE7A8300E3D5FC /* TGPControls-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TGPControls-Bridging.h"; sourceTree = "<group>"; };
 		D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsViewController.swift; sourceTree = "<group>"; };
 		D32FAC741CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyTrackMetadataOperation.swift; sourceTree = "<group>"; };
 		D32FAC761CA42CEA0030AC71 /* ConcurrentOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcurrentOperation.swift; sourceTree = "<group>"; };
@@ -132,7 +131,7 @@
 		D3FC5E581C6F2EB600443F68 /* Alamofire.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Alamofire.framework; path = Carthage/Build/iOS/Alamofire.framework; sourceTree = "<group>"; };
 		D3FC5E5B1C6F34B100443F68 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
-		D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Spotify-Bridging.h"; sourceTree = "<group>"; };
+		D3FC5E5F1C6F368800443F68 /* rp2spot-Bridging.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "rp2spot-Bridging.h"; sourceTree = "<group>"; };
 		D3FC5E601C6F542F00443F68 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		D3FC5E621C6F55F000443F68 /* CoreDataStack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataStack.swift; sourceTree = "<group>"; };
 		D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyClient.swift; sourceTree = "<group>"; };
@@ -183,7 +182,6 @@
 				D31D8E1F1CBE7A5D00E3D5FC /* TGPDiscreteSlider.m */,
 				D31D8E201CBE7A5D00E3D5FC /* TGPDiscreteSlider7.h */,
 				D31D8E211CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m */,
-				D31D8E241CBE7A8300E3D5FC /* TGPControls-Bridging.h */,
 			);
 			name = TGPControls;
 			sourceTree = "<group>";
@@ -191,7 +189,6 @@
 		D3409D9D1C89EB850089DEC1 /* Spotify */ = {
 			isa = PBXGroup;
 			children = (
-				D3FC5E5F1C6F368800443F68 /* Spotify-Bridging.h */,
 				D3FC5E641C6F5AA100443F68 /* SpotifyClient.swift */,
 				D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */,
 				D3EF74F11CA40D75001A0662 /* SpotifyTrackInfoManager.swift */,
@@ -262,6 +259,7 @@
 		D3C0CA7B1C6248E10055B650 /* rp2spot */ = {
 			isa = PBXGroup;
 			children = (
+				D3FC5E5F1C6F368800443F68 /* rp2spot-Bridging.h */,
 				D31D8E1C1CBE7A4600E3D5FC /* TGPControls */,
 				D345FC451C8CDD7F00F118B3 /* Core Extensions */,
 				D37482231CA803BC00193AD1 /* Operations */,
@@ -717,7 +715,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "rp2spot/Spotify-Bridging.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "rp2spot/rp2spot-Bridging.h";
 			};
 			name = Debug;
 		};
@@ -740,7 +738,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = ch.truckin.rp2spot;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE = "";
-				SWIFT_OBJC_BRIDGING_HEADER = "rp2spot/Spotify-Bridging.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "rp2spot/rp2spot-Bridging.h";
 			};
 			name = Release;
 		};
