@@ -681,6 +681,8 @@
                         <outlet property="nextTrackButton" destination="L9B-dp-qsS" id="RJD-vo-9cP"/>
                         <outlet property="playPauseButton" destination="daB-gr-9Oy" id="jhX-KS-eOi"/>
                         <outlet property="previousTrackButton" destination="v8P-n5-FXd" id="F5d-BZ-BE4"/>
+                        <outlet property="progressBar" destination="Kiz-Dv-JpG" id="0B8-as-36A"/>
+                        <outlet property="progressBarContainer" destination="xYV-j6-y7e" id="ywm-SR-TSl"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MmP-yq-6ri" userLabel="First Responder" sceneMemberID="firstResponder"/>

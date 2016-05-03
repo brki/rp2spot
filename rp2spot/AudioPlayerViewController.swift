@@ -23,6 +23,9 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var previousTrackButton: UIButton!
 	@IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
+	@IBOutlet weak var progressBar: UIProgressView!
+	@IBOutlet weak var progressBarContainer: UIView!
+
 	var playlist = AudioPlayerPlaylist(list:[])
 
 	var spotify = SpotifyClient.sharedInstance
@@ -67,6 +70,8 @@ class AudioPlayerViewController: UIViewController {
 			object: nil)
 
 		registerForRemoteEvents()
+
+		addProgressBarGestureRecognizers()
 	}
 
 	override func viewWillAppear(animated: Bool) {
@@ -108,13 +113,14 @@ class AudioPlayerViewController: UIViewController {
 					Utility.presentAlert("Unable to start playing", message: err.localizedDescription)
 					return
 				}
-
+				self.startProgressUpdating()
 			}
 		}
 	}
 
 	func pausePlaying(sender: AnyObject? = nil) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
+		stopProgressUpdating()
 		spotify.player.setIsPlaying(false) { error in
 			if let err = error {
 				print("pausePlaying: error while trying to pause player: \(err)")
@@ -373,14 +379,6 @@ class AudioPlayerViewController: UIViewController {
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
 	}
 
-	func startProgressUpdating() {
-		stopProgressUpdating()
-	}
-
-	func stopProgressUpdating() {
-		// TODO: pause animation
-	}
-
 	func showActivityIndicator() {
 		activityIndicator.startAnimating()
 	}
@@ -636,5 +634,82 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 			"Message for you from Spotify",
 			message: message
 		)
+	}
+}
+
+// MARK: progress bar control
+extension AudioPlayerViewController {
+
+	/**
+	Add gesture recognizers for tapping and panning on the progress bar.
+	*/
+	func addProgressBarGestureRecognizers() {
+		progressBarContainer.addGestureRecognizer(
+			UITapGestureRecognizer(target: self, action: #selector(self.progressBarContainerTapped(_:)))
+		)
+		progressBarContainer.addGestureRecognizer(
+			UIPanGestureRecognizer(target: self, action: #selector(self.progressBarContainerPanned(_:)))
+		)
+	}
+
+	func progressBarContainerTapped(recognizer: UITapGestureRecognizer) {
+		let progress = Float(recognizer.locationInView(progressBar).x / progressBar.bounds.width)
+		self.progressBar.setProgress(progress, animated: true)
+		endProgressBarAnimation()
+		print("Tapped")
+	}
+
+	func progressBarContainerPanned(recognizer: UIPanGestureRecognizer) {
+		// Update the position before cancelling the animation, so that it
+		// doesn't jump back from the end.
+		progressBar.progress = Float(recognizer.locationInView(progressBar).x / progressBar.bounds.width)
+		switch (recognizer.state) {
+		case .Began:
+			endProgressBarAnimation()
+		case .Ended:
+			print("Finished panning")
+		default:
+			break
+		}
+	}
+
+	/**
+	Stop the animation in all sublayers of the progress bar.
+	*/
+	func endProgressBarAnimation() {
+		guard let layers = progressBar.layer.sublayers else {
+			return
+		}
+		CATransaction.begin()
+		for layer in layers {
+			layer.removeAllAnimations()
+		}
+		CATransaction.commit()
+	}
+
+	func startProgressUpdating() {
+		stopProgressUpdating()
+
+		guard spotify.player.isPlaying else {
+			print("startProgressUpdating called, but player is not playing")
+			return
+		}
+
+		let remainder = spotify.player.currentTrackDuration - spotify.player.currentPlaybackPosition
+		let progress = Float(spotify.player.currentPlaybackPosition / spotify.player.currentTrackDuration)
+		progressBar.progress = progress
+
+		UIView.animateWithDuration(
+			remainder,
+			delay: 0.0,
+			options: .CurveLinear,
+			animations: {
+				self.progressBar.setProgress(1.0, animated: true)
+			},
+			completion: nil)
+	}
+
+	func stopProgressUpdating() {
+		endProgressBarAnimation()
 	}
 }
