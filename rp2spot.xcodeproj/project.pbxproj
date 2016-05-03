@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */; };
-		D31D8E221CBE7A5D00E3D5FC /* TGPDiscreteSlider.m in Sources */ = {isa = PBXBuildFile; fileRef = D31D8E1F1CBE7A5D00E3D5FC /* TGPDiscreteSlider.m */; };
-		D31D8E231CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m in Sources */ = {isa = PBXBuildFile; fileRef = D31D8E211CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m */; };
 		D32EA3731CAAB2440024B598 /* UserSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */; };
 		D32FAC751CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32FAC741CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift */; };
 		D32FAC771CA42CEA0030AC71 /* ConcurrentOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32FAC761CA42CEA0030AC71 /* ConcurrentOperation.swift */; };
@@ -80,11 +78,6 @@
 
 /* Begin PBXFileReference section */
 		D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuthRenewalOperation.swift; sourceTree = "<group>"; };
-		D31D8E1D1CBE7A5D00E3D5FC /* TGPControlsTicksProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TGPControlsTicksProtocol.h; path = "third-party-manual/TGPControls/TGPControls/TGPControlsTicksProtocol.h"; sourceTree = SOURCE_ROOT; };
-		D31D8E1E1CBE7A5D00E3D5FC /* TGPDiscreteSlider.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TGPDiscreteSlider.h; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider.h"; sourceTree = SOURCE_ROOT; };
-		D31D8E1F1CBE7A5D00E3D5FC /* TGPDiscreteSlider.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TGPDiscreteSlider.m; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider.m"; sourceTree = SOURCE_ROOT; };
-		D31D8E201CBE7A5D00E3D5FC /* TGPDiscreteSlider7.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TGPDiscreteSlider7.h; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider7.h"; sourceTree = SOURCE_ROOT; };
-		D31D8E211CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = TGPDiscreteSlider7.m; path = "third-party-manual/TGPControls/TGPControls/TGPDiscreteSlider7.m"; sourceTree = SOURCE_ROOT; };
 		D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsViewController.swift; sourceTree = "<group>"; };
 		D32FAC741CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyTrackMetadataOperation.swift; sourceTree = "<group>"; };
 		D32FAC761CA42CEA0030AC71 /* ConcurrentOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcurrentOperation.swift; sourceTree = "<group>"; };
@@ -174,18 +167,6 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		D31D8E1C1CBE7A4600E3D5FC /* TGPControls */ = {
-			isa = PBXGroup;
-			children = (
-				D31D8E1D1CBE7A5D00E3D5FC /* TGPControlsTicksProtocol.h */,
-				D31D8E1E1CBE7A5D00E3D5FC /* TGPDiscreteSlider.h */,
-				D31D8E1F1CBE7A5D00E3D5FC /* TGPDiscreteSlider.m */,
-				D31D8E201CBE7A5D00E3D5FC /* TGPDiscreteSlider7.h */,
-				D31D8E211CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m */,
-			);
-			name = TGPControls;
-			sourceTree = "<group>";
-		};
 		D3409D9D1C89EB850089DEC1 /* Spotify */ = {
 			isa = PBXGroup;
 			children = (
@@ -260,7 +241,6 @@
 			isa = PBXGroup;
 			children = (
 				D3FC5E5F1C6F368800443F68 /* rp2spot-Bridging.h */,
-				D31D8E1C1CBE7A4600E3D5FC /* TGPControls */,
 				D345FC451C8CDD7F00F118B3 /* Core Extensions */,
 				D37482231CA803BC00193AD1 /* Operations */,
 				D3C98A071C86E56100C2C9E4 /* Protocols */,
@@ -523,7 +503,6 @@
 				D3D6FF451C8DD65100B7E8A6 /* AudioPlayerViewController.swift in Sources */,
 				D3992AB01C7A0A870077DDA7 /* PlainHistoryTableViewCell.swift in Sources */,
 				D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */,
-				D31D8E231CBE7A5D00E3D5FC /* TGPDiscreteSlider7.m in Sources */,
 				D3FC5E711C70A51000443F68 /* PlayedSong.swift in Sources */,
 				D37482251CA8528500193AD1 /* ScrollViewRefreshManager.swift in Sources */,
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
@@ -542,7 +521,6 @@
 				D32FAC771CA42CEA0030AC71 /* ConcurrentOperation.swift in Sources */,
 				D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */,
 				D345FC471C8CDDA300F118B3 /* Array+extension.swift in Sources */,
-				D31D8E221CBE7A5D00E3D5FC /* TGPDiscreteSlider.m in Sources */,
 				D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */,
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,

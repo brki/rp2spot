@@ -22,10 +22,7 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var nextTrackButton: UIButton!
 	@IBOutlet weak var previousTrackButton: UIButton!
 	@IBOutlet weak var activityIndicator: UIActivityIndicatorView!
-	@IBOutlet weak var progressBar: TGPDiscreteSlider!
 
-	let MIN_PROGRESS_BAR_VALUE = CGFloat(-5)
-	let MAX_PROGRESS_BAR_VALUE = CGFloat(4090)
 	var playlist = AudioPlayerPlaylist(list:[])
 
 	var spotify = SpotifyClient.sharedInstance
@@ -70,11 +67,6 @@ class AudioPlayerViewController: UIViewController {
 			object: nil)
 
 		registerForRemoteEvents()
-
-		progressBar.addTarget(self,
-		                      action: #selector(self.userChangedProgressBarLocation(_:)),
-		                      forControlEvents: [.TouchUpInside, .TouchUpOutside]
-		)
 	}
 
 	override func viewWillAppear(animated: Bool) {
@@ -116,6 +108,7 @@ class AudioPlayerViewController: UIViewController {
 					Utility.presentAlert("Unable to start playing", message: err.localizedDescription)
 					return
 				}
+
 			}
 		}
 	}
@@ -199,6 +192,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func stopPlaying(sender: AnyObject) {
+		stopProgressUpdating()
 		guard spotify.player.isPlaying || status == .Active else {
 			return
 		}
@@ -281,6 +275,7 @@ class AudioPlayerViewController: UIViewController {
 					)
 					return
 				}
+				self.startProgressUpdating()
 			}
 		}
 	}
@@ -378,28 +373,12 @@ class AudioPlayerViewController: UIViewController {
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
 	}
 
-	/**
-	TGPDiscreteSlider event handler.
-	*/
-	func userChangedProgressBarLocation(sender: TGPDiscreteSlider) {
-		guard spotify.player.isPlaying else {
-			return
-		}
-		guard MIN_PROGRESS_BAR_VALUE <= sender.value && sender.value <= MAX_PROGRESS_BAR_VALUE else {
-			print("Sender not in expected range:  \(MIN_PROGRESS_BAR_VALUE) <= \(sender.value) <= \(MAX_PROGRESS_BAR_VALUE)")
-			return
-		}
+	func startProgressUpdating() {
+		stopProgressUpdating()
+	}
 
-		let duration = CGFloat(spotify.player.currentTrackDuration)
-		var position = sender.value * duration / (MAX_PROGRESS_BAR_VALUE - MIN_PROGRESS_BAR_VALUE)
-		position = min(max(0, position), duration)
-		spotify.player.seekToOffset(NSTimeInterval(position)) { error in
-			guard error == nil else {
-				print("Error while trying to seek to position in userChangedProgressBarLocation(): \(error!)")
-				return
-			}
-			self.updateNowPlayingInfo()
-		}
+	func stopProgressUpdating() {
+		// TODO: pause animation
 	}
 
 	func showActivityIndicator() {

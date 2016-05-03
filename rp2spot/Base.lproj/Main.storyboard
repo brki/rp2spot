@@ -613,41 +613,14 @@
                             <view clipsSubviews="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="E4Q-eW-7lM" userLabel="Track Control View">
                                 <rect key="frame" x="20" y="76" width="560" height="44"/>
                                 <subviews>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="--:--" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RLU-0j-ZCF" userLabel="Elapsed Time">
-                                        <rect key="frame" x="0.0" y="12" width="42" height="21"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--:--" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RLU-0j-ZCF" userLabel="Elapsed Time">
+                                        <rect key="frame" x="0.0" y="12" width="35.5" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
-                                    <view contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="wYK-AC-kbP" customClass="TGPDiscreteSlider">
-                                        <rect key="frame" x="50" y="-3" width="460" height="50"/>
-                                        <color key="backgroundColor" red="0.83921568629999999" green="0.81568627449999997" blue="0.4823529412" alpha="1" colorSpace="calibratedRGB"/>
-                                        <constraints>
-                                            <constraint firstAttribute="height" constant="50" id="Phj-qH-Wqu"/>
-                                        </constraints>
-                                        <userDefinedRuntimeAttributes>
-                                            <userDefinedRuntimeAttribute type="color" keyPath="minimumTrackTintColor">
-                                                <color key="value" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="color" keyPath="maximumTrackTintColor">
-                                                <color key="value" red="0.066621767240000004" green="0.63235452589999996" blue="0.1122306034" alpha="1" colorSpace="calibratedRGB"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="tickStyle">
-                                                <integer key="value" value="4"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="thumbStyle">
-                                                <integer key="value" value="4"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="number" keyPath="tickCount">
-                                                <integer key="value" value="4096"/>
-                                            </userDefinedRuntimeAttribute>
-                                            <userDefinedRuntimeAttribute type="size" keyPath="thumbSize">
-                                                <size key="value" width="0.0" height="0.0"/>
-                                            </userDefinedRuntimeAttribute>
-                                        </userDefinedRuntimeAttributes>
-                                    </view>
-                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="--:--" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="57e-5R-oNb" userLabel="Total Time">
-                                        <rect key="frame" x="518" y="12" width="42" height="21"/>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--:--" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="57e-5R-oNb" userLabel="Total Time">
+                                        <rect key="frame" x="524.5" y="12" width="35.5" height="21"/>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
@@ -655,14 +628,11 @@
                                 </subviews>
                                 <color key="backgroundColor" red="0.83921568627450982" green="0.81568627450980391" blue="0.4823529411764706" alpha="1" colorSpace="calibratedRGB"/>
                                 <constraints>
-                                    <constraint firstItem="wYK-AC-kbP" firstAttribute="leading" secondItem="RLU-0j-ZCF" secondAttribute="trailing" constant="8" id="GjN-e4-hkJ"/>
                                     <constraint firstItem="57e-5R-oNb" firstAttribute="trailing" secondItem="E4Q-eW-7lM" secondAttribute="trailing" id="HEo-8M-BP8"/>
-                                    <constraint firstItem="wYK-AC-kbP" firstAttribute="centerY" secondItem="E4Q-eW-7lM" secondAttribute="centerY" id="Ubx-3y-yRl"/>
                                     <constraint firstAttribute="height" constant="44" id="XhY-Du-zkj"/>
                                     <constraint firstItem="RLU-0j-ZCF" firstAttribute="centerY" secondItem="E4Q-eW-7lM" secondAttribute="centerY" id="i8Y-4c-iOF"/>
                                     <constraint firstItem="RLU-0j-ZCF" firstAttribute="leading" secondItem="E4Q-eW-7lM" secondAttribute="leading" id="k86-3f-4nu"/>
                                     <constraint firstItem="57e-5R-oNb" firstAttribute="centerY" secondItem="E4Q-eW-7lM" secondAttribute="centerY" id="muW-Ef-yew"/>
-                                    <constraint firstItem="57e-5R-oNb" firstAttribute="leading" secondItem="wYK-AC-kbP" secondAttribute="trailing" constant="8" id="rYM-In-7cF"/>
                                 </constraints>
                             </view>
                             <activityIndicatorView hidden="YES" opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" hidesWhenStopped="YES" style="white" translatesAutoresizingMaskIntoConstraints="NO" id="vq3-tW-TyL">
@@ -677,13 +647,13 @@
                             <constraint firstItem="L9B-dp-qsS" firstAttribute="centerY" secondItem="daB-gr-9Oy" secondAttribute="centerY" id="LCq-hi-zDG"/>
                             <constraint firstAttribute="right" secondItem="3M6-Pe-sox" secondAttribute="right" id="LUF-Lj-enb"/>
                             <constraint firstItem="v8P-n5-FXd" firstAttribute="centerY" secondItem="daB-gr-9Oy" secondAttribute="centerY" id="MXS-x2-Keq"/>
-                            <constraint firstItem="3M6-Pe-sox" firstAttribute="top" secondItem="khs-GQ-h7l" secondAttribute="bottom" id="Pgf-TO-Bjj"/>
                             <constraint firstItem="daB-gr-9Oy" firstAttribute="leading" secondItem="v8P-n5-FXd" secondAttribute="trailing" constant="37" id="VUf-gd-lGP"/>
-                            <constraint firstItem="daB-gr-9Oy" firstAttribute="top" secondItem="khs-GQ-h7l" secondAttribute="bottom" constant="2" id="Yfr-Y6-VJY"/>
                             <constraint firstItem="L9B-dp-qsS" firstAttribute="leading" secondItem="daB-gr-9Oy" secondAttribute="trailing" constant="37" id="Zbr-fQ-lJx"/>
                             <constraint firstAttribute="trailingMargin" secondItem="E4Q-eW-7lM" secondAttribute="trailing" id="b2F-iv-o6J"/>
+                            <constraint firstItem="3M6-Pe-sox" firstAttribute="top" secondItem="khs-GQ-h7l" secondAttribute="bottom" id="g9K-ba-WVg"/>
+                            <constraint firstItem="89p-lb-SUM" firstAttribute="top" secondItem="E4Q-eW-7lM" secondAttribute="bottom" id="idW-H1-XC8"/>
                             <constraint firstItem="E4Q-eW-7lM" firstAttribute="leading" secondItem="SuN-qs-nmB" secondAttribute="leadingMargin" id="j5w-7q-Z7Z"/>
-                            <constraint firstItem="89p-lb-SUM" firstAttribute="top" secondItem="E4Q-eW-7lM" secondAttribute="bottom" id="zE6-CD-dqN"/>
+                            <constraint firstItem="daB-gr-9Oy" firstAttribute="top" secondItem="khs-GQ-h7l" secondAttribute="bottom" constant="2" id="wWq-dW-5Ji"/>
                         </constraints>
                     </view>
                     <connections>
@@ -691,7 +661,6 @@
                         <outlet property="nextTrackButton" destination="L9B-dp-qsS" id="RJD-vo-9cP"/>
                         <outlet property="playPauseButton" destination="daB-gr-9Oy" id="jhX-KS-eOi"/>
                         <outlet property="previousTrackButton" destination="v8P-n5-FXd" id="F5d-BZ-BE4"/>
-                        <outlet property="progressBar" destination="wYK-AC-kbP" id="vR8-qp-ggS"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="MmP-yq-6ri" userLabel="First Responder" sceneMemberID="firstResponder"/>

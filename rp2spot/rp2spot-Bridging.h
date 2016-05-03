@@ -1,5 +1,5 @@
 //
-//  Spotify-Bridging.h
+//  rp2spot_Bridging.h
 //  rp2spot
 //
 //  Created by Brian on 13/02/16.
@@ -14,11 +14,4 @@
 #import <Spotify/Spotify.h>
 
 
-// TGPControls:
-#import <UIKit/UIKit.h>
-#import "TGPControlsTicksProtocol.h"
-#import "TGPDiscreteSlider.h"
-#import "TGPDiscreteSlider7.h"
-
-
-#endif /* Spotify_Bridging_h */
+#endif /* rp2spot_Bridging_h */
