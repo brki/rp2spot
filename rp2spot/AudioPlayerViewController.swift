@@ -25,7 +25,8 @@ class AudioPlayerViewController: UIViewController {
 
 	@IBOutlet weak var progressBar: UIProgressView!
 	@IBOutlet weak var progressBarContainer: UIView!
-
+	@IBOutlet weak var trackDurationLabel: UILabel!
+	@IBOutlet weak var elapsedTrackTimeLabel: UILabel!
 	var playlist = AudioPlayerPlaylist(list:[])
 
 	var spotify = SpotifyClient.sharedInstance
@@ -45,6 +46,9 @@ class AudioPlayerViewController: UIViewController {
 			}
 		}
 	}
+
+	var progressBarAnimating = false
+	var progressBarAnimationRequested = false
 
 	var delegate: AudioStatusObserver?
 
@@ -69,14 +73,16 @@ class AudioPlayerViewController: UIViewController {
 			name: AVAudioSessionInterruptionNotification,
 			object: nil)
 
+		// Listen for remote control events.
 		registerForRemoteEvents()
 
-		addProgressBarGestureRecognizers()
+		initProgressBar()
 	}
 
 	override func viewWillAppear(animated: Bool) {
 		super.viewWillAppear(animated)
 		updateUI(isPlaying: spotify.player.isPlaying)
+		setProgress()
 	}
 
 	deinit {
@@ -500,6 +506,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 		playlist.setCurrentTrack(shortTrackId)
 		updateNowPlayingInfo(shortTrackId)
+		setProgress()
 
 		if playlist.windowNeedsAdjustment() {
 			playlist.setCurrentWindow()
@@ -523,6 +530,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
 		updateUI(isPlaying: isPlaying)
 		updateNowPlayingInfo()
+		setProgress()
 	}
 
 	/**
@@ -534,6 +542,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if playlist.isLastTrack(trackId) {
 			updateUI(isPlaying: false)
 		}
+		setProgress()
 		delegate?.trackStoppedPlaying(trackId)
 	}
 
@@ -541,7 +550,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if let interested = delegate {
 			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
 		}
-
+		setProgress()
 		updateUI(isPlaying: true)
 	}
 
@@ -558,6 +567,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			spotify.player.stop(nil)
 			return
 		}
+		setProgress()
 	}
 
 	/** Called when the audio streaming object becomes an inactive playback device on the user's account.
@@ -640,6 +650,17 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 // MARK: progress bar control
 extension AudioPlayerViewController {
 
+	func initProgressBar() {
+		// Listen for backgrounding event, so that progress bar updates can be stopped.
+		NSNotificationCenter.defaultCenter().addObserver(
+			self,
+			selector: #selector(self.willResignActive(_:)),
+			name: UIApplicationWillResignActiveNotification,
+			object: nil)
+
+		addProgressBarGestureRecognizers()
+	}
+
 	/**
 	Add gesture recognizers for tapping and panning on the progress bar.
 	*/
@@ -673,6 +694,48 @@ extension AudioPlayerViewController {
 		}
 	}
 
+	func setProgress(stopAnimation stopAnimation: Bool = false) {
+		print ("setProgress")
+		let duration = spotify.player.currentTrackDuration
+		let position = spotify.player.currentPlaybackPosition
+		let remainder = duration - position
+		let progress = Float(position / duration)
+
+		if progressBarAnimating {
+			self.stopProgressUpdating()
+		}
+
+		progressBar.progress = progress
+
+		guard stopAnimation == false && progressBarAnimationRequested == false else {
+			return
+		}
+
+		if spotify.player.isPlaying {
+			self.progressBarAnimationRequested = true
+			async_main {
+				guard self.progressBarAnimationRequested else {
+					return
+				}
+				self.progressBarAnimationRequested = false
+				self.progressBarAnimating = true
+				UIView.animateWithDuration(
+					remainder,
+					delay: 0.0,
+					options: .CurveLinear,
+					animations: {
+						self.progressBar.setProgress(1.0, animated: true)
+					},
+					completion: nil)
+			}
+		}
+	}
+
+	func stopProgressUpdating() {
+		endProgressBarAnimation()
+		progressBarAnimating = false
+	}
+
 	/**
 	Stop the animation in all sublayers of the progress bar.
 	*/
@@ -687,29 +750,20 @@ extension AudioPlayerViewController {
 		CATransaction.commit()
 	}
 
-	func startProgressUpdating() {
-		stopProgressUpdating()
+	func willResignActive(notification: NSNotification) {
 
-		guard spotify.player.isPlaying else {
-			print("startProgressUpdating called, but player is not playing")
-			return
-		}
+		setProgress(stopAnimation: true)
 
-		let remainder = spotify.player.currentTrackDuration - spotify.player.currentPlaybackPosition
-		let progress = Float(spotify.player.currentPlaybackPosition / spotify.player.currentTrackDuration)
-		progressBar.progress = progress
-
-		UIView.animateWithDuration(
-			remainder,
-			delay: 0.0,
-			options: .CurveLinear,
-			animations: {
-				self.progressBar.setProgress(1.0, animated: true)
-			},
-			completion: nil)
+		// Listen for foregrounding event, so that progress bar updates will be triggered.
+		NSNotificationCenter.defaultCenter().addObserver(
+			self,
+			selector: #selector(self.willEnterForeground(_:)),
+			name: UIApplicationWillEnterForegroundNotification,
+			object: nil)
 	}
 
-	func stopProgressUpdating() {
-		endProgressBarAnimation()
+	func willEnterForeground(notification: NSNotification) {
+		setProgress()
 	}
+	
 }
