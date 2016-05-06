@@ -49,6 +49,7 @@ class AudioPlayerViewController: UIViewController {
 
 	var progressBarAnimating = false
 	var progressBarAnimationRequested = false
+	var elapsedTimeTimer: NSTimer?
 
 	var delegate: AudioStatusObserver?
 
@@ -506,7 +507,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 		playlist.setCurrentTrack(shortTrackId)
 		updateNowPlayingInfo(shortTrackId)
-		setProgress()
+		setProgress(updateTrackDuration: true)
 
 		if playlist.windowNeedsAdjustment() {
 			playlist.setCurrentWindow()
@@ -694,7 +695,7 @@ extension AudioPlayerViewController {
 		}
 	}
 
-	func setProgress(stopAnimation stopAnimation: Bool = false) {
+	func setProgress(stopAnimation stopAnimation: Bool = false, updateTrackDuration: Bool = false) {
 		print ("setProgress")
 		let duration = spotify.player.currentTrackDuration
 		let position = spotify.player.currentPlaybackPosition
@@ -703,6 +704,13 @@ extension AudioPlayerViewController {
 
 		if progressBarAnimating {
 			self.stopProgressUpdating()
+		}
+
+		async_main {
+			self.showElapsedTime()
+			if updateTrackDuration {
+				self.showTrackDuration()
+			}
 		}
 
 		progressBar.progress = progress
@@ -714,26 +722,36 @@ extension AudioPlayerViewController {
 		if spotify.player.isPlaying {
 			self.progressBarAnimationRequested = true
 			async_main {
-				guard self.progressBarAnimationRequested else {
-					return
+
+				if self.progressBarAnimationRequested {
+					self.progressBarAnimationRequested = false
+					self.progressBarAnimating = true
+					UIView.animateWithDuration(
+						remainder,
+						delay: 0.0,
+						options: .CurveLinear,
+						animations: {
+							self.progressBar.setProgress(1.0, animated: true)
+						},
+						completion: nil)
 				}
-				self.progressBarAnimationRequested = false
-				self.progressBarAnimating = true
-				UIView.animateWithDuration(
-					remainder,
-					delay: 0.0,
-					options: .CurveLinear,
-					animations: {
-						self.progressBar.setProgress(1.0, animated: true)
-					},
-					completion: nil)
+				self.startElapsedTimeTimer()
+
 			}
 		}
 	}
 
+
+
 	func stopProgressUpdating() {
 		endProgressBarAnimation()
 		progressBarAnimating = false
+
+		// Invalidate the timer on the same run loop that it was created on.
+		async_main {
+			self.elapsedTimeTimer?.invalidate()
+			self.elapsedTimeTimer = nil
+		}
 	}
 
 	/**
@@ -748,6 +766,40 @@ extension AudioPlayerViewController {
 			layer.removeAllAnimations()
 		}
 		CATransaction.commit()
+	}
+
+	func startElapsedTimeTimer() {
+		guard elapsedTimeTimer == nil || elapsedTimeTimer!.valid == false else {
+			// A timer is already running.
+			return
+		}
+
+		let appState = UIApplication.sharedApplication().applicationState
+		guard appState == .Active || appState == .Inactive else {
+			// No need to update the elapsed time label if the app is in the background.
+			return
+		}
+
+		self.elapsedTimeTimer = NSTimer.scheduledTimerWithTimeInterval(
+			1.0,
+			target: self,
+			selector: #selector(self.showElapsedTime),
+			userInfo: nil,
+			repeats: true)
+
+	}
+
+	func showTrackDuration() {
+		trackDurationLabel.text = formatTrackTime(spotify.player.currentTrackDuration)
+	}
+
+	func showElapsedTime(sender: AnyObject? = nil) {
+		print("tick")
+		elapsedTrackTimeLabel.text = formatTrackTime(spotify.player.currentPlaybackPosition)
+	}
+
+	func formatTrackTime(interval: NSTimeInterval) -> String {
+		return String(format: "%d:%02.0f", Int(interval) / 60, round(interval % 60))
 	}
 
 	func willResignActive(notification: NSNotification) {
