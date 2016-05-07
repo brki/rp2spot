@@ -86,6 +86,46 @@ class AudioPlayerViewController: UIViewController {
 		setProgress()
 	}
 
+	override func viewWillDisappear(animated: Bool) {
+		setProgressBarPosition()
+		stopProgressUpdating()
+		super.viewWillDisappear(animated)
+	}
+
+	override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+
+		// No special treatment needed unless the progress bar is currently animating.
+		guard self.progressBarAnimating else {
+			return
+		}
+
+		// If the progress is not stopped before animation, the animation does odd things.
+		// For example:
+		// * vertical -> horizontal rotation: progress jumps too far forward (e.g. where
+		//   it should be 1/4 finished, it appears as if it's 1/2 finished).
+		// * horizontal -> vertical rotation: the progress sometimes jumps backwards, even
+		//   to the point where the progress indicator is outside of the bounds of the
+		//   progress bar.
+
+		// The progress point is currently 1.0, and the bar is animating towards that
+		// position.  Stop the animation and set the progress bar position to the current
+		// progress point according to the position in the track.
+		// If layoutIfNeeded() is not called, the progress appears to be 100% complete at
+		// the beginning of the rotation animation, and animates backwards to the real 
+		// current progress point.
+		setProgressBarPosition()
+		progressBar.layoutIfNeeded()
+
+ 		coordinator.animateAlongsideTransition(
+			nil,
+			completion: { context in
+				// Restart the progress animation.
+				self.setProgress()
+		})
+
+		super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+	}
+
 	deinit {
 		NSNotificationCenter.defaultCenter().removeObserver(self)
 		removeMPRemoteCommandCenterEventListeners()
@@ -120,14 +160,12 @@ class AudioPlayerViewController: UIViewController {
 					Utility.presentAlert("Unable to start playing", message: err.localizedDescription)
 					return
 				}
-				self.startProgressUpdating()
 			}
 		}
 	}
 
 	func pausePlaying(sender: AnyObject? = nil) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
-		stopProgressUpdating()
 		spotify.player.setIsPlaying(false) { error in
 			if let err = error {
 				print("pausePlaying: error while trying to pause player: \(err)")
@@ -205,7 +243,6 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func stopPlaying(sender: AnyObject) {
-		stopProgressUpdating()
 		guard spotify.player.isPlaying || status == .Active else {
 			return
 		}
@@ -288,7 +325,6 @@ class AudioPlayerViewController: UIViewController {
 					)
 					return
 				}
-				self.startProgressUpdating()
 			}
 		}
 	}
@@ -478,7 +514,12 @@ extension AudioPlayerViewController {
 
 		remote.stopCommand.enabled = true
 		remote.stopCommand.addTarget(self, action: #selector(self.stopPlaying(_:)))
+
+//		remote.seekForwardCommand.enabled = true
+//		remote.seekForwardCommand.addTarget(self, action: <#T##Selector#>)
 	}
+
+//	func remoteSeek
 
 	func removeMPRemoteCommandCenterEventListeners() {
 		let remote = MPRemoteCommandCenter.sharedCommandCenter()
@@ -689,22 +730,21 @@ extension AudioPlayerViewController {
 		case .Began:
 			endProgressBarAnimation()
 		case .Ended:
+			let offset = spotify.player.currentTrackDuration * Double(progressBar.progress)
+			spotify.player.seekToOffset(offset) { error in
+				print("TODO: do something about an error while trying to seek to a new position")
+				self.showElapsedTime()
+				self.setProgress()
+			}
 			print("Finished panning")
 		default:
 			break
 		}
 	}
 
-	func setProgress(stopAnimation stopAnimation: Bool = false, updateTrackDuration: Bool = false) {
-		print ("setProgress")
-		let duration = spotify.player.currentTrackDuration
-		let position = spotify.player.currentPlaybackPosition
-		let remainder = duration - position
-		let progress = Float(position / duration)
+	func setProgress(updateTrackDuration updateTrackDuration: Bool = false) {
 
-		if progressBarAnimating {
-			self.stopProgressUpdating()
-		}
+		setProgressBarPosition()
 
 		async_main {
 			self.showElapsedTime()
@@ -713,39 +753,60 @@ extension AudioPlayerViewController {
 			}
 		}
 
-		progressBar.progress = progress
-
-		guard stopAnimation == false && progressBarAnimationRequested == false else {
+		guard spotify.player.isPlaying else {
+			stopProgressUpdating()
 			return
 		}
 
-		if spotify.player.isPlaying {
-			self.progressBarAnimationRequested = true
-			async_main {
+		startElapsedTimeTimer()
 
-				if self.progressBarAnimationRequested {
-					self.progressBarAnimationRequested = false
-					self.progressBarAnimating = true
-					UIView.animateWithDuration(
-						remainder,
-						delay: 0.0,
-						options: .CurveLinear,
-						animations: {
-							self.progressBar.setProgress(1.0, animated: true)
-						},
-						completion: nil)
-				}
-				self.startElapsedTimeTimer()
+		guard progressBarAnimationRequested == false else {
+			return
+		}
 
+		progressBarAnimationRequested = true
+		async_main {
+
+			if self.progressBarAnimationRequested {
+				print("starting animation")
+				self.progressBarAnimationRequested = false
+				self.progressBarAnimating = true
+				let remainder = self.spotify.player.currentTrackDuration - self.spotify.player.currentPlaybackPosition
+
+				UIView.animateWithDuration(
+					remainder,
+					delay: 0.0,
+					options: .CurveLinear,
+					animations: {
+						self.progressBar.setProgress(1.0, animated: true)
+					},
+					completion: nil)
 			}
 		}
 	}
 
+	/**
+	Sets the progress bar position based on the the spotify player's progress, 
+	and stops any progress bar animation that might be running.
+	*/
+	func setProgressBarPosition() {
+		print ("setProgressBarPosition")
+		let duration = spotify.player.currentTrackDuration
+		let position = spotify.player.currentPlaybackPosition
+		let progress = Float(position / duration)
 
+		progressBar.progress = progress
+
+		if progressBarAnimating {
+			endProgressBarAnimation()
+			print ("ending")
+		}
+	}
 
 	func stopProgressUpdating() {
-		endProgressBarAnimation()
-		progressBarAnimating = false
+		if progressBarAnimating {
+			endProgressBarAnimation()
+		}
 
 		// Invalidate the timer on the same run loop that it was created on.
 		async_main {
@@ -757,15 +818,32 @@ extension AudioPlayerViewController {
 	/**
 	Stop the animation in all sublayers of the progress bar.
 	*/
+//	func endProgressBarAnimation() {
+//		guard let layers = progressBar.layer.sublayers else {
+//			return
+//		}
+//		CATransaction.begin()
+//		for layer in layers {
+//			layer.removeAllAnimations()
+//		}
+//		CATransaction.commit()
+//	}
+
 	func endProgressBarAnimation() {
-		guard let layers = progressBar.layer.sublayers else {
-			return
-		}
-		CATransaction.begin()
-		for layer in layers {
+		func removeLayerAnimations(layer: CALayer) {
 			layer.removeAllAnimations()
+			if let sublayers = layer.sublayers {
+				for sublayer in sublayers {
+					removeLayerAnimations(sublayer)
+				}
+			}
 		}
+
+		progressBarAnimating = false
+		CATransaction.begin()
+		removeLayerAnimations(progressBar.layer)
 		CATransaction.commit()
+
 	}
 
 	func startElapsedTimeTimer() {
@@ -804,7 +882,7 @@ extension AudioPlayerViewController {
 
 	func willResignActive(notification: NSNotification) {
 
-		setProgress(stopAnimation: true)
+		setProgressBarPosition()
 
 		// Listen for foregrounding event, so that progress bar updates will be triggered.
 		NSNotificationCenter.defaultCenter().addObserver(
@@ -816,6 +894,11 @@ extension AudioPlayerViewController {
 
 	func willEnterForeground(notification: NSNotification) {
 		setProgress()
+
+		NSNotificationCenter.defaultCenter().removeObserver(
+			self,
+			name: UIApplicationWillEnterForegroundNotification,
+			object: nil)
 	}
 	
 }
