@@ -636,6 +636,13 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	func audioStreamingDidLosePermissionForPlayback(audioStreaming: SPTAudioStreamingController!) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 
+		guard !AVAudioSession.sharedInstance().otherAudioPlaying else {
+			// If permission was lost and another application on this device is now playing audio,
+			// it's presumably the Spotify application, and it doesn't make sense to show an alert
+			// in this case
+			return
+		}
+
 		Utility.presentAlert(
 			"Lost playback permission",
 			message: "This usually happens if your Spotify account is being used on another device."
