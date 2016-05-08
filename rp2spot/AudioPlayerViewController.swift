@@ -486,7 +486,14 @@ extension AudioPlayerViewController {
 
 		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .Began {
 			pausePlaying()
-			pausedDueToAudioInterruption = true
+
+			// The pausedDueToAudioInterruption flag is used to determine whether audio should restart
+			// after the interruption has finished.  If the AVAudioSessionInterruption was triggered
+			// due to another app starting to play music, we do not want to re-start playing after
+			// the other app finishes.
+			if !AVAudioSession.sharedInstance().otherAudioPlaying {
+				pausedDueToAudioInterruption = true
+			}
 		} else {
 			if pausedDueToAudioInterruption && status == .Active {
 				pausedDueToAudioInterruption = false
@@ -896,6 +903,7 @@ extension AudioPlayerViewController {
 	func willResignActive(notification: NSNotification) {
 
 		setProgressBarPosition()
+		stopProgressUpdating()
 
 		// Listen for foregrounding event, so that progress bar updates will be triggered.
 		NSNotificationCenter.defaultCenter().addObserver(
@@ -906,7 +914,9 @@ extension AudioPlayerViewController {
 	}
 
 	func willEnterForeground(notification: NSNotification) {
+		print("isPlaying: \(spotify.player.isPlaying)")
 		setProgress()
+		updateUI(isPlaying: spotify.player.isPlaying)
 
 		NSNotificationCenter.defaultCenter().removeObserver(
 			self,
