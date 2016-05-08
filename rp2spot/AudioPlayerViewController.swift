@@ -752,6 +752,7 @@ extension AudioPlayerViewController {
 			stopProgressUpdating()
 
 		case .Ended:
+			// TODO: spotify ios-sdk bug here when trying to seek after having paused at last 1-2 seconds before track end?
 			spotify.player.seekToOffset(offset) { error in
 				self.setElapsedTimeValue(offset)
 				self.setProgress()
