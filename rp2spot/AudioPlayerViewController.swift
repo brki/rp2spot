@@ -758,7 +758,9 @@ extension AudioPlayerViewController {
 			return
 		}
 
-		startElapsedTimeTimer()
+		async_main {
+			self.startElapsedTimeTimer()
+		}
 
 		guard progressBarAnimationRequested == false else {
 			return
@@ -768,7 +770,6 @@ extension AudioPlayerViewController {
 		async_main {
 
 			if self.progressBarAnimationRequested {
-				print("starting animation")
 				self.progressBarAnimationRequested = false
 				self.progressBarAnimating = true
 				let remainder = self.spotify.player.currentTrackDuration - self.spotify.player.currentPlaybackPosition
@@ -790,7 +791,6 @@ extension AudioPlayerViewController {
 	and stops any progress bar animation that might be running.
 	*/
 	func setProgressBarPosition() {
-		print ("setProgressBarPosition")
 		let duration = spotify.player.currentTrackDuration
 		let position = spotify.player.currentPlaybackPosition
 		let progress = Float(position / duration)
@@ -799,7 +799,6 @@ extension AudioPlayerViewController {
 
 		if progressBarAnimating {
 			endProgressBarAnimation()
-			print ("ending")
 		}
 	}
 
@@ -818,17 +817,6 @@ extension AudioPlayerViewController {
 	/**
 	Stop the animation in all sublayers of the progress bar.
 	*/
-//	func endProgressBarAnimation() {
-//		guard let layers = progressBar.layer.sublayers else {
-//			return
-//		}
-//		CATransaction.begin()
-//		for layer in layers {
-//			layer.removeAllAnimations()
-//		}
-//		CATransaction.commit()
-//	}
-
 	func endProgressBarAnimation() {
 		func removeLayerAnimations(layer: CALayer) {
 			layer.removeAllAnimations()
@@ -872,7 +860,6 @@ extension AudioPlayerViewController {
 	}
 
 	func showElapsedTime(sender: AnyObject? = nil) {
-		print("tick")
 		elapsedTrackTimeLabel.text = formatTrackTime(spotify.player.currentPlaybackPosition)
 	}
 
