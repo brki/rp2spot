@@ -27,6 +27,10 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var progressBarContainer: UIView!
 	@IBOutlet weak var trackDurationLabel: UILabel!
 	@IBOutlet weak var elapsedTrackTimeLabel: UILabel!
+
+	var progressBarPanGestureRecognizer: UIPanGestureRecognizer?
+	var progressBarTapGestureRecognizer: UITapGestureRecognizer?
+
 	var playlist = AudioPlayerPlaylist(list:[])
 
 	var spotify = SpotifyClient.sharedInstance
@@ -546,6 +550,9 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			return
 		}
 
+		// Cancel any currently-being-recognized pan gesture:
+		progressBarPanGestureRecognizer?.cancel()
+
 		playlist.setCurrentTrack(shortTrackId)
 		updateNowPlayingInfo(shortTrackId)
 		setProgress(updateTrackDuration: true)
@@ -707,12 +714,11 @@ extension AudioPlayerViewController {
 	Add gesture recognizers for tapping and panning on the progress bar.
 	*/
 	func addProgressBarGestureRecognizers() {
-		progressBarContainer.addGestureRecognizer(
-			UITapGestureRecognizer(target: self, action: #selector(self.progressBarContainerTapped(_:)))
-		)
-		progressBarContainer.addGestureRecognizer(
-			UIPanGestureRecognizer(target: self, action: #selector(self.progressBarContainerPanned(_:)))
-		)
+		progressBarTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.progressBarContainerTapped(_:)))
+		progressBarPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.progressBarContainerPanned(_:)))
+
+		progressBarContainer.addGestureRecognizer(progressBarTapGestureRecognizer!)
+		progressBarContainer.addGestureRecognizer(progressBarPanGestureRecognizer!)
 	}
 
 	func progressBarContainerTapped(recognizer: UITapGestureRecognizer) {
@@ -726,17 +732,26 @@ extension AudioPlayerViewController {
 		// Update the position before cancelling the animation, so that it
 		// doesn't jump back from the end.
 		progressBar.progress = Float(recognizer.locationInView(progressBar).x / progressBar.bounds.width)
+		let offset = spotify.player.currentTrackDuration * Double(progressBar.progress)
 		switch (recognizer.state) {
 		case .Began:
-			endProgressBarAnimation()
+			stopProgressUpdating()
+
 		case .Ended:
-			let offset = spotify.player.currentTrackDuration * Double(progressBar.progress)
 			spotify.player.seekToOffset(offset) { error in
-				print("TODO: do something about an error while trying to seek to a new position")
-				self.showElapsedTime()
+				self.setElapsedTimeValue(offset)
 				self.setProgress()
+				if let err = error {
+					print("Error while trying to seek to offset: \(offset): \(err)")
+				}
 			}
-			print("Finished panning")
+
+		case .Changed:
+			self.setElapsedTimeValue(offset)
+
+		case .Cancelled, .Failed:
+			setProgress()
+
 		default:
 			break
 		}
@@ -860,7 +875,11 @@ extension AudioPlayerViewController {
 	}
 
 	func showElapsedTime(sender: AnyObject? = nil) {
-		elapsedTrackTimeLabel.text = formatTrackTime(spotify.player.currentPlaybackPosition)
+		setElapsedTimeValue(spotify.player.currentPlaybackPosition)
+	}
+
+	func setElapsedTimeValue(elapsed: Double) {
+		elapsedTrackTimeLabel.text = formatTrackTime(elapsed)
 	}
 
 	func formatTrackTime(interval: NSTimeInterval) -> String {

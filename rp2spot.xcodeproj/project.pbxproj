@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */; };
+		D31AAFEC1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */; };
 		D32EA3731CAAB2440024B598 /* UserSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */; };
 		D32FAC751CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32FAC741CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift */; };
 		D32FAC771CA42CEA0030AC71 /* ConcurrentOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32FAC761CA42CEA0030AC71 /* ConcurrentOperation.swift */; };
@@ -78,6 +79,7 @@
 
 /* Begin PBXFileReference section */
 		D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuthRenewalOperation.swift; sourceTree = "<group>"; };
+		D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIGestureRecognizer+extension.swift"; sourceTree = "<group>"; };
 		D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsViewController.swift; sourceTree = "<group>"; };
 		D32FAC741CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyTrackMetadataOperation.swift; sourceTree = "<group>"; };
 		D32FAC761CA42CEA0030AC71 /* ConcurrentOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConcurrentOperation.swift; sourceTree = "<group>"; };
@@ -184,6 +186,7 @@
 				D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */,
 				D345FC461C8CDDA300F118B3 /* Array+extension.swift */,
 				D378C50F1C9D8A87006A9BF0 /* String+extension.swift */,
+				D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */,
 			);
 			name = "Core Extensions";
 			sourceTree = "<group>";
@@ -533,6 +536,7 @@
 				D38839FF1C974B03001C4FE3 /* PlaylistTableViewCell.swift in Sources */,
 				D3FC5E6D1C70A1C500443F68 /* RadioParadise.swift in Sources */,
 				D39DA4801C91FD9D00FC12F8 /* PlayedSongDataManager.swift in Sources */,
+				D31AAFEC1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift in Sources */,
 				D32EA3731CAAB2440024B598 /* UserSettingsViewController.swift in Sources */,
 				D3C98A061C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift in Sources */,
 				D3FC5E671C6F5C0C00443F68 /* Constant.swift in Sources */,
