@@ -738,8 +738,15 @@ extension AudioPlayerViewController {
 	func progressBarContainerTapped(recognizer: UITapGestureRecognizer) {
 		let progress = Float(recognizer.locationInView(progressBar).x / progressBar.bounds.width)
 		self.progressBar.setProgress(progress, animated: true)
+		let offset = spotify.player.currentTrackDuration * Double(progressBar.progress)
 		endProgressBarAnimation()
-		print("Tapped")
+		spotify.player.seekToOffset(offset) { error in
+			self.setElapsedTimeValue(offset)
+			self.setProgress()
+			if let err = error {
+				print("Error in progressBarContainerTapped while trying to seek to offset: \(offset): \(err)")
+			}
+		}
 	}
 
 	func progressBarContainerPanned(recognizer: UIPanGestureRecognizer) {
@@ -757,7 +764,7 @@ extension AudioPlayerViewController {
 				self.setElapsedTimeValue(offset)
 				self.setProgress()
 				if let err = error {
-					print("Error while trying to seek to offset: \(offset): \(err)")
+					print("Error in progressBarContainerPanned while trying to seek to offset: \(offset): \(err)")
 				}
 			}
 
