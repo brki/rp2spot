@@ -177,7 +177,7 @@
                     <navigationItem key="navigationItem" id="eoS-O3-9vu">
                         <barButtonItem key="rightBarButtonItem" title="Spotify Playlist" id="VtV-LV-oLt">
                             <connections>
-                                <segue destination="e46-wt-Ss3" kind="presentation" identifier="BrowserToPlaylistCreation" id="e2i-BU-HdT"/>
+                                <segue destination="e46-wt-Ss3" kind="presentation" identifier="BrowserToPlaylistCreation" modalTransitionStyle="flipHorizontal" id="e2i-BU-HdT"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
