@@ -29,7 +29,6 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var elapsedTrackTimeLabel: UILabel!
 
 	var progressIndicatorPanGestureRecognizer: UIPanGestureRecognizer?
-	var progressIndicatorTapGestureRecognizer: UITapGestureRecognizer?
 
 	var playlist = AudioPlayerPlaylist(list:[])
 
@@ -737,28 +736,12 @@ extension AudioPlayerViewController {
 	}
 
 	/**
-	Add gesture recognizers for tapping and panning on the progress indicator.
+	Add gesture recognizer for panning on the progress indicator.
 	*/
 	func addprogressIndicatorGestureRecognizers() {
-		progressIndicatorTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.progressIndicatorContainerTapped(_:)))
 		progressIndicatorPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.progressIndicatorContainerPanned(_:)))
 
-		progressIndicatorContainer.addGestureRecognizer(progressIndicatorTapGestureRecognizer!)
 		progressIndicatorContainer.addGestureRecognizer(progressIndicatorPanGestureRecognizer!)
-	}
-
-	func progressIndicatorContainerTapped(recognizer: UITapGestureRecognizer) {
-		let progress = Float(recognizer.locationInView(progressIndicator).x / progressIndicator.bounds.width)
-		self.progressIndicator.setValue(progress, animated: true)
-		let offset = spotify.player.currentTrackDuration * Double(progress)
-		endprogressIndicatorAnimation()
-		spotify.player.seekToOffset(offset) { error in
-			self.setElapsedTimeValue(offset)
-			self.setProgress()
-			if let err = error {
-				print("Error in progressIndicatorContainerTapped while trying to seek to offset: \(offset): \(err)")
-			}
-		}
 	}
 
 	func progressIndicatorContainerPanned(recognizer: UIPanGestureRecognizer) {
