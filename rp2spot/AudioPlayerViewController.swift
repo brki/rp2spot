@@ -23,13 +23,13 @@ class AudioPlayerViewController: UIViewController {
 	@IBOutlet weak var previousTrackButton: UIButton!
 	@IBOutlet weak var activityIndicator: UIActivityIndicatorView!
 
-	@IBOutlet weak var progressBar: UIProgressView!
-	@IBOutlet weak var progressBarContainer: UIView!
+	@IBOutlet weak var progressIndicator: UISlider!
+	@IBOutlet weak var progressIndicatorContainer: UIView!
 	@IBOutlet weak var trackDurationLabel: UILabel!
 	@IBOutlet weak var elapsedTrackTimeLabel: UILabel!
 
-	var progressBarPanGestureRecognizer: UIPanGestureRecognizer?
-	var progressBarTapGestureRecognizer: UITapGestureRecognizer?
+	var progressIndicatorPanGestureRecognizer: UIPanGestureRecognizer?
+	var progressIndicatorTapGestureRecognizer: UITapGestureRecognizer?
 
 	var playlist = AudioPlayerPlaylist(list:[])
 
@@ -51,14 +51,22 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	var progressBarAnimating = false
-	var progressBarAnimationRequested = false
+	var progressIndicatorAnimating = false
+	var progressIndicatorAnimationRequested = false
+	var progressIndicatorPanGestureInvalid = false
 	var elapsedTimeTimer: NSTimer?
 
 	var delegate: AudioStatusObserver?
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
+
+		// Set a smaller-than-default thumbnail image, and disable user interaction
+		// (user interaction will be handled by a gesture recognizer so that it works
+		// well while the thumb image is animating).
+		progressIndicator.setThumbImage(UIImage(named: "slider-thumb"), forState: .Normal)
+		self.progressIndicator.userInteractionEnabled = false
+
 		spotify.player.delegate = self
 		spotify.player.playbackDelegate = self
 
@@ -81,7 +89,7 @@ class AudioPlayerViewController: UIViewController {
 		// Listen for remote control events.
 		registerForRemoteEvents()
 
-		initProgressBar()
+		initprogressIndicator()
 	}
 
 	override func viewWillAppear(animated: Bool) {
@@ -91,15 +99,15 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	override func viewWillDisappear(animated: Bool) {
-		setProgressBarPosition()
+		setProgressIndicatorPosition()
 		stopProgressUpdating()
 		super.viewWillDisappear(animated)
 	}
 
 	override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
 
-		// No special treatment needed unless the progress bar is currently animating.
-		guard self.progressBarAnimating else {
+		// No special treatment needed unless the progress indicator is currently animating.
+		guard self.progressIndicatorAnimating else {
 			return
 		}
 
@@ -109,16 +117,16 @@ class AudioPlayerViewController: UIViewController {
 		//   it should be 1/4 finished, it appears as if it's 1/2 finished).
 		// * horizontal -> vertical rotation: the progress sometimes jumps backwards, even
 		//   to the point where the progress indicator is outside of the bounds of the
-		//   progress bar.
+		//   progress indicator.
 
-		// The progress point is currently 1.0, and the bar is animating towards that
-		// position.  Stop the animation and set the progress bar position to the current
+		// The progress point is currently 1.0, and the thumb/bar are animating towards that
+		// position.  Stop the animation and set the progress indicator position to the current
 		// progress point according to the position in the track.
 		// If layoutIfNeeded() is not called, the progress appears to be 100% complete at
 		// the beginning of the rotation animation, and animates backwards to the real 
 		// current progress point.
-		setProgressBarPosition()
-		progressBar.layoutIfNeeded()
+		setProgressIndicatorPosition()
+		progressIndicator.layoutIfNeeded()
 
  		coordinator.animateAlongsideTransition(
 			nil,
@@ -207,7 +215,9 @@ class AudioPlayerViewController: UIViewController {
 			self.spotify.player.skipNext() { error in
 				self.hideActivityIndicator()
 				self.updateNowPlayingInfo()
-				print("Error when trying to skip to next track: \(error)")
+				if let err = error {
+					print("Error when trying to skip to next track: \(err)")
+				}
 			}
 		}
 	}
@@ -241,7 +251,9 @@ class AudioPlayerViewController: UIViewController {
 			self.spotify.player.skipPrevious() { error in
 				self.hideActivityIndicator()
 				self.updateNowPlayingInfo()
-				print("Error when trying to skip to previous track: \(error)")
+				if let err = error {
+					print("Error when trying to skip to previous track: \(err)")
+				}
 			}
 		}
 	}
@@ -558,7 +570,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		}
 
 		// Cancel any currently-being-recognized pan gesture:
-		progressBarPanGestureRecognizer?.cancel()
+		progressIndicatorPanGestureRecognizer?.cancel()
 
 		playlist.setCurrentTrack(shortTrackId)
 		updateNowPlayingInfo(shortTrackId)
@@ -710,52 +722,65 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	}
 }
 
-// MARK: progress bar control
+// MARK: progress inidicator control
 extension AudioPlayerViewController {
 
-	func initProgressBar() {
-		// Listen for backgrounding event, so that progress bar updates can be stopped.
+	func initprogressIndicator() {
+		// Listen for backgrounding event, so that progress indicator updates can be stopped.
 		NSNotificationCenter.defaultCenter().addObserver(
 			self,
 			selector: #selector(self.willResignActive(_:)),
 			name: UIApplicationWillResignActiveNotification,
 			object: nil)
 
-		addProgressBarGestureRecognizers()
+		addprogressIndicatorGestureRecognizers()
 	}
 
 	/**
-	Add gesture recognizers for tapping and panning on the progress bar.
+	Add gesture recognizers for tapping and panning on the progress indicator.
 	*/
-	func addProgressBarGestureRecognizers() {
-		progressBarTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.progressBarContainerTapped(_:)))
-		progressBarPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.progressBarContainerPanned(_:)))
+	func addprogressIndicatorGestureRecognizers() {
+		progressIndicatorTapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.progressIndicatorContainerTapped(_:)))
+		progressIndicatorPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.progressIndicatorContainerPanned(_:)))
 
-		progressBarContainer.addGestureRecognizer(progressBarTapGestureRecognizer!)
-		progressBarContainer.addGestureRecognizer(progressBarPanGestureRecognizer!)
+		progressIndicatorContainer.addGestureRecognizer(progressIndicatorTapGestureRecognizer!)
+		progressIndicatorContainer.addGestureRecognizer(progressIndicatorPanGestureRecognizer!)
 	}
 
-	func progressBarContainerTapped(recognizer: UITapGestureRecognizer) {
-		let progress = Float(recognizer.locationInView(progressBar).x / progressBar.bounds.width)
-		self.progressBar.setProgress(progress, animated: true)
-		let offset = spotify.player.currentTrackDuration * Double(progressBar.progress)
-		endProgressBarAnimation()
+	func progressIndicatorContainerTapped(recognizer: UITapGestureRecognizer) {
+		let progress = Float(recognizer.locationInView(progressIndicator).x / progressIndicator.bounds.width)
+		self.progressIndicator.setValue(progress, animated: true)
+		let offset = spotify.player.currentTrackDuration * Double(progress)
+		endprogressIndicatorAnimation()
 		spotify.player.seekToOffset(offset) { error in
 			self.setElapsedTimeValue(offset)
 			self.setProgress()
 			if let err = error {
-				print("Error in progressBarContainerTapped while trying to seek to offset: \(offset): \(err)")
+				print("Error in progressIndicatorContainerTapped while trying to seek to offset: \(offset): \(err)")
 			}
 		}
 	}
 
-	func progressBarContainerPanned(recognizer: UIPanGestureRecognizer) {
-		// Update the position before cancelling the animation, so that it
-		// doesn't jump back from the end.
-		progressBar.progress = Float(recognizer.locationInView(progressBar).x / progressBar.bounds.width)
-		let offset = spotify.player.currentTrackDuration * Double(progressBar.progress)
+	func progressIndicatorContainerPanned(recognizer: UIPanGestureRecognizer) {
+
+		var pannedProgress = Float(recognizer.locationInView(progressIndicator).x / progressIndicator.bounds.width)
+		pannedProgress = max(0.0, min(1.0, pannedProgress))
+		let offset = spotify.player.currentTrackDuration * Double(pannedProgress)
+
 		switch (recognizer.state) {
 		case .Began:
+			// If the pan is not starting over the thumb image, cancel the gesture recognizer.
+			let trackDuration = spotify.player.currentTrackDuration
+			let currentPosition = Float(spotify.player.currentPlaybackPosition / trackDuration)
+			guard abs(currentPosition - pannedProgress) < 0.15 else {
+				progressIndicatorPanGestureInvalid = true
+				progressIndicatorPanGestureRecognizer?.cancel()
+				return
+			}
+
+			// Update the position before cancelling the animation, so that it
+			// doesn't jump back from the end.
+			progressIndicator.value = pannedProgress
 			stopProgressUpdating()
 
 		case .Ended:
@@ -764,15 +789,22 @@ extension AudioPlayerViewController {
 				self.setElapsedTimeValue(offset)
 				self.setProgress()
 				if let err = error {
-					print("Error in progressBarContainerPanned while trying to seek to offset: \(offset): \(err)")
+					print("Error in progressIndicatorContainerPanned while trying to seek to offset: \(offset): \(err)")
 				}
 			}
 
 		case .Changed:
+			progressIndicator.value = pannedProgress
 			self.setElapsedTimeValue(offset)
 
 		case .Cancelled, .Failed:
-			setProgress()
+			if progressIndicatorPanGestureInvalid {
+				// The pan gesture was marked invalid as soon as recognized, and the animation was not interrupted.
+				progressIndicatorPanGestureInvalid = false
+			} else {
+				// The animation was interrupted, ensure that it starts again.
+				setProgress()
+			}
 
 		default:
 			break
@@ -781,7 +813,7 @@ extension AudioPlayerViewController {
 
 	func setProgress(updateTrackDuration updateTrackDuration: Bool = false) {
 
-		setProgressBarPosition()
+		setProgressIndicatorPosition()
 
 		async_main {
 			self.showElapsedTime()
@@ -799,24 +831,24 @@ extension AudioPlayerViewController {
 			self.startElapsedTimeTimer()
 		}
 
-		guard progressBarAnimationRequested == false else {
+		guard progressIndicatorAnimationRequested == false else {
 			return
 		}
 
-		progressBarAnimationRequested = true
+		progressIndicatorAnimationRequested = true
 		async_main {
 
-			if self.progressBarAnimationRequested {
-				self.progressBarAnimationRequested = false
-				self.progressBarAnimating = true
+			if self.progressIndicatorAnimationRequested {
+				self.progressIndicatorAnimationRequested = false
+				self.progressIndicatorAnimating = true
 				let remainder = self.spotify.player.currentTrackDuration - self.spotify.player.currentPlaybackPosition
 
 				UIView.animateWithDuration(
 					remainder,
 					delay: 0.0,
-					options: .CurveLinear,
+					options: [.CurveLinear],
 					animations: {
-						self.progressBar.setProgress(1.0, animated: true)
+						self.progressIndicator.setValue(1.0, animated: true)
 					},
 					completion: nil)
 			}
@@ -824,24 +856,24 @@ extension AudioPlayerViewController {
 	}
 
 	/**
-	Sets the progress bar position based on the the spotify player's progress, 
-	and stops any progress bar animation that might be running.
+	Sets the progress indicator position based on the the spotify player's progress,
+	and stops any progress indicator animation that might be running.
 	*/
-	func setProgressBarPosition() {
+	func setProgressIndicatorPosition() {
 		let duration = spotify.player.currentTrackDuration
 		let position = spotify.player.currentPlaybackPosition
 		let progress = Float(position / duration)
 
-		progressBar.progress = progress
+		progressIndicator.value = progress
 
-		if progressBarAnimating {
-			endProgressBarAnimation()
+		if progressIndicatorAnimating {
+			endprogressIndicatorAnimation()
 		}
 	}
 
 	func stopProgressUpdating() {
-		if progressBarAnimating {
-			endProgressBarAnimation()
+		if progressIndicatorAnimating {
+			endprogressIndicatorAnimation()
 		}
 
 		// Invalidate the timer on the same run loop that it was created on.
@@ -852,9 +884,9 @@ extension AudioPlayerViewController {
 	}
 
 	/**
-	Stop the animation in all sublayers of the progress bar.
+	Stop the animation in all sublayers of the progress indicator.
 	*/
-	func endProgressBarAnimation() {
+	func endprogressIndicatorAnimation() {
 		func removeLayerAnimations(layer: CALayer) {
 			layer.removeAllAnimations()
 			if let sublayers = layer.sublayers {
@@ -864,9 +896,9 @@ extension AudioPlayerViewController {
 			}
 		}
 
-		progressBarAnimating = false
+		progressIndicatorAnimating = false
 		CATransaction.begin()
-		removeLayerAnimations(progressBar.layer)
+		removeLayerAnimations(progressIndicator.layer)
 		CATransaction.commit()
 
 	}
@@ -910,10 +942,10 @@ extension AudioPlayerViewController {
 
 	func willResignActive(notification: NSNotification) {
 
-		setProgressBarPosition()
+		setProgressIndicatorPosition()
 		stopProgressUpdating()
 
-		// Listen for foregrounding event, so that progress bar updates will be triggered.
+		// Listen for foregrounding event, so that progress indicator updates will be triggered.
 		NSNotificationCenter.defaultCenter().addObserver(
 			self,
 			selector: #selector(self.willEnterForeground(_:)),
