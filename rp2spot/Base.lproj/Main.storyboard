@@ -614,16 +614,19 @@
                                 <rect key="frame" x="20" y="76" width="560" height="44"/>
                                 <subviews>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--:--" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="RLU-0j-ZCF" userLabel="Elapsed Time">
-                                        <rect key="frame" x="0.0" y="12" width="36" height="21"/>
+                                        <rect key="frame" x="0.0" y="12" width="40" height="21"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="40" id="ZoG-Ff-Ear"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
                                     </label>
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xYV-j6-y7e" userLabel="Progress container">
-                                        <rect key="frame" x="46" y="12" width="468" height="21"/>
+                                        <rect key="frame" x="47" y="12" width="466" height="21"/>
                                         <subviews>
                                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="YWM-XY-yjo" userLabel="Progress Indicator">
-                                                <rect key="frame" x="-2" y="-5" width="472" height="31"/>
+                                                <rect key="frame" x="-2" y="-5" width="470" height="31"/>
                                                 <color key="minimumTrackTintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
                                                 <color key="maximumTrackTintColor" red="0.1575380965" green="0.88926373110000001" blue="0.057973459179999999" alpha="1" colorSpace="calibratedRGB"/>
                                                 <color key="thumbTintColor" white="0.0" alpha="1" colorSpace="calibratedWhite"/>
@@ -638,7 +641,10 @@
                                         </constraints>
                                     </view>
                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="--:--" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="57e-5R-oNb" userLabel="Total Time">
-                                        <rect key="frame" x="524" y="12" width="36" height="21"/>
+                                        <rect key="frame" x="520" y="12" width="40" height="21"/>
+                                        <constraints>
+                                            <constraint firstAttribute="width" constant="40" id="uVw-ri-1Ds"/>
+                                        </constraints>
                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                         <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                         <nil key="highlightedColor"/>
@@ -648,9 +654,9 @@
                                 <constraints>
                                     <constraint firstItem="57e-5R-oNb" firstAttribute="trailing" secondItem="E4Q-eW-7lM" secondAttribute="trailing" id="HEo-8M-BP8"/>
                                     <constraint firstItem="xYV-j6-y7e" firstAttribute="centerY" secondItem="E4Q-eW-7lM" secondAttribute="centerY" id="Qx6-tv-FlW"/>
-                                    <constraint firstItem="57e-5R-oNb" firstAttribute="leading" secondItem="xYV-j6-y7e" secondAttribute="trailing" constant="10" id="VhP-n1-9TX"/>
+                                    <constraint firstItem="57e-5R-oNb" firstAttribute="leading" secondItem="xYV-j6-y7e" secondAttribute="trailing" constant="7" id="VhP-n1-9TX"/>
                                     <constraint firstAttribute="height" constant="44" id="XhY-Du-zkj"/>
-                                    <constraint firstItem="xYV-j6-y7e" firstAttribute="leading" secondItem="RLU-0j-ZCF" secondAttribute="trailing" constant="10" id="ca3-tH-zbz"/>
+                                    <constraint firstItem="xYV-j6-y7e" firstAttribute="leading" secondItem="RLU-0j-ZCF" secondAttribute="trailing" constant="7" id="ca3-tH-zbz"/>
                                     <constraint firstItem="RLU-0j-ZCF" firstAttribute="centerY" secondItem="E4Q-eW-7lM" secondAttribute="centerY" id="i8Y-4c-iOF"/>
                                     <constraint firstItem="RLU-0j-ZCF" firstAttribute="leading" secondItem="E4Q-eW-7lM" secondAttribute="leading" id="k86-3f-4nu"/>
                                     <constraint firstItem="57e-5R-oNb" firstAttribute="centerY" secondItem="E4Q-eW-7lM" secondAttribute="centerY" id="muW-Ef-yew"/>
