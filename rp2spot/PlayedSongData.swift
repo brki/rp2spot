@@ -16,43 +16,44 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		case small, large
 	}
 	
-	// Note, there is a bug in Swift versions < 2.2 that prohibits returning nil in a failable initializer
-	// before all non-optional properties have been initialized.  For this reason, these properties are declared
-	// as vars, and the non-optionals as implicitly unwrapped optionals:
-	// (ref: https://groups.google.com/d/msg/swift-language/78A0i1vDasc/hWnaDleYNf0J )
-	var title: String!
-	var playedAt: Foundation.Date!
-	var albumTitle: String!
+	var title: String
+	var playedAt: Foundation.Date
+	var albumTitle: String
 	var asin: String?
 	var largeImageURL: String?
 	var smallImageURL: String?
 	var spotifyTrackId: String?
-	var radioParadiseSongId: NSNumber!
-	var artistName: String!
+	var radioParadiseSongId: NSNumber
+	var artistName: String
 
-	init?(response: HTTPURLResponse, representation: AnyObject) {
+	init?(response: HTTPURLResponse, representation: Any) {
 
-		guard let title = representation.value(forKeyPath: "title") as? String else {
+		guard let representation = representation as? [String: Any] else {
+			print("PlayedSongData: representation is not of expected form [String: Any]")
+			return nil
+		}
+
+		guard let title = representation["title"] as? String else {
 			print("PlayedSongData: unable to extract title")
 			return nil
 		}
 
-		guard let playedAt = Date.sharedInstance.dateFromRPDateString(representation.value(forKeyPath: "played_at") as! String) else {
+		guard let playedAt = Date.sharedInstance.dateFromRPDateString(representation["played_at"] as! String) else {
 			print("PlayedSongData: unable to extract playedAt")
 			return nil
 		}
 
-		guard let albumTitle = representation.value(forKeyPath: "album_title") as? String else {
+		guard let albumTitle = representation["album_title"] as? String else {
 			print("PlayedSongData: unable to extract albumTitle")
 			return nil
 		}
 
-		guard let radioParadiseSongId = representation.value(forKeyPath: "rp_song_id") as? NSNumber else {
+		guard let radioParadiseSongId = representation["rp_song_id"] as? NSNumber else {
 			print("PlayedSongData: unable to extract radioParadiseSongId")
 			return nil
 		}
 
-		guard let artistName = representation.value(forKeyPath: "artist_name") as? String else {
+		guard let artistName = representation["artist_name"] as? String else {
 			print("PlayedSongData: unable to extract artistName")
 			return nil
 		}
@@ -63,10 +64,10 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.radioParadiseSongId = radioParadiseSongId
 		self.artistName = artistName
 
-		self.asin = representation.value(forKeyPath: "asin") as? String ?? nil
-		self.spotifyTrackId = representation.value(forKeyPath: "spotify_track_id") as? String ?? nil
-		self.smallImageURL = representation.value(forKeyPath: "spotify_album_img_small_url") as? String ?? nil
-		self.largeImageURL = representation.value(forKeyPath: "spotify_album_img_large_url") as? String ?? nil
+		self.asin = representation["asin"] as? String ?? nil
+		self.spotifyTrackId = representation["spotify_track_id"] as? String ?? nil
+		self.smallImageURL = representation["spotify_album_img_small_url"] as? String ?? nil
+		self.largeImageURL = representation["spotify_album_img_large_url"] as? String ?? nil
 	}
 
 	/**

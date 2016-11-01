@@ -50,12 +50,11 @@ struct RadioParadise {
 
 		let url = Constant.RADIO_PARADISE_HISTORY_URL_BASE + region + "/"
 
-		let request = Alamofire.request(url, parameters: params).responseCollection() { (response: Response<[PlayedSongData], NSError>) in
-			switch response.result {
-			case .success(let playedSongs):
-				handler?(playedSongs: playedSongs, error:nil, response: response.response)
-			case .failure(let error):
-				handler?(playedSongs: nil, error:error, response: response.response)
+		let request = Alamofire.request(url, parameters: params).responseCollection() { (response: DataResponse<[PlayedSongData]>) in
+			if let playedSongs = response.result.value {
+				handler?(playedSongs, nil, response.response)
+			} else {
+				handler?(nil, response.result.error as NSError?, response.response)
 			}
 		}
 		return request
