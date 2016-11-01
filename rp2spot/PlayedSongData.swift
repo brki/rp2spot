@@ -77,7 +77,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	*/
 	init(song: PlayedSong) {
 		self.title = song.title
-		self.playedAt = song.playedAt as Date!
+		self.playedAt = song.playedAt
 		self.albumTitle = song.albumTitle
 		self.radioParadiseSongId = song.radioParadiseSongId
 		self.artistName = song.artistName

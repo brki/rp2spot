@@ -37,12 +37,12 @@ class PlayedSongDataManager {
 		self.context = context
 	}
 
-	lazy var fetchedResultsController: NSFetchedResultsController = {
+	lazy var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult> = {
 		// TODO: clarify why conversion added this:
 		// () -> <<error type>> in
 		var frc: NSFetchedResultsController<NSFetchRequestResult>!
 		self.context.performAndWait {
-			let fetchRequest = NSFetchRequest(entityName: "PlayedSong")
+			let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "PlayedSong")
 			fetchRequest.sortDescriptors = [NSSortDescriptor(key: "playedAt", ascending: true)]
 			frc = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: self.context, sectionNameKeyPath: nil, cacheName: nil)
 
@@ -141,7 +141,7 @@ class PlayedSongDataManager {
 	}
 
 	func extremityDateInList(newest: Bool = true) -> Foundation.Date? {
-		return extremitySongData(newest: newest)?.playedAt as Date?
+		return extremitySongData(newest: newest)?.playedAt
 	}
 
 	func hasEarlierHistory() -> Bool {
@@ -195,7 +195,7 @@ class PlayedSongDataManager {
 			completionHandler?(true, songHistory.count, nil)
 		}
 
-		RadioParadise.fetchHistory(userSettings.spotifyRegionValue, date: date, vectorCount: vectorCount, handler: songProcessingHandler)
+		_ = RadioParadise.fetchHistory(userSettings.spotifyRegionValue, date: date, vectorCount: vectorCount, handler: songProcessingHandler)
 	}
 
 	/**
@@ -267,7 +267,7 @@ class PlayedSongDataManager {
 				return
 			}
 
-			let toBeDeleted: CountableRange<Int>
+			let toBeDeleted: CountableClosedRange<Int>
 
 			if fromBottom {
 				toBeDeleted = (maxHistoryCount - 1)...(currentSongCount - 1)

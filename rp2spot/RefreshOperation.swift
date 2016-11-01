@@ -24,7 +24,7 @@ class RefreshOperation: ConcurrentOperation {
 			state = .Finished
 			return
 		}
-		target?.perform(selector)
+		_ = target?.perform(selector)
 	}
 
 	/**

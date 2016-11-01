@@ -15,7 +15,7 @@ class PlayedSong: NSManagedObject {
 	static func playedDuring(start: Foundation.Date, end: Foundation.Date, context: NSManagedObjectContext) -> [Foundation.Date: PlayedSong] {
 		let request = NSFetchRequest<NSFetchRequestResult>(entityName: "PlayedSong")
 		request.predicate = NSPredicate(format: "playedAt BETWEEN {%@, %@}", start as CVarArg, end as CVarArg)
-		var playTimes = [Foundation.Date: PlayedSong]()
+		var playTimes: [Foundation.Date: PlayedSong] = [:]
 		do {
 			if let songs = try context.fetch(request) as? [PlayedSong] {
 				for song in songs {
@@ -43,7 +43,7 @@ class PlayedSong: NSManagedObject {
 
 			guard onlyInserts else {
 				let existingPlayTimes = playedDuring(
-					start: songDataList.last!.playedAt as Date,
+					start: songDataList.last!.playedAt,
 					end: songDataList.first!.playedAt,
 					context: context)
 

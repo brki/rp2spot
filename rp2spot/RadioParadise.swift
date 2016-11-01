@@ -43,14 +43,14 @@ struct RadioParadise {
 	*/
 	static func fetchHistory(_ region: String, date: Foundation.Date, vectorCount: Int, handler: RPFetchHandler? = nil) -> Request {
 
-		let params: [String: AnyObject] = [
+		let params: [String: Any] = [
 			"base_time": Date.sharedInstance.toUTCString(date),
 			"count_vector": vectorCount,
 		]
 
 		let url = Constant.RADIO_PARADISE_HISTORY_URL_BASE + region + "/"
 
-		let request = Alamofire.request(.GET, url, parameters: params).responseCollection() { (response: Response<[PlayedSongData], NSError>) in
+		let request = Alamofire.request(url, parameters: params).responseCollection() { (response: Response<[PlayedSongData], NSError>) in
 			switch response.result {
 			case .success(let playedSongs):
 				handler?(playedSongs: playedSongs, error:nil, response: response.response)

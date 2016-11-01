@@ -46,7 +46,7 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 			}
 
 			guard error == nil else {
-				self.handler?(error, nil)
+				self.handler?(error! as NSError, nil)
 				self.state = .Finished
 				return
 			}

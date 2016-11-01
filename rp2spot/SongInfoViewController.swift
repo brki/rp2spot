@@ -46,7 +46,7 @@ class SongInfoViewController: UIViewController {
 		let imageURL = songInfo.imageURL(.small)
 		let placeHolderImage =  UIImage(named: "vinyl")
 		if let url = imageURL {
-			albumArtworkImageView.af_setImageWithURL(url, placeholderImage: placeHolderImage)
+			albumArtworkImageView.af_setImage(withURL: url, placeholderImage: placeHolderImage)
 		} else {
 			albumArtworkImageView.image = placeHolderImage
 		}
@@ -97,7 +97,11 @@ class SongInfoViewController: UIViewController {
 			async_main {
 				self.songTitleLabel.text = track.name
 				self.albumNameLabel.text = track.album.name
-				self.artistNameLabel.text = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joined(separator: ", ")
+				self.artistNameLabel.text = track.artists.filter(
+					{($0 as! SPTPartialArtist).name != nil}
+					).map(
+						{($0 as! SPTPartialArtist).name! }).joined(separator: ", "
+				)
 			}
 		}
 	}

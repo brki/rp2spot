@@ -85,16 +85,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 		Handle the callback from the authentication service. -[SPAuth -canHandleURL:]
 		helps us filter out URLs that aren't authentication URLs (i.e., URLs you use elsewhere in the application).
 		*/
-		if (auth.canHandle(url))! {
+		if (auth.canHandle(url)) {
 			auth.handleAuthCallback(withTriggeredAuthURL: url) { error, session in
 				guard error == nil else {
-					print("Auth error: \(error)")
-					SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
+					let err = error! as NSError
+					print("Auth error: \(err)")
+					SpotifyClient.sharedInstance.postSessionUpdateNotification(err)
 
 					// Handle a weird 'unknown error' in the authentication that's probably a bug in Spotify's ios-sdk (or in their Spotify application?).
 					// Refs: * https://github.com/spotify/ios-sdk/issues/631
 					//       * https://github.com/spotify/ios-sdk/issues/505
-					if error!.code == 0 {
+					if err.code == 0 {
 						Utility.presentAlert(
 							"Spotify authentication error",
 							message: "You may be able to work around this by opening the Spotify application and start playing any track that is not locally saved, and then come back to this app and try again."
@@ -125,11 +126,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 						}
 
 						// Send the session update notification.
-						SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
+						SpotifyClient.sharedInstance.postSessionUpdateNotification(nil)
 					}
 				} else {
 					// Send the session update notification.
-					SpotifyClient.sharedInstance.postSessionUpdateNotification(error)
+					SpotifyClient.sharedInstance.postSessionUpdateNotification(nil)
 				}
 			}
 			return true

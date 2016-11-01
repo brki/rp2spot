@@ -33,7 +33,11 @@ class PlainHistoryTableViewCell: UITableViewCell {
 		self.spotifyTrackId = song.spotifyTrackId
 
 		if let url = imageURL {
-			self.albumImageView.af_setImageWithURL(url, placeholderImage: placeHolderImage, filter: PlainHistoryTableViewCell.albumThumbnailFilter)
+			self.albumImageView.af_setImage(
+				withURL: url,
+				placeholderImage: placeHolderImage,
+				filter: PlainHistoryTableViewCell.albumThumbnailFilter
+			)
 		} else {
 			self.albumImageView.image = placeHolderImage
 		}

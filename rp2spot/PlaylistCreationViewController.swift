@@ -121,7 +121,11 @@ class PlaylistCreationViewController: UIViewController {
 					self.postLoginBlock = nil
 					self.tryCreatePlaylist(title, selectedTrackIds: selectedTrackIds)
 				}
-				NotificationCenter.default.addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
+				NotificationCenter.default.addObserver(
+					self,
+					selector: #selector(self.spotifySessionUpdated(_:)),
+					name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION), object: self.spotify
+				)
 				return
 			}
 
@@ -160,7 +164,7 @@ class PlaylistCreationViewController: UIViewController {
 		guard let postLogin = postLoginBlock else {
 			return
 		}
-		guard (spotify.auth.session.isValid())! else {
+		guard (spotify.auth.session.isValid()) else {
 			print("No valid session after session update: discarding postLogin block")
 			enableCreatePlaylistButtonIfValidTitlePresent(playlistTitle.text)
 			postLoginBlock = nil

@@ -419,7 +419,9 @@ class AudioPlayerViewController: UIViewController {
 			return
 		}
 
-		let artistNames = track.artists.filter({ ($0 as AnyObject).name != nil}).map({ $0.name! }).joined(separator: ", ")
+		let artists = track.artists as! [SPTPartialArtist]
+
+		let artistNames = artists.filter({ $0.name != nil}).map({ $0.name! }).joined(separator: ", ")
 
 		var nowPlayingInfo: [String: AnyObject] = [
 			MPMediaItemPropertyTitle: track.name as AnyObject,
@@ -427,11 +429,11 @@ class AudioPlayerViewController: UIViewController {
 			MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
 			MPNowPlayingInfoPropertyElapsedPlaybackTime: spotify.player.currentPlaybackPosition as AnyObject,
 			// This one is necessary for the pause / playback status in control center in the simulator:
-			MPNowPlayingInfoPropertyPlaybackRate: spotify.player.isPlaying ? 1 : 0 as AnyObject
+			MPNowPlayingInfoPropertyPlaybackRate: (spotify.player.isPlaying ? 1 : 0) as AnyObject
 		]
 
 		if artistNames.characters.count > 0 {
-			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames
+			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames as AnyObject?
 		}
 
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
@@ -605,7 +607,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: URL!) {
-		let trackId = SPTTrack.identifier(fromURI: trackUri)
+		let trackId = SPTTrack.identifier(fromURI: trackUri)!
 		if playlist.isLastTrack(trackId) {
 			updateUI(isPlaying: false)
 		}
@@ -697,7 +699,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param audioStreaming The object that sent the message.
 	@param error The error that occurred.
 	*/
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didEncounterError error: NSError!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didEncounterError error: Error!) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 
 		Utility.presentAlert(

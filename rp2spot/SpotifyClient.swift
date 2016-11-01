@@ -27,7 +27,7 @@ class SpotifyClient {
 	}()
 
 	lazy var player: SPTAudioStreamingController = {
-		let player = SPTAudioStreamingController(clientId: self.auth.clientID)
+		let player = SPTAudioStreamingController(clientId: self.auth.clientID)!
 		player.setTargetBitrate(UserSetting.sharedInstance.spotifyStreamingQuality, callback: nil)
 		player.`repeat` = false
 		return player
@@ -112,9 +112,9 @@ class SpotifyClient {
 			return
 		}
 
-		guard (auth.session.isValid())! else {
+		guard (auth.session.isValid()) else {
 			renewSession() { error in
-				handler(false, (self.auth.session.isValid())!, error)
+				handler(false, (self.auth.session.isValid()), error)
 			}
 			return
 		}
