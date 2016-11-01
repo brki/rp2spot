@@ -11,7 +11,7 @@ import UIKit
 class RefreshControlView: UIView {
 
 	enum Position: Int {
-		case Bottom = 0, Top
+		case bottom = 0, top
 	}
 
 	var activityIndicator: UIActivityIndicatorView!
@@ -25,7 +25,7 @@ class RefreshControlView: UIView {
 	}
 
 	required init?(coder aDecoder: NSCoder) {
-		guard let position = Position.init(rawValue: aDecoder.decodeIntegerForKey("refreshControlPosition")) else {
+		guard let position = Position.init(rawValue: aDecoder.decodeInteger(forKey: "refreshControlPosition")) else {
 			return nil
 		}
 		refreshControlPosition = position
@@ -39,31 +39,31 @@ class RefreshControlView: UIView {
 	}
 
 	func setupActivityIndicator() {
-		activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .Gray)
-		activityIndicator.hidden = false
+		activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
+		activityIndicator.isHidden = false
 		activityIndicator.hidesWhenStopped = false
-		activityIndicator.frame = CGRectMake(
-			self.bounds.midX - activityIndicator.frame.width / 2.0,
-			refreshControlPosition == .Top ? 10 : self.bounds.height - 10 - activityIndicator.bounds.height,
-			activityIndicator.bounds.width,
-			activityIndicator.bounds.height
+		activityIndicator.frame = CGRect(
+			x: self.bounds.midX - activityIndicator.frame.width / 2.0,
+			y: refreshControlPosition == .top ? 10 : self.bounds.height - 10 - activityIndicator.bounds.height,
+			width: activityIndicator.bounds.width,
+			height: activityIndicator.bounds.height
 		).integral
-		activityIndicator.autoresizingMask = [.FlexibleLeftMargin, .FlexibleRightMargin]
+		activityIndicator.autoresizingMask = [.flexibleLeftMargin, .flexibleRightMargin]
 
 		self.addSubview(activityIndicator)
 	}
 
 	func setupLabel() {
 		activityLabel = UILabel()
-		activityLabel.textAlignment = .Center
+		activityLabel.textAlignment = .center
 		let labelHeight = CGFloat(25)
-		activityLabel.frame = CGRectMake(
-			0,
-			refreshControlPosition == .Top ? 50 : self.bounds.height - 50 - labelHeight,
-			self.bounds.width,
-			labelHeight
+		activityLabel.frame = CGRect(
+			x: 0,
+			y: refreshControlPosition == .top ? 50 : self.bounds.height - 50 - labelHeight,
+			width: self.bounds.width,
+			height: labelHeight
 		).integral
-		activityLabel.autoresizingMask = .FlexibleWidth
+		activityLabel.autoresizingMask = .flexibleWidth
 		activityLabel.text = "Pull to refresh"
 		self.addSubview(activityLabel)
 	}

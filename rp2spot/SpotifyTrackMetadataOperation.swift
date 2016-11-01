@@ -16,10 +16,10 @@ cancelled.
 */
 class SpotifyTrackMetadataOperation: ConcurrentOperation {
 
-	var trackURIs: [NSURL]
+	var trackURIs: [URL]
 	var handler: ((NSError?, [SPTTrack]?) -> Void)?
 
-	init(trackURIs: [NSURL], handler: ((NSError?, [SPTTrack]?) -> Void)? = nil) {
+	init(trackURIs: [URL], handler: ((NSError?, [SPTTrack]?) -> Void)? = nil) {
 		self.trackURIs = trackURIs
 		self.handler = handler
 	}
@@ -38,8 +38,8 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 			return
 		}
 
-		SPTTrack.tracksWithURIs(missing, accessToken: nil, market: nil) { error, trackInfoList in
-			guard !self.cancelled else {
+		SPTTrack.tracks(withURIs: missing, accessToken: nil, market: nil) { error, trackInfoList in
+			guard !self.isCancelled else {
 				self.handler?(nil, nil)
 				self.state = .Finished
 				return

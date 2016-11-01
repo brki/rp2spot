@@ -15,7 +15,7 @@ extension UIColor {
 
 	Based on https://gist.github.com/mbigatti/c6be210a6bbc0ff25972 .
 	*/
-	class func colorWithRGB(rgbValue : UInt, alpha : CGFloat = 1.0) -> UIColor {
+	class func colorWithRGB(_ rgbValue : UInt, alpha : CGFloat = 1.0) -> UIColor {
 		let red = CGFloat((rgbValue & 0xFF0000) >> 16) / 255
 		let green = CGFloat((rgbValue & 0xFF00) >> 8) / 255
 		let blue = CGFloat(rgbValue & 0xFF) / 255

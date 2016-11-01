@@ -20,7 +20,7 @@ struct AudioPlayerPlaylist {
 
 	let list: [PlayedSongData]
 	var currentIndex: Int?
-	var trackPosition: NSTimeInterval = 0.0 // point in the track at which playback should start.
+	var trackPosition: TimeInterval = 0.0 // point in the track at which playback should start.
 	var trackToIndexMap = [String: Int]() // key is in form "foo" (not "spotify:track:foo"), value is an index into ``list``
 	var trackMetadata = [String: SPTTrack]() // key is in form "foo" (not "spotify:track:foo")
 
@@ -34,7 +34,7 @@ struct AudioPlayerPlaylist {
 	init(list: [PlayedSongData], currentIndex: Int? = nil) {
 		self.list = list
 		self.currentIndex = currentIndex
-		for (index, song) in list.enumerate() {
+		for (index, song) in list.enumerated() {
 			trackToIndexMap[song.spotifyTrackId!] = index
 		}
 		setCurrentWindow()
@@ -48,7 +48,7 @@ struct AudioPlayerPlaylist {
 		currentWindow = windowAroundIndex(index, maxCount: maxWindowSize)
 	}
 
-	func windowAroundIndex(index: Int, maxCount: Int) -> PlaylistWindow {
+	func windowAroundIndex(_ index: Int, maxCount: Int) -> PlaylistWindow {
 		if list.count <= maxCount {
 			return PlaylistWindow(startIndex: 0, endIndex: max(0, list.count - 1))
 		}
@@ -59,7 +59,7 @@ struct AudioPlayerPlaylist {
 	}
 
 	func windowNeedsAdjustment() -> Bool {
-		guard let index = currentIndex, window = currentWindow else {
+		guard let index = currentIndex, let window = currentWindow else {
 			return false
 		}
 
@@ -72,7 +72,7 @@ struct AudioPlayerPlaylist {
 		return index - window.startIndex == 0 || index == window.endIndex
 	}
 
-	func isLastTrack(spotifyTrackId: String) -> Bool {
+	func isLastTrack(_ spotifyTrackId: String) -> Bool {
 		if let index = trackToIndexMap[spotifyTrackId] {
 			return index == list.count - 1
 		}
@@ -93,7 +93,7 @@ struct AudioPlayerPlaylist {
 		return false
 	}
 
-	mutating func setTrackMetadata(newTrackMetadata: [SPTTrack]?) {
+	mutating func setTrackMetadata(_ newTrackMetadata: [SPTTrack]?) {
 		guard let metadata = newTrackMetadata else {
 			return
 		}
@@ -102,7 +102,7 @@ struct AudioPlayerPlaylist {
 		}
 	}
 
-	mutating func setCurrentTrack(trackId: String) {
+	mutating func setCurrentTrack(_ trackId: String) {
 		if let index = trackToIndexMap[trackId] {
 			currentIndex = index
 		} else {
@@ -112,8 +112,8 @@ struct AudioPlayerPlaylist {
 
 	func currentTrackMetadata() -> SPTTrack? {
 		guard let index = currentIndex,
-			trackId = list[index].spotifyTrackId,
-			metadata = trackMetadata[trackId] else {
+			let trackId = list[index].spotifyTrackId,
+			let metadata = trackMetadata[trackId] else {
 			return nil
 		}
 		return metadata
@@ -125,7 +125,7 @@ struct AudioPlayerPlaylist {
 	If the index is near the upper or lower limit, or if the current list 
 	has less than maxCount items, then less than maxCount items will be returned.
 	*/
-	func trackURIsCenteredOnIndex(index: Int, maxCount: Int) -> [NSURL] {
+	func trackURIsCenteredOnIndex(_ index: Int, maxCount: Int) -> [URL] {
 		var selected: [PlayedSongData]
 		if list.count < maxCount {
 			selected = list
@@ -137,10 +137,10 @@ struct AudioPlayerPlaylist {
 		return SpotifyClient.sharedInstance.URIsForTrackIds(selected.map({ $0.spotifyTrackId! }))
 	}
 
-	func trackURIsCenteredOnTrack(trackId: String, maxCount: Int) -> [NSURL] {
+	func trackURIsCenteredOnTrack(_ trackId: String, maxCount: Int) -> [URL] {
 		guard let index = trackToIndexMap[trackId] else {
 			print("trackURIsCenteredOnTrack: track not in track map")
-			return [NSURL]()
+			return [URL]()
 		}
 		return trackURIsCenteredOnIndex(index, maxCount: maxCount)
 	}
@@ -152,8 +152,8 @@ struct AudioPlayerPlaylist {
 	For example, if the playlist has 200 tracks, and the window is tracks
 	51 - 150, and the playlist's currentIndex is 71, indexInWindow will be 20.
 	*/
-	func currentWindowTrackURIs() -> (indexInWindow: Int, tracks: [NSURL])? {
-		guard let index = currentIndex, window = currentWindow else {
+	func currentWindowTrackURIs() -> (indexInWindow: Int, tracks: [URL])? {
+		guard let index = currentIndex, let window = currentWindow else {
 			return nil
 		}
 		let trackIds = list[window.startIndex ... window.endIndex].map({ $0.spotifyTrackId! })
@@ -165,7 +165,7 @@ struct AudioPlayerPlaylist {
 	/**
 	Gets the trackURIs of all playlist songs.
 	*/
-	func trackURIs() -> [NSURL] {
+	func trackURIs() -> [URL] {
 		return SpotifyClient.sharedInstance.URIsForTrackIds(Array(trackToIndexMap.keys))
 	}
 

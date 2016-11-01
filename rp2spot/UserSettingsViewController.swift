@@ -19,37 +19,37 @@ class UserSettingsViewController: UITableViewController {
 	let SECTION_SPOTIFY_STREAMING_QUALITY = 0
 
 	lazy var streamingQualityMap: [(SPTBitrate, UITableViewCell)] = [
-		(SPTBitrate.Low, self.SpotifyStreamingQualityLowCell),			// row 0
-		(SPTBitrate.Normal, self.SpotifyStreamingQualityNormalCell),	// row 1
-		(SPTBitrate.High, self.SpotifyStreamingQualityHighCell)			// row 2
+		(SPTBitrate.low, self.SpotifyStreamingQualityLowCell),			// row 0
+		(SPTBitrate.normal, self.SpotifyStreamingQualityNormalCell),	// row 1
+		(SPTBitrate.high, self.SpotifyStreamingQualityHighCell)			// row 2
 	]
 
 	let settings = UserSetting.sharedInstance
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
-		tableView.backgroundColor = Constant.Color.LightGrey.color()
+		tableView.backgroundColor = Constant.Color.lightGrey.color()
 
 		configureSpotifyStreamingQualityCells()
 
 		configureSongHistoryListControls()
 	}
 
-	@IBAction func maximumSongHistoryValueChanged(sender: AnyObject) {
+	@IBAction func maximumSongHistoryValueChanged(_ sender: AnyObject) {
 		settings.maxLocalSongHistoryCount = Int(maximumSongHistoryStepper.value)
 		maximumSongHistoryLabel.text = String(settings.maxLocalSongHistoryCount)
 	}
 
-	@IBAction func fetchSizeValueChanged(sender: AnyObject) {
+	@IBAction func fetchSizeValueChanged(_ sender: AnyObject) {
 		settings.historyFetchSongCount = Int(fetchSizeStepper.value)
 		fetchSizeLabel.text = String(settings.historyFetchSongCount)
 	}
 
-	@IBAction func doneButtonPressed(sender: AnyObject) {
-		dismissViewControllerAnimated(true, completion: nil)
+	@IBAction func doneButtonPressed(_ sender: AnyObject) {
+		dismiss(animated: true, completion: nil)
 	}
 
-	override func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+	override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		switch indexPath.section {
 		case SECTION_SPOTIFY_STREAMING_QUALITY:
 			let (quality, _) = streamingQualityMap[indexPath.row]
@@ -73,9 +73,9 @@ class UserSettingsViewController: UITableViewController {
 		let settingQuality = settings.spotifyStreamingQuality
 		for (quality, cell) in streamingQualityMap {
 			if quality == settingQuality {
-				cell.accessoryType = .Checkmark
+				cell.accessoryType = .checkmark
 			} else {
-				cell.accessoryType = .None
+				cell.accessoryType = .none
 			}
 		}
 	}

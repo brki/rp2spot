@@ -14,7 +14,7 @@ protocol AudioStatusObserver {
 	Parameters:
 	- spotifyTrackId: id in the form "spotify:track:askseufsdfsdf12"
 	*/
-	func trackStartedPlaying(spotifyTrackId: String)
+	func trackStartedPlaying(_ spotifyTrackId: String)
 
 
 	/**
@@ -23,7 +23,7 @@ protocol AudioStatusObserver {
 	Parameters:
 	- spotifyTrackId: id in the form "spotify:track:askseufsdfsdf12"
 	*/
-	func trackStoppedPlaying(spotifyTrackId: String)
+	func trackStoppedPlaying(_ spotifyTrackId: String)
 
-	func playerStatusChanged(newStatus: AudioPlayerViewController.PlayerStatus)
+	func playerStatusChanged(_ newStatus: AudioPlayerViewController.PlayerStatus)
 }

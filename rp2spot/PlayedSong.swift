@@ -12,12 +12,12 @@ import CoreData
 
 class PlayedSong: NSManagedObject {
 
-	static func playedDuring(start start: NSDate, end: NSDate, context: NSManagedObjectContext) -> [NSDate: PlayedSong] {
-		let request = NSFetchRequest(entityName: "PlayedSong")
-		request.predicate = NSPredicate(format: "playedAt BETWEEN {%@, %@}", start, end)
-		var playTimes = [NSDate: PlayedSong]()
+	static func playedDuring(start: Foundation.Date, end: Foundation.Date, context: NSManagedObjectContext) -> [Foundation.Date: PlayedSong] {
+		let request = NSFetchRequest<NSFetchRequestResult>(entityName: "PlayedSong")
+		request.predicate = NSPredicate(format: "playedAt BETWEEN {%@, %@}", start as CVarArg, end as CVarArg)
+		var playTimes = [Foundation.Date: PlayedSong]()
 		do {
-			if let songs = try context.executeFetchRequest(request) as? [PlayedSong] {
+			if let songs = try context.fetch(request) as? [PlayedSong] {
 				for song in songs {
 					playTimes[song.playedAt] = song
 				}
@@ -38,12 +38,12 @@ class PlayedSong: NSManagedObject {
 	  - context: NSManagedObjectContext
 	  - onlyInserts: if true, perform inserts directly without checking for any existing objects
 	*/
-	static func upsertSongs(songDataList: [PlayedSongData], context: NSManagedObjectContext, onlyInserts: Bool = false) {
-		context.performBlockAndWait {
+	static func upsertSongs(_ songDataList: [PlayedSongData], context: NSManagedObjectContext, onlyInserts: Bool = false) {
+		context.performAndWait {
 
 			guard onlyInserts else {
 				let existingPlayTimes = playedDuring(
-					start: songDataList.last!.playedAt,
+					start: songDataList.last!.playedAt as Date,
 					end: songDataList.first!.playedAt,
 					context: context)
 
@@ -63,13 +63,13 @@ class PlayedSong: NSManagedObject {
 		}
 	}
 
-	override init(entity: NSEntityDescription, insertIntoManagedObjectContext context: NSManagedObjectContext?) {
-		super.init(entity: entity, insertIntoManagedObjectContext: context)
+	override init(entity: NSEntityDescription, insertInto context: NSManagedObjectContext?) {
+		super.init(entity: entity, insertInto: context)
 	}
 
 	init(playedSongData: PlayedSongData, context: NSManagedObjectContext) {
-		let entity = NSEntityDescription.entityForName("PlayedSong", inManagedObjectContext: context)!
-		super.init(entity: entity, insertIntoManagedObjectContext: context)
+		let entity = NSEntityDescription.entity(forEntityName: "PlayedSong", in: context)!
+		super.init(entity: entity, insertInto: context)
 		self.updateWithData(playedSongData, checkBeforeAssignment: false)
 	}
 
@@ -80,7 +80,7 @@ class PlayedSong: NSManagedObject {
 	If ``checkBeforeAssignment`` is ``true``, then only update values if they have changed.
 	This prevents useless updates from happening when the context is saved.
 	*/
-	func updateWithData(data: PlayedSongData, checkBeforeAssignment: Bool = true) {
+	func updateWithData(_ data: PlayedSongData, checkBeforeAssignment: Bool = true) {
 
 		if !checkBeforeAssignment || self.title != data.title {
 			self.title = data.title

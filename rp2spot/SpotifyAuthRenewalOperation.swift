@@ -15,9 +15,9 @@ import Foundation
 class SpotifyAuthRenewalOperation: ConcurrentOperation {
 
 	var forceRenew: Bool
-	var authCompletionHandler: ((error: NSError?) -> Void)?
+	var authCompletionHandler: ((_ error: NSError?) -> Void)?
 
-	init(forceRenew: Bool, authCompletionHandler: ((error: NSError?) -> Void)? = nil) {
+	init(forceRenew: Bool, authCompletionHandler: ((_ error: NSError?) -> Void)? = nil) {
 		self.forceRenew = forceRenew
 		self.authCompletionHandler = authCompletionHandler
 	}
@@ -27,16 +27,16 @@ class SpotifyAuthRenewalOperation: ConcurrentOperation {
 		let spotify = SpotifyClient.sharedInstance
 		guard forceRenew || spotify.sessionShouldBeRenewedSoon() else {
 			// Force renew requested, or a session that will not expire soon already exists.
-			authCompletionHandler?(error: nil)
+			authCompletionHandler?(nil)
 			state = .Finished
 			return
 		}
 		spotify.auth.renewSession(spotify.auth.session) { error, session in
-			if !self.cancelled {
+			if !self.isCancelled {
 				if session != nil {
 					spotify.auth.session = session
 				}
-				self.authCompletionHandler?(error: error)
+				self.authCompletionHandler?(error as NSError?)
 			}
 			self.state = .Finished
 		}

@@ -14,8 +14,8 @@ class AudioPlayerViewController: UIViewController {
 
 	enum PlayerStatus {
 		case
-		Active,		// Player is active an presumably visible
-		Disabled	// Player is non-active, and presumably invisible
+		active,		// Player is active an presumably visible
+		disabled	// Player is non-active, and presumably invisible
 	}
 
 	@IBOutlet weak var playPauseButton: UIButton!
@@ -34,15 +34,15 @@ class AudioPlayerViewController: UIViewController {
 
 	var spotify = SpotifyClient.sharedInstance
 
-	var sessionUpdateRequestTime: NSDate?
+	var sessionUpdateRequestTime: Foundation.Date?
 
 	var pausedDueToAudioInterruption = false
 
 	// ``nowPlayingCenter`` is used to set current song information, this will
 	// be displayed in the control center.
-	var nowPlayingCenter = MPNowPlayingInfoCenter.defaultCenter()
+	var nowPlayingCenter = MPNowPlayingInfoCenter.default()
 
-	var status: PlayerStatus = .Disabled {
+	var status: PlayerStatus = .disabled {
 		didSet {
 			if status != oldValue {
 				delegate?.playerStatusChanged(status)
@@ -53,7 +53,7 @@ class AudioPlayerViewController: UIViewController {
 	var progressIndicatorAnimating = false
 	var progressIndicatorAnimationRequested = false
 	var progressIndicatorPanGestureInvalid = false
-	var elapsedTimeTimer: NSTimer?
+	var elapsedTimeTimer: Timer?
 
 	var delegate: AudioStatusObserver?
 
@@ -63,26 +63,26 @@ class AudioPlayerViewController: UIViewController {
 		// Set a smaller-than-default thumbnail image, and disable user interaction
 		// (user interaction will be handled by a gesture recognizer so that it works
 		// well while the thumb image is animating).
-		progressIndicator.setThumbImage(UIImage(named: "slider-thumb"), forState: .Normal)
-		self.progressIndicator.userInteractionEnabled = false
+		progressIndicator.setThumbImage(UIImage(named: "slider-thumb"), for: UIControlState())
+		self.progressIndicator.isUserInteractionEnabled = false
 
 		spotify.player.delegate = self
 		spotify.player.playbackDelegate = self
 
 		// Listen for a notification so that we can tell when
 		// a user has unplugged their headphones.
-		NSNotificationCenter.defaultCenter().addObserver(
+		NotificationCenter.default.addObserver(
 			self,
 			selector: #selector(self.audioRouteChanged(_:)),
-			name: AVAudioSessionRouteChangeNotification,
+			name: NSNotification.Name.AVAudioSessionRouteChange,
 			object: nil)
 
 		// Listen for Audio Session Interruptions (e.g. incoming phone calls),
 		// so that the player can pause playing.
-		NSNotificationCenter.defaultCenter().addObserver(
+		NotificationCenter.default.addObserver(
 			self,
 			selector: #selector(self.audioSessionInterruption(_:)),
-			name: AVAudioSessionInterruptionNotification,
+			name: NSNotification.Name.AVAudioSessionInterruption,
 			object: nil)
 
 		// Listen for remote control events.
@@ -91,19 +91,19 @@ class AudioPlayerViewController: UIViewController {
 		initprogressIndicator()
 	}
 
-	override func viewWillAppear(animated: Bool) {
+	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		updateUI(isPlaying: spotify.player.isPlaying)
 		setProgress()
 	}
 
-	override func viewWillDisappear(animated: Bool) {
+	override func viewWillDisappear(_ animated: Bool) {
 		setProgressIndicatorPosition()
 		stopProgressUpdating()
 		super.viewWillDisappear(animated)
 	}
 
-	override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
+	override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
 
 		// No special treatment needed unless the progress indicator is currently animating.
 		guard self.progressIndicatorAnimating else {
@@ -127,22 +127,22 @@ class AudioPlayerViewController: UIViewController {
 		setProgressIndicatorPosition()
 		progressIndicator.layoutIfNeeded()
 
- 		coordinator.animateAlongsideTransition(
-			nil,
+ 		coordinator.animate(
+			alongsideTransition: nil,
 			completion: { context in
 				// Restart the progress animation.
 				self.setProgress()
 		})
 
-		super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+		super.viewWillTransition(to: size, with: coordinator)
 	}
 
 	deinit {
-		NSNotificationCenter.defaultCenter().removeObserver(self)
+		NotificationCenter.default.removeObserver(self)
 		removeMPRemoteCommandCenterEventListeners()
 	}
 
-	@IBAction func togglePlayback(sender: AnyObject) {
+	@IBAction func togglePlayback(_ sender: AnyObject) {
 		if spotify.player.isPlaying {
 			pausePlaying()
 		} else {
@@ -150,8 +150,8 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	func startPlaying(sender: AnyObject? = nil) {
-		guard status == .Active else {
+	func startPlaying(_ sender: AnyObject? = nil) {
+		guard status == .active else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
@@ -175,7 +175,7 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	func pausePlaying(sender: AnyObject? = nil) {
+	func pausePlaying(_ sender: AnyObject? = nil) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		spotify.player.setIsPlaying(false) { error in
 			if let err = error {
@@ -185,8 +185,8 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	@IBAction func skipToNextTrack(sender: AnyObject) {
-		guard status == .Active && !playlist.windowNeedsAdjustment() else {
+	@IBAction func skipToNextTrack(_ sender: AnyObject) {
+		guard status == .active && !playlist.windowNeedsAdjustment() else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
@@ -221,8 +221,8 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 	
-	@IBAction func skipToPreviousTrack(sender: AnyObject) {
-		guard status == .Active && !playlist.windowNeedsAdjustment() else {
+	@IBAction func skipToPreviousTrack(_ sender: AnyObject) {
+		guard status == .active && !playlist.windowNeedsAdjustment() else {
 			// This may be triggered by a remote control when the player is disabled.  If that
 			// is the case, then the tracklist and index will need to be communicated to the
 			// Spotify player controller again.
@@ -257,8 +257,8 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	@IBAction func stopPlaying(sender: AnyObject) {
-		guard spotify.player.isPlaying || status == .Active else {
+	@IBAction func stopPlaying(_ sender: AnyObject) {
+		guard spotify.player.isPlaying || status == .active else {
 			return
 		}
 
@@ -280,12 +280,12 @@ class AudioPlayerViewController: UIViewController {
 					return
 				}
 				self.updateNowPlayingInfo()
-				self.status = .Disabled
+				self.status = .disabled
 			}
 		}
 	}
 
-	func playTracks(withPlaylist: AudioPlayerPlaylist? = nil) {
+	func playTracks(_ withPlaylist: AudioPlayerPlaylist? = nil) {
 
 		if let newPlaylist = withPlaylist {
 			playlist = newPlaylist
@@ -299,7 +299,7 @@ class AudioPlayerViewController: UIViewController {
 			return
 		}
 
-		status = .Active
+		status = .active
 		showActivityIndicator()
 
 		spotify.loginOrRenewSession() { willTriggerLogin, sessionValid, error in
@@ -308,23 +308,23 @@ class AudioPlayerViewController: UIViewController {
 					"Unable to start playing",
 					message: error!.localizedDescription
 				)
-				self.status = .Disabled
+				self.status = .disabled
 				self.hideActivityIndicator()
 				return
 			}
 			guard !willTriggerLogin else {
 
 				// Register to be notified when the session is updated.
-				self.sessionUpdateRequestTime = NSDate()
-				NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
+				self.sessionUpdateRequestTime = Foundation.Date()
+				NotificationCenter.default.addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION), object: self.spotify)
 
 				// Let the presenter hide the player:
 				self.hideActivityIndicator()
-				self.status = .Disabled
+				self.status = .disabled
 				return
 			}
 
-			guard self.status == .Active else {
+			guard self.status == .active else {
 				// On a slow network when a session needed to be renewed,
 				// it's possible that the stop button was already pressed.
 				self.hideActivityIndicator()
@@ -347,25 +347,25 @@ class AudioPlayerViewController: UIViewController {
 	/**
 	Handles notification that the spotify session was updated (when user logs in).
 	*/
-	func spotifySessionUpdated(notification: NSNotification) {
+	func spotifySessionUpdated(_ notification: Notification) {
 
 		// Do not keep listening for the notification.
-		NSNotificationCenter.defaultCenter().removeObserver(self, name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: spotify)
+		NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION), object: spotify)
 		let loginRequestTime = sessionUpdateRequestTime
 		sessionUpdateRequestTime = nil
 
 		// No valid session ... nothing to do.
-		guard let session = spotify.auth.session where session.isValid() else {
+		guard let session = spotify.auth.session, session.isValid() else {
 			return
 		}
 
 		guard UserSetting.sharedInstance.canStreamSpotifyTracks != false else {
-			self.status = .Disabled
+			self.status = .disabled
 			return
 		}
 
 		// Request was made a long time (> 30 seconds) ago ... do not surprise user by blasting music now.
-		guard let requestTime = loginRequestTime where NSDate().timeIntervalSinceDate(requestTime) < 30.0 else {
+		guard let requestTime = loginRequestTime, Foundation.Date().timeIntervalSince(requestTime) < 30.0 else {
 			return
 		}
 
@@ -373,12 +373,12 @@ class AudioPlayerViewController: UIViewController {
 		playTracks()
 	}
 
-	func updateUI(isPlaying isPlaying: Bool) {
+	func updateUI(isPlaying: Bool) {
 		let imageName = isPlaying ? "Pause" : "Play"
-		playPauseButton.setImage(UIImage(named: imageName), forState: .Normal)
+		playPauseButton.setImage(UIImage(named: imageName), for: UIControlState())
 	}
 
-	func updateNowPlayingInfo(trackId: String? = nil) {
+	func updateNowPlayingInfo(_ trackId: String? = nil) {
 
 		guard let nowPlayingId = trackId ?? playlist.currentTrack?.spotifyTrackId ?? spotify.playerCurrentTrackId else {
 			print("updateNowPlayingInfo(): no nowPlayingId available")
@@ -413,21 +413,21 @@ class AudioPlayerViewController: UIViewController {
 		setNowPlayingInfo(track)
 	}
 
-	func setNowPlayingInfo(trackInfo: SPTTrack?) {
+	func setNowPlayingInfo(_ trackInfo: SPTTrack?) {
 		guard let track = trackInfo else {
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
 
-		let artistNames = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joinWithSeparator(", ")
+		let artistNames = track.artists.filter({ ($0 as AnyObject).name != nil}).map({ $0.name! }).joined(separator: ", ")
 
 		var nowPlayingInfo: [String: AnyObject] = [
-			MPMediaItemPropertyTitle: track.name,
-			MPMediaItemPropertyAlbumTitle: track.album.name,
-			MPMediaItemPropertyPlaybackDuration: track.duration,
-			MPNowPlayingInfoPropertyElapsedPlaybackTime: spotify.player.currentPlaybackPosition,
+			MPMediaItemPropertyTitle: track.name as AnyObject,
+			MPMediaItemPropertyAlbumTitle: track.album.name as AnyObject,
+			MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
+			MPNowPlayingInfoPropertyElapsedPlaybackTime: spotify.player.currentPlaybackPosition as AnyObject,
 			// This one is necessary for the pause / playback status in control center in the simulator:
-			MPNowPlayingInfoPropertyPlaybackRate: spotify.player.isPlaying ? 1 : 0
+			MPNowPlayingInfoPropertyPlaybackRate: spotify.player.isPlaying ? 1 : 0 as AnyObject
 		]
 
 		if artistNames.characters.count > 0 {
@@ -457,7 +457,7 @@ extension AudioPlayerViewController {
 	If the user has unplugged their headphones / disconnected from bluetooth speakers / something similar,
 	then pause the audio.
 	*/
-	dynamic func audioRouteChanged(notification: NSNotification) {
+	dynamic func audioRouteChanged(_ notification: Notification) {
 		guard spotify.player.isPlaying else {
 			return
 		}
@@ -470,7 +470,7 @@ extension AudioPlayerViewController {
 			return
 		}
 
-		if AVAudioSessionRouteChangeReason(rawValue: reasonCode) == .OldDeviceUnavailable {
+		if AVAudioSessionRouteChangeReason(rawValue: reasonCode) == .oldDeviceUnavailable {
 			spotify.player.setIsPlaying(false) { error in
 				guard error == nil else {
 					print("audioRouteChanged: error while trying to pause player: \(error)")
@@ -486,8 +486,8 @@ extension AudioPlayerViewController {
 	some people report that the audio fails to resume after an interruption when
 	the app is in the background, but it seems to work fine in ios 9.3.
 	*/
-	func audioSessionInterruption(notification: NSNotification) {
-		guard notification.name == AVAudioSessionInterruptionNotification else {
+	func audioSessionInterruption(_ notification: Notification) {
+		guard notification.name == NSNotification.Name.AVAudioSessionInterruption else {
 			return
 		}
 
@@ -495,18 +495,18 @@ extension AudioPlayerViewController {
 			return
 		}
 
-		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .Began {
+		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .began {
 			pausePlaying()
 
 			// The pausedDueToAudioInterruption flag is used to determine whether audio should restart
 			// after the interruption has finished.  If the AVAudioSessionInterruption was triggered
 			// due to another app starting to play music, we do not want to re-start playing after
 			// the other app finishes.
-			if !AVAudioSession.sharedInstance().otherAudioPlaying {
+			if !AVAudioSession.sharedInstance().isOtherAudioPlaying {
 				pausedDueToAudioInterruption = true
 			}
 		} else {
-			if pausedDueToAudioInterruption && status == .Active {
+			if pausedDueToAudioInterruption && status == .active {
 				pausedDueToAudioInterruption = false
 				startPlaying()
 			}
@@ -517,24 +517,24 @@ extension AudioPlayerViewController {
 	Configure handling for events triggered by remote hardware (e.g. headphones, bluetooth speakers, etc.).
 	*/
 	func registerForRemoteEvents() {
-		let remote = MPRemoteCommandCenter.sharedCommandCenter()
+		let remote = MPRemoteCommandCenter.shared()
 
-		remote.nextTrackCommand.enabled = true
+		remote.nextTrackCommand.isEnabled = true
 		remote.nextTrackCommand.addTarget(self, action: #selector(self.skipToNextTrack(_:)))
 
-		remote.previousTrackCommand.enabled = true
+		remote.previousTrackCommand.isEnabled = true
 		remote.previousTrackCommand.addTarget(self, action: #selector(self.skipToPreviousTrack(_:)))
 
-		remote.togglePlayPauseCommand.enabled = true
+		remote.togglePlayPauseCommand.isEnabled = true
 		remote.togglePlayPauseCommand.addTarget(self, action: #selector(self.togglePlayback(_:)))
 
-		remote.pauseCommand.enabled = true
+		remote.pauseCommand.isEnabled = true
 		remote.pauseCommand.addTarget(self, action: #selector(self.pausePlaying(_:)))
 
-		remote.playCommand.enabled = true
+		remote.playCommand.isEnabled = true
 		remote.playCommand.addTarget(self, action: #selector(self.startPlaying(_:)))
 
-		remote.stopCommand.enabled = true
+		remote.stopCommand.isEnabled = true
 		remote.stopCommand.addTarget(self, action: #selector(self.stopPlaying(_:)))
 
 //		remote.seekForwardCommand.enabled = true
@@ -544,7 +544,7 @@ extension AudioPlayerViewController {
 //	func remoteSeek
 
 	func removeMPRemoteCommandCenterEventListeners() {
-		let remote = MPRemoteCommandCenter.sharedCommandCenter()
+		let remote = MPRemoteCommandCenter.shared()
 		remote.nextTrackCommand.removeTarget(self)
 		remote.previousTrackCommand.removeTarget(self)
 		remote.togglePlayPauseCommand.removeTarget(self)
@@ -559,7 +559,7 @@ extension AudioPlayerViewController {
 
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
-	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangeToTrack trackMetadata: [NSObject : AnyObject]!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangeToTrack trackMetadata: [AnyHashable: Any]!) {
 		// The trackMetadata object *should* have the track identifier too, but 
 		// trackMetadata itself is occaionally nil, despite the method signature 
 		// indicating otherwise.  So, fetch the track id from the player.
@@ -594,7 +594,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		}
 	}
 
-	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
 		updateUI(isPlaying: isPlaying)
 		updateNowPlayingInfo()
 		setProgress()
@@ -604,8 +604,8 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	Somtimes this is called a long while before audioStreaming(_:didChangePlaybackStatus); it is being
 	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
-	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: NSURL!) {
-		let trackId = SPTTrack.identifierFromURI(trackUri)
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: URL!) {
+		let trackId = SPTTrack.identifier(fromURI: trackUri)
 		if playlist.isLastTrack(trackId) {
 			updateUI(isPlaying: false)
 		}
@@ -613,9 +613,9 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		delegate?.trackStoppedPlaying(trackId)
 	}
 
-	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: NSURL!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: URL!) {
 		if let interested = delegate {
-			interested.trackStartedPlaying(SPTTrack.identifierFromURI(trackUri))
+			interested.trackStartedPlaying(SPTTrack.identifier(fromURI: trackUri))
 		}
 		setProgress()
 		updateUI(isPlaying: true)
@@ -624,13 +624,13 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
 	@param audioStreaming The object that sent the message.
 	*/
-	func audioStreamingDidBecomeActivePlaybackDevice(audioStreaming: SPTAudioStreamingController!) {
+	func audioStreamingDidBecomeActivePlaybackDevice(_ audioStreaming: SPTAudioStreamingController!) {
 		// print("audioStreamingDidBecomeActivePlaybackDevice")
 
 		// If the user taps on a track before this device is the active playback device,
 		// and then hits the stop button to close the audio player before playback has
 		// started, do not start playing.
-		guard status == .Active else {
+		guard status == .active else {
 			spotify.player.stop(nil)
 			return
 		}
@@ -640,7 +640,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	/** Called when the audio streaming object becomes an inactive playback device on the user's account.
 	@param audioStreaming The object that sent the message.
 	*/
-	func audioStreamingDidBecomeInactivePlaybackDevice(audioStreaming: SPTAudioStreamingController!) {
+	func audioStreamingDidBecomeInactivePlaybackDevice(_ audioStreaming: SPTAudioStreamingController!) {
 		// Probably nothing to do here.
 		print("audioStreamingDidBecomeInactivePlaybackDevice")
 	}
@@ -651,10 +651,10 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	@param audioStreaming The object that sent the message.
 	*/
-	func audioStreamingDidLosePermissionForPlayback(audioStreaming: SPTAudioStreamingController!) {
+	func audioStreamingDidLosePermission(forPlayback audioStreaming: SPTAudioStreamingController!) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 
-		guard !AVAudioSession.sharedInstance().otherAudioPlaying else {
+		guard !AVAudioSession.sharedInstance().isOtherAudioPlaying else {
 			// If permission was lost and another application on this device is now playing audio,
 			// it's presumably the Spotify application, and it doesn't make sense to show an alert
 			// in this case
@@ -676,7 +676,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	/** Called when network connectivity is lost.
 	@param audioStreaming The object that sent the message.
 	*/
-	func audioStreamingDidDisconnect(audioStreaming: SPTAudioStreamingController!) {
+	func audioStreamingDidDisconnect(_ audioStreaming: SPTAudioStreamingController!) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 		print("audioStreamingDidDisconnect")
 	}
@@ -684,7 +684,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	/** Called when network connectivitiy is back after being lost.
 	@param audioStreaming The object that sent the message.
 	*/
-	func audioStreamingDidReconnect(audioStreaming: SPTAudioStreamingController!) {
+	func audioStreamingDidReconnect(_ audioStreaming: SPTAudioStreamingController!) {
 		// Probably do nothing here.  We don't want music to suddenly start blaring
 		// out when network connectivity is restored minutes or hours after it was lost.
 		print("audioStreamingDidReconnect")
@@ -697,7 +697,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param audioStreaming The object that sent the message.
 	@param error The error that occurred.
 	*/
-	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didEncounterError error: NSError!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didEncounterError error: NSError!) {
 		playlist.trackPosition = spotify.player.currentPlaybackPosition
 
 		Utility.presentAlert(
@@ -713,7 +713,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param audioStreaming The object that sent the message.
 	@param message The message to display to the user.
 	*/
-	func audioStreaming(audioStreaming: SPTAudioStreamingController!, didReceiveMessage message: String!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceiveMessage message: String!) {
 		Utility.presentAlert(
 			"Message for you from Spotify",
 			message: message
@@ -726,10 +726,10 @@ extension AudioPlayerViewController {
 
 	func initprogressIndicator() {
 		// Listen for backgrounding event, so that progress indicator updates can be stopped.
-		NSNotificationCenter.defaultCenter().addObserver(
+		NotificationCenter.default.addObserver(
 			self,
 			selector: #selector(self.willResignActive(_:)),
-			name: UIApplicationWillResignActiveNotification,
+			name: NSNotification.Name.UIApplicationWillResignActive,
 			object: nil)
 
 		addprogressIndicatorGestureRecognizers()
@@ -744,14 +744,14 @@ extension AudioPlayerViewController {
 		progressIndicatorContainer.addGestureRecognizer(progressIndicatorPanGestureRecognizer!)
 	}
 
-	func progressIndicatorContainerPanned(recognizer: UIPanGestureRecognizer) {
+	func progressIndicatorContainerPanned(_ recognizer: UIPanGestureRecognizer) {
 
-		var pannedProgress = Float(recognizer.locationInView(progressIndicator).x / progressIndicator.bounds.width)
+		var pannedProgress = Float(recognizer.location(in: progressIndicator).x / progressIndicator.bounds.width)
 		pannedProgress = max(0.0, min(1.0, pannedProgress))
 		let offset = spotify.player.currentTrackDuration * Double(pannedProgress)
 
 		switch (recognizer.state) {
-		case .Began:
+		case .began:
 			// If the pan is not starting over the thumb image, cancel the gesture recognizer.
 			let trackDuration = spotify.player.currentTrackDuration
 			let currentPosition = Float(spotify.player.currentPlaybackPosition / trackDuration)
@@ -766,9 +766,9 @@ extension AudioPlayerViewController {
 			progressIndicator.value = pannedProgress
 			stopProgressUpdating()
 
-		case .Ended:
+		case .ended:
 			// TODO: spotify ios-sdk bug here when trying to seek after having paused at last 1-2 seconds before track end?
-			spotify.player.seekToOffset(offset) { error in
+			spotify.player.seek(toOffset: offset) { error in
 				self.setElapsedTimeValue(offset)
 				self.setProgress()
 				if let err = error {
@@ -776,11 +776,11 @@ extension AudioPlayerViewController {
 				}
 			}
 
-		case .Changed:
+		case .changed:
 			progressIndicator.value = pannedProgress
 			self.setElapsedTimeValue(offset)
 
-		case .Cancelled, .Failed:
+		case .cancelled, .failed:
 			if progressIndicatorPanGestureInvalid {
 				// The pan gesture was marked invalid as soon as recognized, and the animation was not interrupted.
 				progressIndicatorPanGestureInvalid = false
@@ -794,7 +794,7 @@ extension AudioPlayerViewController {
 		}
 	}
 
-	func setProgress(updateTrackDuration updateTrackDuration: Bool = false) {
+	func setProgress(updateTrackDuration: Bool = false) {
 
 		setProgressIndicatorPosition()
 
@@ -826,10 +826,10 @@ extension AudioPlayerViewController {
 				self.progressIndicatorAnimating = true
 				let remainder = self.spotify.player.currentTrackDuration - self.spotify.player.currentPlaybackPosition
 
-				UIView.animateWithDuration(
-					remainder,
+				UIView.animate(
+					withDuration: remainder,
 					delay: 0.0,
-					options: [.CurveLinear],
+					options: [.curveLinear],
 					animations: {
 						self.progressIndicator.setValue(1.0, animated: true)
 					},
@@ -870,7 +870,7 @@ extension AudioPlayerViewController {
 	Stop the animation in all sublayers of the progress indicator.
 	*/
 	func endprogressIndicatorAnimation() {
-		func removeLayerAnimations(layer: CALayer) {
+		func removeLayerAnimations(_ layer: CALayer) {
 			layer.removeAllAnimations()
 			if let sublayers = layer.sublayers {
 				for sublayer in sublayers {
@@ -887,19 +887,19 @@ extension AudioPlayerViewController {
 	}
 
 	func startElapsedTimeTimer() {
-		guard elapsedTimeTimer == nil || elapsedTimeTimer!.valid == false else {
+		guard elapsedTimeTimer == nil || elapsedTimeTimer!.isValid == false else {
 			// A timer is already running.
 			return
 		}
 
-		let appState = UIApplication.sharedApplication().applicationState
-		guard appState == .Active || appState == .Inactive else {
+		let appState = UIApplication.shared.applicationState
+		guard appState == .active || appState == .inactive else {
 			// No need to update the elapsed time label if the app is in the background.
 			return
 		}
 
-		self.elapsedTimeTimer = NSTimer.scheduledTimerWithTimeInterval(
-			1.0,
+		self.elapsedTimeTimer = Timer.scheduledTimer(
+			timeInterval: 1.0,
 			target: self,
 			selector: #selector(self.showElapsedTime),
 			userInfo: nil,
@@ -911,39 +911,39 @@ extension AudioPlayerViewController {
 		trackDurationLabel.text = formatTrackTime(spotify.player.currentTrackDuration)
 	}
 
-	func showElapsedTime(sender: AnyObject? = nil) {
+	func showElapsedTime(_ sender: AnyObject? = nil) {
 		setElapsedTimeValue(spotify.player.currentPlaybackPosition)
 	}
 
-	func setElapsedTimeValue(elapsed: Double) {
+	func setElapsedTimeValue(_ elapsed: Double) {
 		elapsedTrackTimeLabel.text = formatTrackTime(elapsed)
 	}
 
-	func formatTrackTime(interval: NSTimeInterval) -> String {
-		return String(format: "%d:%02.0f", Int(interval) / 60, round(interval % 60))
+	func formatTrackTime(_ interval: TimeInterval) -> String {
+		return String(format: "%d:%02.0f", Int(interval) / 60, round(interval.truncatingRemainder(dividingBy: 60)))
 	}
 
-	func willResignActive(notification: NSNotification) {
+	func willResignActive(_ notification: Notification) {
 
 		setProgressIndicatorPosition()
 		stopProgressUpdating()
 
 		// Listen for foregrounding event, so that progress indicator updates will be triggered.
-		NSNotificationCenter.defaultCenter().addObserver(
+		NotificationCenter.default.addObserver(
 			self,
 			selector: #selector(self.willEnterForeground(_:)),
-			name: UIApplicationWillEnterForegroundNotification,
+			name: NSNotification.Name.UIApplicationWillEnterForeground,
 			object: nil)
 	}
 
-	func willEnterForeground(notification: NSNotification) {
+	func willEnterForeground(_ notification: Notification) {
 		print("isPlaying: \(spotify.player.isPlaying)")
 		setProgress()
 		updateUI(isPlaying: spotify.player.isPlaying)
 
-		NSNotificationCenter.defaultCenter().removeObserver(
+		NotificationCenter.default.removeObserver(
 			self,
-			name: UIApplicationWillEnterForegroundNotification,
+			name: NSNotification.Name.UIApplicationWillEnterForeground,
 			object: nil)
 	}
 	

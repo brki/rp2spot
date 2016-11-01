@@ -11,48 +11,48 @@ import Foundation
 class UserSetting {
 	static let sharedInstance = UserSetting()
 
-	lazy var settings = NSUserDefaults.standardUserDefaults()
+	lazy var settings = UserDefaults.standard
 
 	var spotifyStreamingQuality: SPTBitrate {
 		get {
 			// Use objectForKey instead of integerForKey since integerForKey returns 0 when nothing set.
-			guard let quality = settings.objectForKey("spotifyStreamingQuality") as? UInt else {
-				let bitRate = SPTBitrate.Normal
-				settings.setInteger(Int(bitRate.rawValue), forKey: "spotifyStreamingQuality")
+			guard let quality = settings.object(forKey: "spotifyStreamingQuality") as? UInt else {
+				let bitRate = SPTBitrate.normal
+				settings.set(Int(bitRate.rawValue), forKey: "spotifyStreamingQuality")
 				return bitRate
 			}
 			guard let bitRate = SPTBitrate.init(rawValue: quality) else {
 				print("Unable to initialize SPTBitrate enum from user default setting")
-				return SPTBitrate.Normal
+				return SPTBitrate.normal
 			}
 			return bitRate
 		}
 		set {
-			settings.setInteger(Int(newValue.rawValue), forKey: "spotifyStreamingQuality")
+			settings.set(Int(newValue.rawValue), forKey: "spotifyStreamingQuality")
 		}
 	}
 
 	// How many songs should be fetched in a history request:
 	var historyFetchSongCount: Int {
 		get {
-			let count = settings.integerForKey("historyFetchSongCount")
+			let count = settings.integer(forKey: "historyFetchSongCount")
 			guard count != 0 else {
-				settings.setInteger(20, forKey: "historyFetchSongCount")
+				settings.set(20, forKey: "historyFetchSongCount")
 				return 20
 			}
 			return count
 		}
 		set {
-			settings.setInteger(newValue, forKey: "historyFetchSongCount")
+			settings.set(newValue, forKey: "historyFetchSongCount")
 		}
 	}
 
 	// How many song items, at most, should be stored locally:
 	var maxLocalSongHistoryCount: Int {
 		get {
-			let count = settings.integerForKey("maxLocalSongHistoryCount")
+			let count = settings.integer(forKey: "maxLocalSongHistoryCount")
 			guard count != 0 else {
-				settings.setInteger(200, forKey: "maxLocalSongHistoryCount")
+				settings.set(200, forKey: "maxLocalSongHistoryCount")
 				return 200
 			}
 			return count
@@ -62,17 +62,17 @@ class UserSetting {
 				// Enforce that maxLocalSongHistoryCount >= historyFetchSongCount
 				return
 			}
-			settings.setInteger(newValue, forKey: "maxLocalSongHistoryCount")
+			settings.set(newValue, forKey: "maxLocalSongHistoryCount")
 		}
 	}
 
 	// User's Spotify region
 	var spotifyRegion: String? {
 		get {
-			return settings.stringForKey("spotifyRegion")
+			return settings.string(forKey: "spotifyRegion")
 		}
 		set {
-			settings.setObject(newValue, forKey: "spotifyRegion")
+			settings.set(newValue, forKey: "spotifyRegion")
 		}
 	}
 
@@ -87,23 +87,23 @@ class UserSetting {
 
 	var canStreamSpotifyTracks: Bool? {
 		get {
-			return settings.objectForKey("canStreamSpotifyTracks") as? Bool
+			return settings.object(forKey: "canStreamSpotifyTracks") as? Bool
 		}
 		set {
 			if newValue == nil {
-				settings.removeObjectForKey("canStreamSpotifyTracks")
+				settings.removeObject(forKey: "canStreamSpotifyTracks")
 			} else {
-				settings.setObject(newValue, forKey: "canStreamSpotifyTracks")
+				settings.set(newValue, forKey: "canStreamSpotifyTracks")
 			}
 		}
 	}
 
 	var historyBrowserTopVisibleRow: Int {
 		get {
-			return settings.integerForKey("historyBrowserTopVisibleRow")
+			return settings.integer(forKey: "historyBrowserTopVisibleRow")
 		}
 		set {
-			settings.setInteger(newValue, forKey: "historyBrowserTopVisibleRow")
+			settings.set(newValue, forKey: "historyBrowserTopVisibleRow")
 		}
 	}
 }

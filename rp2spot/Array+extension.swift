@@ -18,13 +18,13 @@ extension Array {
 
 	If preserveOrder == false, the values will be returned in reverse order.
 	*/
-	mutating func removeAllReturningValues(preserveOrder preserveOrder: Bool = false) -> [Element] {
+	mutating func removeAllReturningValues(preserveOrder: Bool = false) -> [Element] {
 		var values = [Element]()
 		while let value = self.popLast() {
 			values.append(value)
 		}
 		if preserveOrder {
-			return values.reverse()
+			return values.reversed()
 		}
 		return values
 	}

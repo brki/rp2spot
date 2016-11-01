@@ -10,17 +10,17 @@ import UIKit
 
 class PlaylistTableViewCell: PlainHistoryTableViewCell {
 
-	override func configureForSong(song: PlayedSongData, currentlyPlayingTrackId: String?) {
+	override func configureForSong(_ song: PlayedSongData, currentlyPlayingTrackId: String?) {
 		super.configureForSong(song, currentlyPlayingTrackId: nil)
 
 	}
 
-	func configureForSong(song: PlayedSongData, selected: Bool) {
+	func configureForSong(_ song: PlayedSongData, selected: Bool) {
 		super.configureForSong(song, currentlyPlayingTrackId: nil)
 		if selected {
-			accessoryType = .Checkmark
+			accessoryType = .checkmark
 		} else {
-			accessoryType = .None
+			accessoryType = .none
 		}
 	}
 }

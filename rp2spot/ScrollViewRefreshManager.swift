@@ -21,10 +21,10 @@ class ScrollViewRefreshManager {
 
 	var inactiveControlsEnabled = true {
 		didSet {
-			if let topControl = topRefreshControl where !topControl.refreshing {
+			if let topControl = topRefreshControl, !topControl.refreshing {
 				topControl.enabled = inactiveControlsEnabled
 			}
-			if let bottomControl = bottomRefreshControl where !bottomControl.refreshing {
+			if let bottomControl = bottomRefreshControl, !bottomControl.refreshing {
 				bottomControl.enabled = inactiveControlsEnabled
 			}
 		}
@@ -38,7 +38,7 @@ class ScrollViewRefreshManager {
 		collectionView.backgroundView = backgroundView
 	}
 
-	func addRefreshControl(position: RefreshControlView.Position, target: AnyObject, refreshAction: Selector, readyToRefreshText: String? = "Pull to refresh", currentlyRefreshingText: String? = "Refreshing ...") {
+	func addRefreshControl(_ position: RefreshControlView.Position, target: AnyObject, refreshAction: Selector, readyToRefreshText: String? = "Pull to refresh", currentlyRefreshingText: String? = "Refreshing ...") {
 
 		let refreshControlView = viewForPosition(position)
 		backgroundView.addSubview(refreshControlView)
@@ -50,32 +50,32 @@ class ScrollViewRefreshManager {
 			readyToRefreshText: readyToRefreshText,
 			currentlyRefreshingText: currentlyRefreshingText
 		)
-		refreshControl.view.activityLabel.textColor = Constant.Color.SpotifyGreen.color()
+		refreshControl.view.activityLabel.textColor = Constant.Color.spotifyGreen.color()
 
 		// Make the control initially hidden, so that it won't be visible underneath
 		// a table view cell when the cell is selected.
 		refreshControl.hidden = true
 
-		if position == .Top {
+		if position == .top {
 			topRefreshControl = refreshControl
 		} else {
 			bottomRefreshControl = refreshControl
 		}
 	}
 
-	func viewForPosition(position: RefreshControlView.Position) -> RefreshControlView {
-		let frame = CGRectMake(
-			0,
-			position == .Top ? 0 : backgroundView.bounds.height - refreshControlViewHeight,
-			backgroundView.bounds.width,
-			refreshControlViewHeight
+	func viewForPosition(_ position: RefreshControlView.Position) -> RefreshControlView {
+		let frame = CGRect(
+			x: 0,
+			y: position == .top ? 0 : backgroundView.bounds.height - refreshControlViewHeight,
+			width: backgroundView.bounds.width,
+			height: refreshControlViewHeight
 		)
 		let refreshControlView = RefreshControlView(position: position, frame: frame)
 
-		if position == .Top {
-			refreshControlView.autoresizingMask = [.FlexibleWidth, .FlexibleBottomMargin]
+		if position == .top {
+			refreshControlView.autoresizingMask = [.flexibleWidth, .flexibleBottomMargin]
 		} else {
-			refreshControlView.autoresizingMask = [.FlexibleWidth, .FlexibleTopMargin]
+			refreshControlView.autoresizingMask = [.flexibleWidth, .flexibleTopMargin]
 		}
 
 		return refreshControlView
@@ -88,7 +88,7 @@ class ScrollViewRefreshManager {
 
 	If a refresh was not started, then the control should be hidden.
 	*/
-	func didEndDragging(scrollView: UIScrollView) {
+	func didEndDragging(_ scrollView: UIScrollView) {
 		// If either control is currently refreshing, do not pass the message through to them.
 		guard !currentlyRefreshing else {
 			return
@@ -111,7 +111,7 @@ class ScrollViewRefreshManager {
 	Dragging has started; the controls should be visible if
 	the user pulls the table view beyond it's end.
 	*/
-	func willBeginDragging(scrollView: UIScrollView) {
+	func willBeginDragging(_ scrollView: UIScrollView) {
 		topRefreshControl?.hidden = false
 		bottomRefreshControl?.hidden = false
 	}
@@ -124,7 +124,7 @@ class ScrollViewRefreshManager {
 	- The user has simply stopped scrolling.  The control should be hidden so
 	  that it is not visible underneath a table view cell when it is selected.
 	*/
-	func didEndDecelerating(scrollView: UIScrollView) {
+	func didEndDecelerating(_ scrollView: UIScrollView) {
 		if let topControl = topRefreshControl {
 			if !topControl.refreshing {
 				topControl.hidden = true

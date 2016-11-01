@@ -19,7 +19,7 @@ class LocalPlaylistSongs {
 		self.songs = songs
 	}
 
-	func toggleSelection(index: Int) {
+	func toggleSelection(_ index: Int) {
 		guard index < songs.count else {
 			print("LocalPlaylistSongs:toggleSelection: warning: index out of bounds")
 			return
@@ -31,11 +31,11 @@ class LocalPlaylistSongs {
 		}
 	}
 
-	func setPlaylistTitle(title: String?) {
+	func setPlaylistTitle(_ title: String?) {
 		playlistTitle = title
 	}
 
-	func songAtIndex(index: Int) -> (song: PlayedSongData, selected: Bool) {
+	func songAtIndex(_ index: Int) -> (song: PlayedSongData, selected: Bool) {
 		return (songs[index], selected[index] != nil)
 	}
 
@@ -44,7 +44,7 @@ class LocalPlaylistSongs {
 	*/
 	func selectedTrackIds() -> [String] {
 		var selectedIds = [String]()
-		for index in selected.keys.sort() {
+		for index in selected.keys.sorted() {
 			if let trackId = songs[index].spotifyTrackId {
 				selectedIds.append(trackId)
 			}

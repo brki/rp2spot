@@ -20,10 +20,10 @@ class SongInfoViewController: UIViewController {
 	@IBOutlet weak var spotifyOpenButton: UIButton!
 
 	var songInfo: PlayedSongData!
-	var canOpenSpotifyAppStoreURL = UIApplication.sharedApplication().canOpenURL(Constant.SPOTIFY_APPSTORE_URL)
-	lazy var spotifyTrackURL: NSURL? = {
+	var canOpenSpotifyAppStoreURL = UIApplication.shared.canOpenURL(Constant.SPOTIFY_APPSTORE_URL as URL)
+	lazy var spotifyTrackURL: URL? = {
 		guard let trackId = self.songInfo.spotifyTrackId,
-			url = NSURL(string: SpotifyClient.fullSpotifyTrackId(trackId)) else {
+			let url = URL(string: SpotifyClient.fullSpotifyTrackId(trackId)) else {
 
 			return nil
 		}
@@ -34,16 +34,16 @@ class SongInfoViewController: UIViewController {
 		guard let url = self.spotifyTrackURL else {
 			return false
 		}
-		return UIApplication.sharedApplication().canOpenURL(url)
+		return UIApplication.shared.canOpenURL(url)
 	}()
 
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
-		view.backgroundColor = Constant.Color.SageGreen.color()
+		view.backgroundColor = Constant.Color.sageGreen.color()
 
-		let imageURL = songInfo.imageURL(.Small)
+		let imageURL = songInfo.imageURL(.small)
 		let placeHolderImage =  UIImage(named: "vinyl")
 		if let url = imageURL {
 			albumArtworkImageView.af_setImageWithURL(url, placeholderImage: placeHolderImage)
@@ -56,28 +56,28 @@ class SongInfoViewController: UIViewController {
 		albumNameLabel.text = songInfo.albumTitle
 
 		if !(canOpenTrackInSpotify || canOpenSpotifyAppStoreURL) {
-			spotifyOpenButton.enabled = false
+			spotifyOpenButton.isEnabled = false
 		}
 		updateSpotifyTrackInfo()
 	}
 
-	@IBAction func showRadioParadiseInfoPage(sender: AnyObject) {
+	@IBAction func showRadioParadiseInfoPage(_ sender: AnyObject) {
 		guard let url = RadioParadise.songInfoURL(songInfo.radioParadiseSongId) else {
 			print("showRadioParadiseInfoPage: unable to get URL for song with id: \(songInfo.radioParadiseSongId)")
 			return
 		}
-		let safariVC = SFSafariViewController(URL: url)
-		presentViewController(safariVC, animated: true, completion: nil)
+		let safariVC = SFSafariViewController(url: url)
+		present(safariVC, animated: true, completion: nil)
 	}
 
-	@IBAction func openInSpotify(sender: AnyObject) {
+	@IBAction func openInSpotify(_ sender: AnyObject) {
 
-		let app = UIApplication.sharedApplication()
+		let app = UIApplication.shared
 
 		if canOpenTrackInSpotify {
 			app.openURL(spotifyTrackURL!)
 		} else {
-			app.openURL(Constant.SPOTIFY_APPSTORE_URL)
+			app.openURL(Constant.SPOTIFY_APPSTORE_URL as URL)
 		}
 	}
 
@@ -90,14 +90,14 @@ class SongInfoViewController: UIViewController {
 			return
 		}
 		spotify.trackInfo.trackInfo(trackId) { error, trackInfo in
-			guard let track = trackInfo where error == nil else {
+			guard let track = trackInfo, error == nil else {
 				print("updateSpotifyTrackInfo(): Unable to get track information: error: \(error)")
 				return
 			}
 			async_main {
 				self.songTitleLabel.text = track.name
 				self.albumNameLabel.text = track.album.name
-				self.artistNameLabel.text = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joinWithSeparator(", ")
+				self.artistNameLabel.text = track.artists.filter({ $0.name != nil}).map({ $0.name! }).joined(separator: ", ")
 			}
 		}
 	}

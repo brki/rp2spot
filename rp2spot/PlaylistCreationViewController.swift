@@ -23,17 +23,17 @@ class PlaylistCreationViewController: UIViewController {
 	@IBOutlet weak var cancelDoneButton: UIBarButtonItem!
 
 	var localPlaylist: LocalPlaylistSongs!
-	var playlistURI: NSURL?
+	var playlistURI: URL?
 	let spotify = SpotifyClient.sharedInstance
 	var postLoginBlock: (() -> Void)?
 
 	var activeTextField: UITextField?	// Keeps track of the active text field.
 
 	override func viewDidLoad() {
-		let sageGreen = Constant.Color.SageGreen.color()
+		let sageGreen = Constant.Color.sageGreen.color()
 		controlsView.backgroundColor = sageGreen
 		scrollView.backgroundColor = sageGreen
-		playlistTitle.backgroundColor = Constant.Color.LightGrey.color()
+		playlistTitle.backgroundColor = Constant.Color.lightGrey.color()
 		playlistTitle.delegate = self
 
 		let count = localPlaylist.selected.count
@@ -50,36 +50,36 @@ class PlaylistCreationViewController: UIViewController {
 		view.addGestureRecognizer(tapRecognizer)
 	}
 
-	override func viewWillAppear(animated: Bool) {
+	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 		registerForKeyboardAndStatusBarNotifications()
 	}
 
-	override func viewDidAppear(animated: Bool) {
+	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 		setHeightConstraintIfNeeded()
 	}
 
-	override func viewWillDisappear(animated: Bool) {
+	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 		unregisterForNotifications()
 	}
 
-	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-		if let id = segue.identifier where id == "PlaylistCreationExit" {
+	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+		if let id = segue.identifier, id == "PlaylistCreationExit" {
 			view.endEditing(true)
 		}
 	}
 
-	@IBAction func openInSpotify(sender: UIButton) {
+	@IBAction func openInSpotify(_ sender: UIButton) {
 		guard let uri = playlistURI else {
 			print("Open in Spotify tapped, but no playlist URI available")
 			return
 		}
-		UIApplication.sharedApplication().openURL(uri)
+		UIApplication.shared.openURL(uri)
 	}
 
-	@IBAction func createPlaylist(sender: UIButton) {
+	@IBAction func createPlaylist(_ sender: UIButton) {
 		view.endEditing(true)
 		let title = (playlistTitle.text ?? "").trim()
 		guard title.characters.count > 0 else {
@@ -101,11 +101,11 @@ class PlaylistCreationViewController: UIViewController {
 	This may not be immediately possible if the user needs to log in first.  If that is the case, save a closure that
 	can be executed on sucessful login, and register to get notified when the session is updated.
 	*/
-	func tryCreatePlaylist(title: String, selectedTrackIds: [String]) {
+	func tryCreatePlaylist(_ title: String, selectedTrackIds: [String]) {
 		enableEditingControls(false)
 		activityIndicator.startAnimating()
 
-		spotify.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.on) { playlistSnapshot, willTriggerLogin, error in
+		spotify.createPlaylistWithTracks(title, trackIds: selectedTrackIds, publicFlag: publicPlaylistSwitch.isOn) { playlistSnapshot, willTriggerLogin, error in
 
 			self.activityIndicator.stopAnimating()
 
@@ -121,7 +121,7 @@ class PlaylistCreationViewController: UIViewController {
 					self.postLoginBlock = nil
 					self.tryCreatePlaylist(title, selectedTrackIds: selectedTrackIds)
 				}
-				NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
+				NotificationCenter.default.addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
 				return
 			}
 
@@ -134,33 +134,33 @@ class PlaylistCreationViewController: UIViewController {
 			self.playlistURI = playlist.uri
 			async_main  {
 				self.creationStatusLabel.text = "Playlist created"
-				self.creationStatusLabel.hidden = false
+				self.creationStatusLabel.isHidden = false
 				self.creationStatusLabel.alpha = 0
-				UIView.animateWithDuration(0.4) {
+				UIView.animate(withDuration: 0.4, animations: {
 					self.cancelDoneButton.title = "Done"
-					self.cancelDoneButton.enabled = true
+					self.cancelDoneButton.isEnabled = true
 					self.creationStatusLabel.alpha = 1.0
 					self.showOpenInSpotify()
-				}
+				}) 
 			}
 		}
 	}
 
-	func enableEditingControls(enabled: Bool) {
+	func enableEditingControls(_ enabled: Bool) {
 		async_main {
-			self.createPlaylistButton.enabled = enabled
-			self.playlistTitle.enabled = enabled
-			self.publicPlaylistSwitch.enabled = enabled
+			self.createPlaylistButton.isEnabled = enabled
+			self.playlistTitle.isEnabled = enabled
+			self.publicPlaylistSwitch.isEnabled = enabled
 			self.navigationItem.hidesBackButton = !enabled
 		}
 	}
 
-	func spotifySessionUpdated(notification: NSNotification) {
-		NSNotificationCenter.defaultCenter().removeObserver(self, name: SpotifyClient.SESSION_UPDATE_NOTIFICATION, object: self.spotify)
+	func spotifySessionUpdated(_ notification: Notification) {
+		NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION), object: self.spotify)
 		guard let postLogin = postLoginBlock else {
 			return
 		}
-		guard spotify.auth.session.isValid() else {
+		guard (spotify.auth.session.isValid())! else {
 			print("No valid session after session update: discarding postLogin block")
 			enableCreatePlaylistButtonIfValidTitlePresent(playlistTitle.text)
 			postLoginBlock = nil
@@ -174,15 +174,15 @@ class PlaylistCreationViewController: UIViewController {
 			print("No playlist URI available")
 			return
 		}
-		guard UIApplication.sharedApplication().canOpenURL(uri) else {
+		guard UIApplication.shared.canOpenURL(uri) else {
 			print("Spotify application not available")
 			return
 		}
-		openInSpotifyButton.hidden = false
-		openInSpotifyButton.enabled = true
+		openInSpotifyButton.isHidden = false
+		openInSpotifyButton.isEnabled = true
 	}
 
-	func viewTapped(sender: UITapGestureRecognizer) {
+	func viewTapped(_ sender: UITapGestureRecognizer) {
 		view.endEditing(true)
 	}
 }
@@ -193,26 +193,26 @@ extension PlaylistCreationViewController: UITextFieldDelegate {
 	/**
 	The create playlist button should only be enabled if there's valid text for the playlist name.
 	*/
-	func textField(textField: UITextField, shouldChangeCharactersInRange range: NSRange, replacementString string: String) -> Bool {
+	func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
 		if let text = textField.text {
-			let newString = (text as NSString).stringByReplacingCharactersInRange(range, withString: string)
+			let newString = (text as NSString).replacingCharacters(in: range, with: string)
 			enableCreatePlaylistButtonIfValidTitlePresent(newString)
 		}
 		localPlaylist.playlistTitle = textField.text
 		return true
 	}
 
-	func enableCreatePlaylistButtonIfValidTitlePresent(title: String?) {
+	func enableCreatePlaylistButtonIfValidTitlePresent(_ title: String?) {
 		let titleText = title ?? ""
-		createPlaylistButton.enabled = titleText.trim() != ""
+		createPlaylistButton.isEnabled = titleText.trim() != ""
 	}
 
-	func textFieldShouldClear(textField: UITextField) -> Bool {
-		createPlaylistButton.enabled = false
+	func textFieldShouldClear(_ textField: UITextField) -> Bool {
+		createPlaylistButton.isEnabled = false
 		return true
 	}
 
-	func textFieldShouldReturn(textField: UITextField) -> Bool {
+	func textFieldShouldReturn(_ textField: UITextField) -> Bool {
 		textField.resignFirstResponder()
 		return true
 	}
@@ -226,12 +226,12 @@ extension PlaylistCreationViewController {
 	/**
 	The status bar may or may not be visible in the new orientation.
 	*/
-	override func viewWillTransitionToSize(size: CGSize, withTransitionCoordinator coordinator: UIViewControllerTransitionCoordinator) {
-		super.viewWillTransitionToSize(size, withTransitionCoordinator: coordinator)
+	override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+		super.viewWillTransition(to: size, with: coordinator)
 		// Before the animation is a good time to call invalidateIntrinsicContentSize() on a toolbar.
 		// This makes it's new height available during the animation.
-		coordinator.animateAlongsideTransition(
-			{ context in
+		coordinator.animate(
+			alongsideTransition: { context in
 				self.setHeightConstraintIfNeeded()
 			},
 			completion: nil
@@ -241,14 +241,14 @@ extension PlaylistCreationViewController {
 	/**
 	Keep track of the currently active text field.
 	*/
-	func textFieldDidBeginEditing(textField: UITextField) {
+	func textFieldDidBeginEditing(_ textField: UITextField) {
 		activeTextField = textField
 	}
 
 	/**
 	Unset the currently active text field when the text field resigns as a first responder.
 	*/
-	func textFieldDidEndEditing(textField: UITextField) {
+	func textFieldDidEndEditing(_ textField: UITextField) {
 		if activeTextField == textField {
 			activeTextField = nil
 		}
@@ -258,11 +258,11 @@ extension PlaylistCreationViewController {
 	}
 
 	func registerForKeyboardAndStatusBarNotifications() {
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.keyboardChangingSize(_:)), name: UIKeyboardWillChangeFrameNotification, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardChangingSize(_:)), name: NSNotification.Name.UIKeyboardWillChangeFrame, object: nil)
 	}
 
 	func unregisterForNotifications() {
-		NSNotificationCenter.defaultCenter().removeObserver(self)
+		NotificationCenter.default.removeObserver(self)
 	}
 
 	/**
@@ -292,19 +292,19 @@ extension PlaylistCreationViewController {
 	Change the UIScrollView's contentInset when the keyboard appears / disappears / changes size.
 	If necessary, scroll so that the currently active text field is visible.
 	*/
-	func keyboardChangingSize(notification: NSNotification) {
+	func keyboardChangingSize(_ notification: Notification) {
 
-		guard let userInfo = notification.userInfo as [NSObject: AnyObject]?,
-			endFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.CGRectValue() else {
+		guard let userInfo = notification.userInfo as [AnyHashable: Any]?,
+			let endFrame = (userInfo[UIKeyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue else {
 				// Needed information not available.
 				return
 		}
 
-		let convertedEndFrame = view.convertRect(endFrame, fromView: view.window)
+		let convertedEndFrame = view.convert(endFrame, from: view.window)
 		if convertedEndFrame.origin.y == view.bounds.height {
 
 			// Keyboard is hidden.
-			let contentInset = UIEdgeInsetsZero
+			let contentInset = UIEdgeInsets.zero
 			scrollView.contentInset = contentInset
 			scrollView.scrollIndicatorInsets = contentInset
 
@@ -315,7 +315,7 @@ extension PlaylistCreationViewController {
 				return
 			}
 
-			let textFieldRect = textField.convertRect(textField.bounds, toView: view)
+			let textFieldRect = textField.convert(textField.bounds, to: view)
 
 			// Adjust the scroll view content inset.
 			let contentInset = UIEdgeInsets(top:0.0, left:0.0, bottom:convertedEndFrame.height, right:0.0)
@@ -324,9 +324,9 @@ extension PlaylistCreationViewController {
 
 			// Animate the text field into view.
 			let animationDuration = userInfo[UIKeyboardAnimationDurationUserInfoKey] as? Double ?? 0.0
-			let animationOption = userInfo[UIKeyboardAnimationCurveUserInfoKey] as? UIViewAnimationOptions ?? UIViewAnimationOptions.TransitionNone
-			UIView.animateWithDuration(
-				animationDuration,
+			let animationOption = userInfo[UIKeyboardAnimationCurveUserInfoKey] as? UIViewAnimationOptions ?? UIViewAnimationOptions()
+			UIView.animate(
+				withDuration: animationDuration,
 				delay: 0.0,
 				options: animationOption,
 				animations: {

@@ -14,31 +14,31 @@ import Alamofire
 
 
 public protocol ResponseObjectSerializable {
-	init?(response: NSHTTPURLResponse, representation: AnyObject)
+	init?(response: HTTPURLResponse, representation: AnyObject)
 }
 
 extension Request {
-	public func responseObject<T: ResponseObjectSerializable>(completionHandler: Response<T, NSError> -> Void) -> Self {
+	public func responseObject<T: ResponseObjectSerializable>(_ completionHandler: (Response<T, NSError>) -> Void) -> Self {
 		let responseSerializer = ResponseSerializer<T, NSError> { request, response, data, error in
-			guard error == nil else { return .Failure(error!) }
+			guard error == nil else { return .failure(error!) }
 
-			let JSONResponseSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
+			let JSONResponseSerializer = Request.JSONResponseSerializer(options: .allowFragments)
 			let result = JSONResponseSerializer.serializeResponse(request, response, data, error)
 
 			switch result {
-			case .Success(let value):
+			case .success(let value):
 				if let
 					response = response,
-					responseObject = T(response: response, representation: value)
+					let responseObject = T(response: response, representation: value)
 				{
-					return .Success(responseObject)
+					return .success(responseObject)
 				} else {
 					let failureReason = "JSON could not be serialized into response object: \(value)"
-					let error = Error.errorWithCode(.JSONSerializationFailed, failureReason: failureReason)
-					return .Failure(error)
+					let error = Alamofire.Error.errorWithCode(.jsonSerializationFailed, failureReason: failureReason)
+					return .failure(error)
 				}
-			case .Failure(let error):
-				return .Failure(error)
+			case .failure(let error):
+				return .failure(error)
 			}
 		}
 
@@ -47,28 +47,28 @@ extension Request {
 }
 
 public protocol ResponseCollectionSerializable {
-	static func collection(response response: NSHTTPURLResponse, representation: AnyObject) -> [Self]
+	static func collection(response: HTTPURLResponse, representation: AnyObject) -> [Self]
 }
 
 extension Alamofire.Request {
-	public func responseCollection<T: ResponseCollectionSerializable>(completionHandler: Response<[T], NSError> -> Void) -> Self {
+	public func responseCollection<T: ResponseCollectionSerializable>(_ completionHandler: (Response<[T], NSError>) -> Void) -> Self {
 		let responseSerializer = ResponseSerializer<[T], NSError> { request, response, data, error in
-			guard error == nil else { return .Failure(error!) }
+			guard error == nil else { return .failure(error!) }
 
-			let JSONSerializer = Request.JSONResponseSerializer(options: .AllowFragments)
+			let JSONSerializer = Request.JSONResponseSerializer(options: .allowFragments)
 			let result = JSONSerializer.serializeResponse(request, response, data, error)
 
 			switch result {
-			case .Success(let value):
+			case .success(let value):
 				if let response = response {
-					return .Success(T.collection(response: response, representation: value))
+					return .success(T.collection(response: response, representation: value))
 				} else {
 					let failureReason = "Response collection could not be serialized due to nil response"
-					let error = Error.errorWithCode(.JSONSerializationFailed, failureReason: failureReason)
-					return .Failure(error)
+					let error = Alamofire.Error.errorWithCode(.jsonSerializationFailed, failureReason: failureReason)
+					return .failure(error)
 				}
-			case .Failure(let error):
-				return .Failure(error)
+			case .failure(let error):
+				return .failure(error)
 			}
 		}
 

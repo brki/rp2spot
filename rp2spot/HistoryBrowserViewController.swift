@@ -10,7 +10,7 @@ import UIKit
 import CoreData
 import AlamofireImage
 
-typealias RPFetchResultHandler = (success: Bool, fetchedCount: Int, error: NSError?) -> Void
+typealias RPFetchResultHandler = (_ success: Bool, _ fetchedCount: Int, _ error: NSError?) -> Void
 
 class HistoryBrowserViewController: UIViewController {
 
@@ -28,9 +28,9 @@ class HistoryBrowserViewController: UIViewController {
 			context: CoreDataStack.childContextForContext(CoreDataStack.sharedInstance.managedObjectContext))
 	}()
 
-	var insertIndexPaths = [NSIndexPath]()
-	var deleteIndexPaths = [NSIndexPath]()
-	var updateIndexPaths = [NSIndexPath]()
+	var insertIndexPaths = [IndexPath]()
+	var deleteIndexPaths = [IndexPath]()
+	var updateIndexPaths = [IndexPath]()
 
 	var currentlyPlayingTrackId: String?
 
@@ -49,7 +49,7 @@ class HistoryBrowserViewController: UIViewController {
 				if enabled {
 					self.refreshManager.topRefreshControl?.enabled = self.historyData.hasEarlierHistory()
 				}
-				self.dateSelectionButton.enabled = enabled
+				self.dateSelectionButton.isEnabled = enabled
 			}
 		}
 	}
@@ -77,9 +77,9 @@ class HistoryBrowserViewController: UIViewController {
 					// Try to restore the history view that the user had when they left the app.
 					let topRow = self.userSettings.historyBrowserTopVisibleRow
 					if  topRow != 0  && topRow < self.historyData.songCount {
-						self.tableView.scrollToRowAtIndexPath(
-							NSIndexPath(forRow: topRow, inSection: 0),
-							atScrollPosition: .Top,
+						self.tableView.scrollToRow(
+							at: IndexPath(row: topRow, section: 0),
+							at: .top,
 							animated: false
 						)
 					}
@@ -90,7 +90,7 @@ class HistoryBrowserViewController: UIViewController {
 
 	}
 
-	override func viewWillAppear(animated: Bool) {
+	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
 
 		if !historyData.isRefreshing {
@@ -99,13 +99,13 @@ class HistoryBrowserViewController: UIViewController {
 			historyData.removeExcessLocalHistory(fromBottom: false)
 		}
 
-		NSNotificationCenter.defaultCenter().addObserver(self, selector: #selector(self.willResignActive(_:)), name: UIApplicationWillResignActiveNotification, object: nil)
+		NotificationCenter.default.addObserver(self, selector: #selector(self.willResignActive(_:)), name: NSNotification.Name.UIApplicationWillResignActive, object: nil)
 	}
 
-	override func viewWillDisappear(animated: Bool) {
+	override func viewWillDisappear(_ animated: Bool) {
 		super.viewWillDisappear(animated)
 		saveTopVisibleRow()
-		NSNotificationCenter.defaultCenter().removeObserver(self, name: UIApplicationWillResignActiveNotification, object: nil)
+		NotificationCenter.default.removeObserver(self, name: NSNotification.Name.UIApplicationWillResignActive, object: nil)
 	}
 
 	override func didReceiveMemoryWarning() {
@@ -113,18 +113,18 @@ class HistoryBrowserViewController: UIViewController {
 		// Dispose of any resources that can be recreated.
 	}
 
-	override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
-		let destinationVC = segue.destinationViewController
+	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+		let destinationVC = segue.destination
 
-		if let identifier = segue.identifier where identifier == "BrowserToPlaylistCreation",
+		if let identifier = segue.identifier, identifier == "BrowserToPlaylistCreation",
 			let navController = destinationVC as? UINavigationController,
-			vc = navController.topViewController as? PlaylistViewController {
+			let vc = navController.topViewController as? PlaylistViewController {
 
 			let songData = historyData.dataForSpotifyTracks()
 			vc.localPlaylist = LocalPlaylistSongs(songs: songData)
 
 			for cell in tableView.visibleCells as! [PlainHistoryTableViewCell] {
-				if let _ = cell.spotifyTrackId, indexPath = tableView.indexPathForCell(cell) {
+				if let _ = cell.spotifyTrackId, let indexPath = tableView.indexPath(for: cell) {
 					let song = historyData.songDataForObjectAtIndexPath(indexPath)
 					vc.firstVisibleDate = song?.playedAt
 					break
@@ -139,8 +139,8 @@ class HistoryBrowserViewController: UIViewController {
 		} else if let vc = destinationVC as? SongInfoViewController {
 
 			guard let cell = sender as? UITableViewCell,
-				indexPath = tableView.indexPathForCell(cell),
-				songData = historyData.songDataForObjectAtIndexPath(indexPath) else {
+				let indexPath = tableView.indexPath(for: cell),
+				let songData = historyData.songDataForObjectAtIndexPath(indexPath) else {
 					print("Unable to get song data for selected row for showing detail view")
 					return
 			}
@@ -148,29 +148,29 @@ class HistoryBrowserViewController: UIViewController {
 		}
 	}
 
-	@IBAction func selectDate(sender: UIBarButtonItem) {
-		guard let datePickerVC = storyboard?.instantiateViewControllerWithIdentifier("HistoryDateSelectorViewController") as? HistoryDateSelectorViewController else {
+	@IBAction func selectDate(_ sender: UIBarButtonItem) {
+		guard let datePickerVC = storyboard?.instantiateViewController(withIdentifier: "HistoryDateSelectorViewController") as? HistoryDateSelectorViewController else {
 			return
 		}
 
-		datePickerVC.modalPresentationStyle = .OverCurrentContext
-		let displayDate = historyData.extremityDateInList(newest: true) ?? NSDate()
+		datePickerVC.modalPresentationStyle = .overCurrentContext
+		let displayDate = historyData.extremityDateInList(newest: true) ?? Foundation.Date()
 		datePickerVC.startingDate = displayDate
 		datePickerVC.delegate = self
 
 		async_main {
-			self.presentViewController(datePickerVC, animated: true, completion: nil)
+			self.present(datePickerVC, animated: true, completion: nil)
 
 			guard let popover = datePickerVC.popoverPresentationController else {
 				return
 			}
-			popover.permittedArrowDirections = .Up
+			popover.permittedArrowDirections = .up
 			popover.barButtonItem = sender
 			popover.delegate = self
 		}
 	}
 
-	@IBAction func prepareForUnwind(segue: UIStoryboardSegue) {
+	@IBAction func prepareForUnwind(_ segue: UIStoryboardSegue) {
 		// Nothing to do here, but this method needs to exist so that the exit segues can be created from other View controllers.
 	}
 
@@ -182,7 +182,7 @@ class HistoryBrowserViewController: UIViewController {
 		self.playerContainerViewHeightConstraint.constant = 120
 	}
 
-	func willResignActive(notification: NSNotification) {
+	func willResignActive(_ notification: Notification) {
 		saveTopVisibleRow()
 	}
 
@@ -190,7 +190,7 @@ class HistoryBrowserViewController: UIViewController {
 	Save the index of the topmost visible row, so that it can be restored when the app restarts.
 	*/
 	func saveTopVisibleRow() {
-		if let indexPaths = tableView.indexPathsForVisibleRows where indexPaths.count > 0 {
+		if let indexPaths = tableView.indexPathsForVisibleRows, indexPaths.count > 0 {
 			userSettings.historyBrowserTopVisibleRow = indexPaths[0].row
 		} else {
 			userSettings.historyBrowserTopVisibleRow = 0
@@ -200,7 +200,7 @@ class HistoryBrowserViewController: UIViewController {
 
 
 extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
-	func dateSelected(date: NSDate) {
+	func dateSelected(_ date: Foundation.Date) {
 
 		// Disable refresh controls while refresh running
 		refreshControlsEnabled = false
@@ -223,9 +223,9 @@ extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 					// Reposition at the bottom of the table, where the selected date is.
 					let rowCount = self.historyData.songCount
 					if rowCount > 0 {
-						self.tableView.scrollToRowAtIndexPath(
-							NSIndexPath(forRow: rowCount - 1, inSection: 0),
-							atScrollPosition: .Bottom,
+						self.tableView.scrollToRow(
+							at: IndexPath(row: rowCount - 1, section: 0),
+							at: .bottom,
 							animated: true
 						)
 					}
@@ -237,15 +237,15 @@ extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 
 
 extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate {
-	func adaptivePresentationStyleForPresentationController(controller: UIPresentationController) -> UIModalPresentationStyle {
-		return .None
+	func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+		return .none
 	}
 }
 
 
 extension HistoryBrowserViewController: AudioStatusObserver {
-	func playerStatusChanged(newStatus: AudioPlayerViewController.PlayerStatus) {
-		if newStatus == .Active {
+	func playerStatusChanged(_ newStatus: AudioPlayerViewController.PlayerStatus) {
+		if newStatus == .active {
 			async_main {
 				self.shouldScrollPlayingSongCellToVisible = true
 				self.showPlayer()
@@ -258,18 +258,18 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 				// and might still be highlighted as the currently playing track.
 				// Reload all visible rows to ensure that no row remains highlighted as playing.
 				if let visibleIndexPaths = self.tableView.indexPathsForVisibleRows {
-					self.tableView.reloadRowsAtIndexPaths(visibleIndexPaths, withRowAnimation: .Automatic)
+					self.tableView.reloadRows(at: visibleIndexPaths, with: .automatic)
 				}
 			}
 		}
 	}
 
-	func trackStartedPlaying(spotifyShortTrackId: String) {
+	func trackStartedPlaying(_ spotifyShortTrackId: String) {
 		currentlyPlayingTrackId = spotifyShortTrackId
 		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: true)
 	}
 
-	func trackStoppedPlaying(spotifyShortTrackId: String) {
+	func trackStoppedPlaying(_ spotifyShortTrackId: String) {
 		currentlyPlayingTrackId = nil
 		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: false)
 	}
@@ -278,18 +278,18 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 	Inspect the currently visisble cells.  If one of them has a matching track id,
 	trigger a reload, so that it's playing status will be updated.
 	*/
-	func updatePlayingStatusOfVisibleCell(trackId: String, isPlaying: Bool) {
+	func updatePlayingStatusOfVisibleCell(_ trackId: String, isPlaying: Bool) {
 		async_main {
 			let ensurePlayingCellVisible = self.shouldScrollPlayingSongCellToVisible
 			self.shouldScrollPlayingSongCellToVisible = false
 
-			guard let indexPaths = self.tableView.indexPathsForVisibleRows where indexPaths.count > 0 else {
+			guard let indexPaths = self.tableView.indexPathsForVisibleRows, indexPaths.count > 0 else {
 				return
 			}
 
 			for path in indexPaths {
-				if let cell = self.tableView.cellForRowAtIndexPath(path) as? PlainHistoryTableViewCell where cell.spotifyTrackId == trackId {
-					self.tableView.reloadRowsAtIndexPaths([path], withRowAnimation: .Fade)
+				if let cell = self.tableView.cellForRow(at: path) as? PlainHistoryTableViewCell, cell.spotifyTrackId == trackId {
+					self.tableView.reloadRows(at: [path], with: .fade)
 					return
 				}
 			}
@@ -304,9 +304,9 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 			let section = indexPaths.last!.section
 			// The height of the player is 120, the playing cell can be at most 3 cells beyond the last visible cell.
 			let maxRowToTry = min(lastVisibleRow + 3, self.historyData.songCount - 1)
-			let searchIndexPaths = Array(lastVisibleRow + 1 ... maxRowToTry).map({ NSIndexPath(forRow: $0, inSection: section) })
+			let searchIndexPaths = Array(lastVisibleRow + 1 ... maxRowToTry).map({ IndexPath(row: $0, section: section) })
 			if let indexPath = self.historyData.indexPathWithMatchingTrackId(trackId, inIndexPaths: searchIndexPaths) {
-				self.tableView.scrollToRowAtIndexPath(indexPath, atScrollPosition: .Bottom, animated: true)
+				self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
 			}
 		}
 	}
@@ -323,16 +323,16 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 	and related methods in this function) so that all the code for the CATransaction is called in one method - see
 	controllerDidChangeContent() for more details on why a CATransaction is used.
 	*/
-	func controller(controller: NSFetchedResultsController, didChangeObject anObject: AnyObject, atIndexPath indexPath: NSIndexPath?, forChangeType type: NSFetchedResultsChangeType, newIndexPath: NSIndexPath?) {
+	func controller(_ controller: NSFetchedResultsController<NSFetchRequestResult>, didChange anObject: Any, at indexPath: IndexPath?, for type: NSFetchedResultsChangeType, newIndexPath: IndexPath?) {
 
 		switch type {
-		case .Delete:
+		case .delete:
 			deleteIndexPaths.append(indexPath!)
 
-		case .Insert:
+		case .insert:
 			insertIndexPaths.append(newIndexPath!)
 
-		case .Update:
+		case .update:
 			updateIndexPaths.append(indexPath!)
 
 		default:
@@ -343,7 +343,7 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 	/**
 	Apply all changes that have been collected.
 	*/
-	func controllerDidChangeContent(controller: NSFetchedResultsController) {
+	func controllerDidChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
 		// When adding items to the end of the table view, there is a noticeable flicker and small jump unless
 		// the table view insert / delete animations are suppressed.
 		let disableRowAnimations = historyData.isFetchingNewer
@@ -356,13 +356,13 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 		tableView.beginUpdates()
 
 		let rowsToDelete = deleteIndexPaths.removeAllReturningValues()
-		tableView.insertRowsAtIndexPaths(insertIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
-		tableView.deleteRowsAtIndexPaths(rowsToDelete, withRowAnimation: .None)
-		tableView.reloadRowsAtIndexPaths(updateIndexPaths.removeAllReturningValues(), withRowAnimation: .None)
+		tableView.insertRows(at: insertIndexPaths.removeAllReturningValues(), with: .none)
+		tableView.deleteRows(at: rowsToDelete, with: .none)
+		tableView.reloadRows(at: updateIndexPaths.removeAllReturningValues(), with: .none)
 
 		if historyData.isFetchingNewer {
 			// If rows above have been deleted at the top of the table view, shift the current contenteOffset up an appropriate amount:
-			tableView.contentOffset = CGPointMake(tableView.contentOffset.x, tableView.contentOffset.y - tableView.rowHeight * CGFloat(rowsToDelete.count))
+			tableView.contentOffset = CGPoint(x: tableView.contentOffset.x, y: tableView.contentOffset.y - tableView.rowHeight * CGFloat(rowsToDelete.count))
 		}
 
 		tableView.endUpdates()
@@ -379,9 +379,9 @@ extension HistoryBrowserViewController: NSFetchedResultsControllerDelegate {
 // MARK: UITableViewDataSource methods
 
 extension HistoryBrowserViewController: UITableViewDataSource {
-	func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+	func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
-		let cell = tableView.dequeueReusableCellWithIdentifier("HistoryBrowserCell", forIndexPath: indexPath) as! PlainHistoryTableViewCell
+		let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryBrowserCell", for: indexPath) as! PlainHistoryTableViewCell
 
 		if let songData = historyData.songDataForObjectAtIndexPath(indexPath) {
 			cell.configureForSong(songData, currentlyPlayingTrackId: currentlyPlayingTrackId)
@@ -403,7 +403,7 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 		return cell
 	}
 
-	func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+	func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		return historyData.numberOfRowsInSection(section)
 	}
 }
@@ -413,14 +413,14 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 
 extension HistoryBrowserViewController: UITableViewDelegate {
 
-	func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+	func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
 		// Only Spotify Premium accounts can stream music.
 		guard userSettings.canStreamSpotifyTracks != false else {
 			return
 		}
 
 		// If selected row has no spotify track, do not start playing
-		historyData.context.performBlock {
+		historyData.context.perform {
 
 			guard self.historyData.objectAtIndexPath(indexPath)?.spotifyTrackId != nil else {
 				return
@@ -446,9 +446,9 @@ extension HistoryBrowserViewController {
 
 	func setupRefreshControls() {
 		refreshManager = ScrollViewRefreshManager(tableView: tableView)
-		refreshManager.backgroundView.backgroundColor = Constant.Color.LightGrey.color()
-		refreshManager.addRefreshControl(.Top, target: self, refreshAction: #selector(self.refreshWithOlderHistory))
-		refreshManager.addRefreshControl(.Bottom, target: self, refreshAction: #selector(self.refreshWithNewerHistory))
+		refreshManager.backgroundView.backgroundColor = Constant.Color.lightGrey.color()
+		refreshManager.addRefreshControl(.top, target: self, refreshAction: #selector(self.refreshWithOlderHistory))
+		refreshManager.addRefreshControl(.bottom, target: self, refreshAction: #selector(self.refreshWithNewerHistory))
 	}
 
 	func refreshWithNewerHistory() {
@@ -473,15 +473,15 @@ extension HistoryBrowserViewController {
 
 	// MARK: UITableViewDelegate actions that need to be communicated to the refresh manager:
 
-	func scrollViewDidEndDragging(scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+	func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
 		refreshManager.didEndDragging(scrollView)
 	}
 
-	func scrollViewWillBeginDragging(scrollView: UIScrollView) {
+	func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
 		refreshManager.willBeginDragging(scrollView)
 	}
 
-	func scrollViewDidEndDecelerating(scrollView: UIScrollView) {
+	func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
 		refreshManager.didEndDecelerating(scrollView)
 	}
 }

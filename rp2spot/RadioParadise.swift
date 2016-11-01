@@ -10,7 +10,7 @@ import Foundation
 import Alamofire
 
 
-typealias RPFetchHandler = (playedSongs: [PlayedSongData]?, error: NSError?, response: NSHTTPURLResponse?) -> Void
+typealias RPFetchHandler = (_ playedSongs: [PlayedSongData]?, _ error: NSError?, _ response: HTTPURLResponse?) -> Void
 
 struct RadioParadise {
 
@@ -24,11 +24,11 @@ struct RadioParadise {
 
 	static let userSettings = UserSetting.sharedInstance
 
-	static func fetchNewer(region: String, newerThan: NSDate, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
+	static func fetchNewer(_ region: String, newerThan: Foundation.Date, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
 		return fetchHistory(region, date: newerThan, vectorCount: count, handler: handler)
 	}
 
-	static func fetchOlder(region: String, olderThan: NSDate, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
+	static func fetchOlder(_ region: String, olderThan: Foundation.Date, count: Int = DEFAULT_FETCH_COUNT, handler: RPFetchHandler? = nil) -> Request {
 		return fetchHistory(region, date: olderThan, vectorCount: -count, handler: handler)
 	}
 
@@ -41,7 +41,7 @@ struct RadioParadise {
 	  - vectorCount: Int - if positive, fetch this many songs after the base date; if negative fetch abs(vectorCount) songs before the base date
 	  - handler: completion handler
 	*/
-	static func fetchHistory(region: String, date: NSDate, vectorCount: Int, handler: RPFetchHandler? = nil) -> Request {
+	static func fetchHistory(_ region: String, date: Foundation.Date, vectorCount: Int, handler: RPFetchHandler? = nil) -> Request {
 
 		let params: [String: AnyObject] = [
 			"base_time": Date.sharedInstance.toUTCString(date),
@@ -52,21 +52,21 @@ struct RadioParadise {
 
 		let request = Alamofire.request(.GET, url, parameters: params).responseCollection() { (response: Response<[PlayedSongData], NSError>) in
 			switch response.result {
-			case .Success(let playedSongs):
+			case .success(let playedSongs):
 				handler?(playedSongs: playedSongs, error:nil, response: response.response)
-			case .Failure(let error):
+			case .failure(let error):
 				handler?(playedSongs: nil, error:error, response: response.response)
 			}
 		}
 		return request
 	}
 
-	static func imageURLText(asin: String, size: ImageSize) -> String {
+	static func imageURLText(_ asin: String, size: ImageSize) -> String {
 		return Constant.RADIO_PARADISE_IMAGE_URL_BASE + "\(size.rawValue)/\(asin).jpg"
 	}
 
-	static func songInfoURL(RPSongId: NSNumber) -> NSURL? {
-		let URLString = Constant.RADIO_PARADISE_SONG_INFO_URL_TEMPLATE.stringByReplacingOccurrencesOfString("{songid}", withString: String(RPSongId))
-		return NSURL(string: URLString)
+	static func songInfoURL(_ RPSongId: NSNumber) -> URL? {
+		let URLString = Constant.RADIO_PARADISE_SONG_INFO_URL_TEMPLATE.replacingOccurrences(of: "{songid}", with: String(describing: RPSongId))
+		return URL(string: URLString)
 	}
 }

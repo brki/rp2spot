@@ -15,7 +15,7 @@ import CoreData
 extension PlayedSong {
 
     @NSManaged var title: String
-    @NSManaged var playedAt: NSDate
+    @NSManaged var playedAt: Foundation.Date
     @NSManaged var albumTitle: String
 	@NSManaged var asin: String?
     @NSManaged var largeImageURL: String?

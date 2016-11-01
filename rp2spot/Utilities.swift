@@ -8,23 +8,23 @@
 
 import Foundation
 
-func async_main(block: () -> Void) {
-	dispatch_async(dispatch_get_main_queue(), block)
+func async_main(_ block: @escaping () -> Void) {
+	DispatchQueue.main.async(execute: block)
 }
 
 class Utility {
 
-	static func presentAlert(title: String?, message: String?, ommitOKButton: Bool = false) {
+	static func presentAlert(_ title: String?, message: String?, ommitOKButton: Bool = false) {
 
-		let alertController = UIAlertController(title: title, message: message, preferredStyle: .Alert)
+		let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
 		if !ommitOKButton {
-			alertController.addAction(UIAlertAction(title: "OK", style: .Default, handler: nil))
+			alertController.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
 		}
 
 		presentAlertControllerOnFrontController(alertController)
 	}
 
-	static func presentAlertControllerOnFrontController(alertController: UIAlertController, iteration: Int = 0) {
+	static func presentAlertControllerOnFrontController(_ alertController: UIAlertController, iteration: Int = 0) {
 
 		guard iteration < 8 else {
 			print("presentAlertControllerOnFrontController: After 8 iterations, still not able to get a stable front view controller, giving up.")
@@ -32,7 +32,7 @@ class Utility {
 		}
 
 		async_main {
-			guard var controller = UIApplication.sharedApplication().keyWindow?.rootViewController else {
+			guard var controller = UIApplication.shared.keyWindow?.rootViewController else {
 				print("presentAlertControllerOnFrontController: Unable to get rootViewController")
 				return
 			}
@@ -42,14 +42,14 @@ class Utility {
 			}
 
 			// If view controller is being dismissed or presented, delay presentation a bit.
-			if controller.isBeingDismissed() || controller.isBeingPresented() {
-				dispatch_after(dispatch_time(DISPATCH_TIME_NOW, Int64(0.37 * Double(NSEC_PER_SEC))), dispatch_get_main_queue()) {
+			if controller.isBeingDismissed || controller.isBeingPresented {
+				DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + Double(Int64(0.37 * Double(NSEC_PER_SEC))) / Double(NSEC_PER_SEC)) {
 					presentAlertControllerOnFrontController(alertController, iteration: iteration + 1)
 				}
 				return
 			}
 
-			controller.presentViewController(alertController, animated: true, completion: nil)
+			controller.present(alertController, animated: true, completion: nil)
 		}
 	}
 }

@@ -10,7 +10,7 @@ import UIKit
 
 class HistoryDateSelectorViewController: UIViewController {
 
-	var startingDate: NSDate!
+	var startingDate: Foundation.Date!
 	var delegate: DateSelectionAcceptingProtocol!
 
 	@IBOutlet weak var datePicker: UIDatePicker!
@@ -20,11 +20,11 @@ class HistoryDateSelectorViewController: UIViewController {
 		super.viewDidLoad()
 		datePicker.date = startingDate
 		datePicker.minimumDate = Constant.RADIO_PARADISE_MINIMUM_SELECTABLE_HISTORY_DATE
-		datePicker.maximumDate = NSDate()
+		datePicker.maximumDate = Foundation.Date()
 
 		// Make the control have rounded edges and a border:
 		let layer = backgroundView.layer
-		let borderColor = Constant.Color.LightGrey.color().CGColor
+		let borderColor = Constant.Color.lightGrey.color().cgColor
 		layer.cornerRadius = 30
 		layer.borderColor = borderColor
 		layer.borderWidth = 0.5
@@ -33,33 +33,33 @@ class HistoryDateSelectorViewController: UIViewController {
 		layer.shadowColor = borderColor
 		layer.shadowOpacity = 0.8
 		layer.shadowRadius = 3.0
-		layer.shadowOffset = CGSizeMake(2.0, 2.0)
+		layer.shadowOffset = CGSize(width: 2.0, height: 2.0)
 	}
 
-	override func viewDidAppear(animated: Bool) {
+	override func viewDidAppear(_ animated: Bool) {
 		super.viewDidAppear(animated)
 	}
 
-	@IBAction func setDateToToday(sender: UIButton) {
-		datePicker.date = NSDate()
+	@IBAction func setDateToToday(_ sender: UIButton) {
+		datePicker.date = Foundation.Date()
 	}
 	
-	@IBAction func cancel(sender: UIButton) {
+	@IBAction func cancel(_ sender: UIButton) {
 		dismiss()
 	}
 
-	@IBAction func OuterViewTapped(sender: UITapGestureRecognizer) {
+	@IBAction func OuterViewTapped(_ sender: UITapGestureRecognizer) {
 		dismissNotifyingDelegateIfChanged()
 	}
 
 	func dismissNotifyingDelegateIfChanged() {
-		if startingDate.compare(datePicker.date) != NSComparisonResult.OrderedSame {
+		if startingDate.compare(datePicker.date) != ComparisonResult.orderedSame {
 			delegate.dateSelected(datePicker.date)
 		}
 		dismiss()
 	}
 
 	func dismiss() {
-		dismissViewControllerAnimated(true, completion: nil)
+		self.dismiss(animated: true, completion: nil)
 	}
 }

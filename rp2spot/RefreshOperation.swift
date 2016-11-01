@@ -20,11 +20,11 @@ class RefreshOperation: ConcurrentOperation {
 	}
 
 	override func main() {
-		if cancelled {
+		if isCancelled {
 			state = .Finished
 			return
 		}
-		target?.performSelector(selector)
+		target?.perform(selector)
 	}
 
 	/**

@@ -18,13 +18,13 @@ class SpotifyTrackInfoManager {
 	The cache key is the short Spotify track id, the value is a SPTTrack.
 	*/
 	lazy var cache: NSCache = {
-		let cache = NSCache()
+		let cache = NSCache<String, SPTTrack>()
 		cache.countLimit = Constant.CACHE_SPOTIFY_TRACK_INFO_MAX_COUNT
 		return cache
 	}()
 
-	lazy var operationQueue: NSOperationQueue = {
-		let queue = NSOperationQueue()
+	lazy var operationQueue: OperationQueue = {
+		let queue = OperationQueue()
 		queue.maxConcurrentOperationCount = 1
 		return queue
 	}()
@@ -36,7 +36,7 @@ class SpotifyTrackInfoManager {
 	A network request is made only if some track-metadata objects
 	are not locally cached.
 	*/
-	func trackMetadata(trackURIs: [NSURL], handler: (NSError?, [SPTTrack]?) -> Void) {
+	func trackMetadata(_ trackURIs: [URL], handler: (NSError?, [SPTTrack]?) -> Void) {
 		let operation = SpotifyTrackMetadataOperation(trackURIs: trackURIs, handler:handler)
 		operationQueue.addOperation(operation)
 	}
@@ -44,8 +44,8 @@ class SpotifyTrackInfoManager {
 	/**
 	Gets the track metadata for the given track.
 	*/
-	func trackInfo(trackId: String, handler: (NSError?, SPTTrack?) -> Void) {
-		if let trackInfo = cache.objectForKey(trackId) as? SPTTrack {
+	func trackInfo(_ trackId: String, handler: @escaping (NSError?, SPTTrack?) -> Void) {
+		if let trackInfo = cache.object(forKey: trackId) as? SPTTrack {
 			handler(nil, trackInfo)
 			return
 		}
@@ -71,12 +71,12 @@ class SpotifyTrackInfoManager {
 	Given the list of URIs, return a tuple containg an array of track metadata for tracks
 	found in the cache, and an array of NSURLs for the tracks not found in the cache.
 	*/
-	func getCachedTrackInfo(trackURIs: [NSURL]) -> (found: [SPTTrack], missing: [NSURL]) {
+	func getCachedTrackInfo(_ trackURIs: [URL]) -> (found: [SPTTrack], missing: [URL]) {
 		var found = [SPTTrack]()
-		var missing = [NSURL]()
+		var missing = [URL]()
 		for uri in trackURIs {
 			let key = SpotifyClient.shortSpotifyTrackId(uri.absoluteString)
-			if let trackInfo = cache.objectForKey(key) as? SPTTrack {
+			if let trackInfo = cache.object(forKey: key) as? SPTTrack {
 				found.append(trackInfo)
 			} else {
 				missing.append(uri)
@@ -85,7 +85,7 @@ class SpotifyTrackInfoManager {
 		return (found: found, missing: missing)
 	}
 
-	func addTracksToCache(tracks: [SPTTrack]) {
+	func addTracksToCache(_ tracks: [SPTTrack]) {
 		for track in tracks {
 			cache.setObject(track, forKey: track.identifier)
 		}

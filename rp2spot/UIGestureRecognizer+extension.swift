@@ -12,9 +12,9 @@ extension UIGestureRecognizer {
 	Disable and re-enable the gesture recognizer to cancel any current active gesture.
 	*/
 	func cancel() {
-		if enabled {
-			enabled = false
-			enabled = true
+		if isEnabled {
+			isEnabled = false
+			isEnabled = true
 		}
 	}
 }

@@ -23,23 +23,23 @@ class ScrollViewRefreshControl {
 	var enabled = true {
 		didSet {
 			if enabled {
-				view.activityIndicator.color = Constant.Color.SpotifyGreen.color()
+				view.activityIndicator.color = Constant.Color.spotifyGreen.color()
 			} else {
-				view.activityIndicator.color = Constant.Color.LightGrey.color()
+				view.activityIndicator.color = Constant.Color.lightGrey.color()
 			}
-			view.activityLabel.hidden = !enabled
+			view.activityLabel.isHidden = !enabled
 		}
 	}
 	var hidden = false {
 		didSet {
 			if hidden != oldValue {
-				view.hidden = hidden
+				view.isHidden = hidden
 			}
 		}
 	}
 
-	lazy var operationQueue: NSOperationQueue = {
-		let queue = NSOperationQueue()
+	lazy var operationQueue: OperationQueue = {
+		let queue = OperationQueue()
 		queue.maxConcurrentOperationCount = 1
 		return queue
 	}()
@@ -66,7 +66,7 @@ class ScrollViewRefreshControl {
 	}
 
 
-	func didEndDragging(scrollView: UIScrollView) {
+	func didEndDragging(_ scrollView: UIScrollView) {
 		// Ignore if not enabled or refresh operation is already in progress.
 		guard enabled && !refreshing else {
 			return
@@ -89,38 +89,38 @@ class ScrollViewRefreshControl {
 		let inset = adjustedContentInset(scrollView)
 		async_main {
 			self.view.activityIndicator?.startAnimating()
-			UIView.animateWithDuration(self.refreshViewAnimationDuration) {
+			UIView.animate(withDuration: self.refreshViewAnimationDuration, animations: {
 				scrollView.contentInset = inset
 				self.view.activityLabel?.text = self.activityLabelCurrentlyRefreshingText
-			}
+			}) 
 		}
 	}
 
-	func refreshShouldBeTriggered(scrollView: UIScrollView) -> Bool {
-		let pullHeight = position == .Bottom ? bottomPullHeight(scrollView) : topPullHeight(scrollView)
+	func refreshShouldBeTriggered(_ scrollView: UIScrollView) -> Bool {
+		let pullHeight = position == .bottom ? bottomPullHeight(scrollView) : topPullHeight(scrollView)
 		return pullHeight >= overPullTriggerHeight
 	}
 
-	func bottomPullHeight(scrollView: UIScrollView) -> CGFloat {
+	func bottomPullHeight(_ scrollView: UIScrollView) -> CGFloat {
 		return scrollView.contentOffset.y + scrollView.frame.size.height -  (scrollView.contentSize.height + scrollView.contentInset.bottom)
 	}
 
-	func topPullHeight(scrollView: UIScrollView) -> CGFloat {
+	func topPullHeight(_ scrollView: UIScrollView) -> CGFloat {
 		return scrollView.contentInset.top - scrollView.contentOffset.y
 	}
 
-	func adjustedContentInset(scrollView: UIScrollView) -> UIEdgeInsets {
+	func adjustedContentInset(_ scrollView: UIScrollView) -> UIEdgeInsets {
 		let adjustment = refreshing ? refreshingViewHeight : -refreshingViewHeight
 
 		return UIEdgeInsetsMake(
-			position == .Top ? scrollView.contentInset.top + adjustment : scrollView.contentInset.top,
+			position == .top ? scrollView.contentInset.top + adjustment : scrollView.contentInset.top,
 			scrollView.contentInset.left,
-			position == .Bottom ? scrollView.contentInset.bottom + adjustment : scrollView.contentInset.bottom,
+			position == .bottom ? scrollView.contentInset.bottom + adjustment : scrollView.contentInset.bottom,
 			scrollView.contentInset.right
 		)
 	}
 
-	func didFinishRefreshing(scrollView: UIScrollView) {
+	func didFinishRefreshing(_ scrollView: UIScrollView) {
 		guard refreshing else {
 			return
 		}
@@ -130,7 +130,7 @@ class ScrollViewRefreshControl {
 		let inset = adjustedContentInset(scrollView)
 		async_main {
 			self.view.activityIndicator?.stopAnimating()
-			UIView.animateWithDuration(self.refreshViewAnimationDuration,
+			UIView.animate(withDuration: self.refreshViewAnimationDuration,
 				animations: {
 					scrollView.contentInset = inset
 				},

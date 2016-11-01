@@ -7,5 +7,5 @@
 //
 
 protocol DateSelectionAcceptingProtocol {
-	func dateSelected(date: NSDate)
+	func dateSelected(_ date: Foundation.Date)
 }

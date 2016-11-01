@@ -15,48 +15,48 @@ class Date {
 	static let RADIO_PARADISE_DATETIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ssZ"
 
 	// A UTC date formatter that has the format expected by the radio paradise history endpoint.
-	lazy var UTCDateFormatter: NSDateFormatter = {
-		let formatter = NSDateFormatter()
+	lazy var UTCDateFormatter: DateFormatter = {
+		let formatter = DateFormatter()
 		formatter.dateFormat = RADIO_PARADISE_DATETIME_FORMAT
-		formatter.timeZone = NSTimeZone(name: "UTC")
+		formatter.timeZone = TimeZone(identifier: "UTC")
 		return formatter
 	}()
 
 	// A UTC date formatter that can convert the  format produced by the radio paradise history endpoint into a NSDate object.
-	lazy var RPDateParser: NSDateFormatter = {
-		let formatter = NSDateFormatter()
+	lazy var RPDateParser: DateFormatter = {
+		let formatter = DateFormatter()
 		formatter.dateFormat = RADIO_PARADISE_DATETIME_FORMAT
 		// According to Apple recommendations, always use the en_US_POSIX locale when parsing dates:
-		formatter.locale = NSLocale(localeIdentifier: "en_US_POSIX")
+		formatter.locale = Locale(identifier: "en_US_POSIX")
 		return formatter
 	}()
 
-	lazy var calendar = NSCalendar.currentCalendar()
+	lazy var calendar = Calendar.current
 
-	func toUTCString(date: NSDate) -> String {
-		return UTCDateFormatter.stringFromDate(date)
+	func toUTCString(_ date: Foundation.Date) -> String {
+		return UTCDateFormatter.string(from: date)
 	}
 
-	func dateFromRPDateString(date: String) -> NSDate? {
-		return RPDateParser.dateFromString(date)
+	func dateFromRPDateString(_ date: String) -> Foundation.Date? {
+		return RPDateParser.date(from: date)
 	}
 
 	// Returns a compact representation of the date / time.
-	func shortLocalizedString(date: NSDate) -> String {
-		return NSDateFormatter.localizedStringFromDate(date, dateStyle: .ShortStyle, timeStyle: .ShortStyle)
+	func shortLocalizedString(_ date: Foundation.Date) -> String {
+		return DateFormatter.localizedString(from: date, dateStyle: .short, timeStyle: .short)
 	}
 
-	func oneDayAgo() -> NSDate {
+	func oneDayAgo() -> Foundation.Date {
 		// First try the correct way:
-		if let date = calendar.dateByAddingUnit(NSCalendarUnit.Day, value: -1, toDate: NSDate(), options: NSCalendarOptions(rawValue: 0)) {
+		if let date = (calendar as NSCalendar).date(byAdding: NSCalendar.Unit.day, value: -1, to: Foundation.Date(), options: NSCalendar.Options(rawValue: 0)) {
 			return date
 		} else {
 			// If that for some reason fails, return the 24 hours ago time:
-			return NSDate(timeInterval: -24 * 60 * 60, sinceDate: NSDate())
+			return Foundation.Date(timeInterval: -24 * 60 * 60, since: Foundation.Date())
 		}
 	}
 
-	func timeWithHourDifference(date: NSDate, hours: Double) -> NSDate {
-		return NSDate(timeInterval: hours * 60 * 60, sinceDate: date)
+	func timeWithHourDifference(_ date: Foundation.Date, hours: Double) -> Foundation.Date {
+		return Foundation.Date(timeInterval: hours * 60 * 60, since: date)
 	}
 }

@@ -13,7 +13,7 @@ import Alamofire
 final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerializable {
 
 	enum ImageSize {
-		case Small, Large
+		case small, large
 	}
 	
 	// Note, there is a bug in Swift versions < 2.2 that prohibits returning nil in a failable initializer
@@ -21,7 +21,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	// as vars, and the non-optionals as implicitly unwrapped optionals:
 	// (ref: https://groups.google.com/d/msg/swift-language/78A0i1vDasc/hWnaDleYNf0J )
 	var title: String!
-	var playedAt: NSDate!
+	var playedAt: Foundation.Date!
 	var albumTitle: String!
 	var asin: String?
 	var largeImageURL: String?
@@ -30,29 +30,29 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	var radioParadiseSongId: NSNumber!
 	var artistName: String!
 
-	init?(response: NSHTTPURLResponse, representation: AnyObject) {
+	init?(response: HTTPURLResponse, representation: AnyObject) {
 
-		guard let title = representation.valueForKeyPath("title") as? String else {
+		guard let title = representation.value(forKeyPath: "title") as? String else {
 			print("PlayedSongData: unable to extract title")
 			return nil
 		}
 
-		guard let playedAt = Date.sharedInstance.dateFromRPDateString(representation.valueForKeyPath("played_at") as! String) else {
+		guard let playedAt = Date.sharedInstance.dateFromRPDateString(representation.value(forKeyPath: "played_at") as! String) else {
 			print("PlayedSongData: unable to extract playedAt")
 			return nil
 		}
 
-		guard let albumTitle = representation.valueForKeyPath("album_title") as? String else {
+		guard let albumTitle = representation.value(forKeyPath: "album_title") as? String else {
 			print("PlayedSongData: unable to extract albumTitle")
 			return nil
 		}
 
-		guard let radioParadiseSongId = representation.valueForKeyPath("rp_song_id") as? NSNumber else {
+		guard let radioParadiseSongId = representation.value(forKeyPath: "rp_song_id") as? NSNumber else {
 			print("PlayedSongData: unable to extract radioParadiseSongId")
 			return nil
 		}
 
-		guard let artistName = representation.valueForKeyPath("artist_name") as? String else {
+		guard let artistName = representation.value(forKeyPath: "artist_name") as? String else {
 			print("PlayedSongData: unable to extract artistName")
 			return nil
 		}
@@ -63,10 +63,10 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.radioParadiseSongId = radioParadiseSongId
 		self.artistName = artistName
 
-		self.asin = representation.valueForKeyPath("asin") as? String ?? nil
-		self.spotifyTrackId = representation.valueForKeyPath("spotify_track_id") as? String ?? nil
-		self.smallImageURL = representation.valueForKeyPath("spotify_album_img_small_url") as? String ?? nil
-		self.largeImageURL = representation.valueForKeyPath("spotify_album_img_large_url") as? String ?? nil
+		self.asin = representation.value(forKeyPath: "asin") as? String ?? nil
+		self.spotifyTrackId = representation.value(forKeyPath: "spotify_track_id") as? String ?? nil
+		self.smallImageURL = representation.value(forKeyPath: "spotify_album_img_small_url") as? String ?? nil
+		self.largeImageURL = representation.value(forKeyPath: "spotify_album_img_large_url") as? String ?? nil
 	}
 
 	/**
@@ -77,7 +77,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	*/
 	init(song: PlayedSong) {
 		self.title = song.title
-		self.playedAt = song.playedAt
+		self.playedAt = song.playedAt as Date!
 		self.albumTitle = song.albumTitle
 		self.radioParadiseSongId = song.radioParadiseSongId
 		self.artistName = song.artistName
@@ -87,20 +87,20 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.largeImageURL = song.largeImageURL
 	}
 
-	func imageURL(preferredSize: ImageSize = .Small) -> NSURL? {
+	func imageURL(_ preferredSize: ImageSize = .small) -> URL? {
 		var urlText: String?
-		var imageURL: NSURL?
-		if preferredSize == .Small {
+		var imageURL: URL?
+		if preferredSize == .small {
 			urlText = smallImageURL
 		} else {
 			urlText = largeImageURL
 		}
 
-		if let imageURLText = urlText, spotifyImageURL = NSURL(string: imageURLText) {
+		if let imageURLText = urlText, let spotifyImageURL = URL(string: imageURLText) {
 			imageURL = spotifyImageURL
 		} else {
-			let radioParadiseImageSize: RadioParadise.ImageSize = preferredSize == .Small ? .Medium : .Large
-			if let albumAsin = asin, radioParadiseImageURL = NSURL(string: RadioParadise.imageURLText(albumAsin, size: radioParadiseImageSize)) {
+			let radioParadiseImageSize: RadioParadise.ImageSize = preferredSize == .small ? .Medium : .Large
+			if let albumAsin = asin, let radioParadiseImageURL = URL(string: RadioParadise.imageURLText(albumAsin, size: radioParadiseImageSize)) {
 				imageURL = radioParadiseImageURL
 			}
 		}
@@ -110,12 +110,12 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	/**
 	Helper method for json deserialization.
 	*/
-	static func collection(response response: NSHTTPURLResponse, representation: AnyObject) -> [PlayedSongData] {
+	static func collection(response: HTTPURLResponse, representation: AnyObject) -> [PlayedSongData] {
 		var objects = [PlayedSongData]()
 
 		if let representation = representation as? [[String: AnyObject]] {
 			for objRepresentation in representation {
-				if let obj = PlayedSongData(response: response, representation: objRepresentation) {
+				if let obj = PlayedSongData(response: response, representation: objRepresentation as AnyObject) {
 					objects.append(obj)
 				}
 			}
@@ -130,7 +130,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	Note that it's the caller's responsibility to ensure that this is done in a thread-safe manner
 	for the song's managedObjectContext.
 	*/
-	static func dataItemsFromPlayedSongs(playedSongs: [PlayedSong]) -> [PlayedSongData] {
+	static func dataItemsFromPlayedSongs(_ playedSongs: [PlayedSong]) -> [PlayedSongData] {
 		return playedSongs.map({ PlayedSongData(song: $0) })
 	}
 }

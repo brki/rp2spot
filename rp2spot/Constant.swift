@@ -10,11 +10,11 @@ import Foundation
 
 struct Constant {
 	static let SPOTIFY_CLIENT_ID = Secrets.SPOTIFY_CLIENT_ID
-	static let SPOTIFY_AUTH_CALLBACK_URL = NSURL(string: Secrets.SPOTIFY_AUTH_CALLBACK_URL)!
-	static let SPOTIFY_TOKEN_SWAP_URL = NSURL(string: Secrets.SPOTIFY_TOKEN_SWAP_URL)!
-	static let SPOTIFY_TOKEN_REFRESH_URL = NSURL(string: Secrets.SPOTIFY_TOKEN_REFRESH_URL)!
+	static let SPOTIFY_AUTH_CALLBACK_URL = URL(string: Secrets.SPOTIFY_AUTH_CALLBACK_URL)!
+	static let SPOTIFY_TOKEN_SWAP_URL = URL(string: Secrets.SPOTIFY_TOKEN_SWAP_URL)!
+	static let SPOTIFY_TOKEN_REFRESH_URL = URL(string: Secrets.SPOTIFY_TOKEN_REFRESH_URL)!
 	static let SPOTIFY_SESSION_USER_DEFAULTS_KEY = "SpotifySession"
-	static let SPOTIFY_APPSTORE_URL = NSURL(string: "itms-apps://itunes.apple.com/app/id324684580")!
+	static let SPOTIFY_APPSTORE_URL = URL(string: "itms-apps://itunes.apple.com/app/id324684580")!
 
 	// The maximum number of tracks that can be added to a playlist in one API call:
 	static let SPOTIFY_MAX_PLAYLIST_ADD_TRACKS = 100
@@ -35,12 +35,12 @@ struct Constant {
 	static let RADIO_PARADISE_REFRESH_SONG_COUNT = 50
 
 	enum Color: UInt {
-		case SageGreen = 0xEEFFEC
-		case LightGrey = 0xD8DBE0
-		case LightOrange = 0xFFF4EC
-		case SpotifyGreen = 0x23CF5F
+		case sageGreen = 0xEEFFEC
+		case lightGrey = 0xD8DBE0
+		case lightOrange = 0xFFF4EC
+		case spotifyGreen = 0x23CF5F
 
-		func color(alpha: CGFloat = 1.0) -> UIColor {
+		func color(_ alpha: CGFloat = 1.0) -> UIColor {
 			return UIColor.colorWithRGB(self.rawValue, alpha: alpha)
 		}
 	}
