@@ -43,7 +43,7 @@ class HistoryBrowserViewController: UIViewController {
 	var refreshControlsEnabled = true {
 		didSet {
 			let enabled = refreshControlsEnabled
-			async_main {
+			DispatchQueue.main.async {
 				self.refreshManager.inactiveControlsEnabled = enabled
 				// The top control should remain disabled if there is no earlier history:
 				if enabled {
@@ -68,7 +68,7 @@ class HistoryBrowserViewController: UIViewController {
 			self.centerActivityIndicator.startAnimating()
 
 			self.historyData.loadLatestIfEmpty() { success in
-				async_main {
+				DispatchQueue.main.async {
 
 					self.centerActivityIndicator.stopAnimating()
 
@@ -158,7 +158,7 @@ class HistoryBrowserViewController: UIViewController {
 		datePickerVC.startingDate = displayDate
 		datePickerVC.delegate = self
 
-		async_main {
+		DispatchQueue.main.async {
 			self.present(datePickerVC, animated: true, completion: nil)
 
 			guard let popover = datePickerVC.popoverPresentationController else {
@@ -208,7 +208,7 @@ extension HistoryBrowserViewController: DateSelectionAcceptingProtocol {
 		dateSelectorActivityIndicator.startAnimating()
 
 		historyData.replaceLocalHistory(date) { success in
-			async_main {
+			DispatchQueue.main.async {
 
 				// Re-enable refresh controls.
 				self.refreshControlsEnabled = true
@@ -246,12 +246,12 @@ extension HistoryBrowserViewController: UIPopoverPresentationControllerDelegate 
 extension HistoryBrowserViewController: AudioStatusObserver {
 	func playerStatusChanged(_ newStatus: AudioPlayerViewController.PlayerStatus) {
 		if newStatus == .active {
-			async_main {
+			DispatchQueue.main.async {
 				self.shouldScrollPlayingSongCellToVisible = true
 				self.showPlayer()
 			}
 		} else {
-			async_main {
+			DispatchQueue.main.async {
 				self.hidePlayer()
 				// trackStoppedPlaying() was already called, but the track that was
 				// playing might have been hidden underneath the player at that time,
@@ -279,7 +279,7 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 	trigger a reload, so that it's playing status will be updated.
 	*/
 	func updatePlayingStatusOfVisibleCell(_ trackId: String, isPlaying: Bool) {
-		async_main {
+		DispatchQueue.main.async {
 			let ensurePlayingCellVisible = self.shouldScrollPlayingSongCellToVisible
 			self.shouldScrollPlayingSongCellToVisible = false
 

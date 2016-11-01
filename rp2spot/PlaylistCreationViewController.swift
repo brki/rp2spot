@@ -136,7 +136,7 @@ class PlaylistCreationViewController: UIViewController {
 			}
 
 			self.playlistURI = playlist.uri
-			async_main  {
+			DispatchQueue.main.async  {
 				self.creationStatusLabel.text = "Playlist created"
 				self.creationStatusLabel.isHidden = false
 				self.creationStatusLabel.alpha = 0
@@ -151,7 +151,7 @@ class PlaylistCreationViewController: UIViewController {
 	}
 
 	func enableEditingControls(_ enabled: Bool) {
-		async_main {
+		DispatchQueue.main.async {
 			self.createPlaylistButton.isEnabled = enabled
 			self.playlistTitle.isEnabled = enabled
 			self.publicPlaylistSwitch.isEnabled = enabled

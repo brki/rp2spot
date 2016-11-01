@@ -8,9 +8,6 @@
 
 import Foundation
 
-func async_main(_ block: @escaping () -> Void) {
-	DispatchQueue.main.async(execute: block)
-}
 
 class Utility {
 
@@ -31,7 +28,7 @@ class Utility {
 			return
 		}
 
-		async_main {
+		DispatchQueue.main.async {
 			guard var controller = UIApplication.shared.keyWindow?.rootViewController else {
 				print("presentAlertControllerOnFrontController: Unable to get rootViewController")
 				return

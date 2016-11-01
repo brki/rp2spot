@@ -800,7 +800,7 @@ extension AudioPlayerViewController {
 
 		setProgressIndicatorPosition()
 
-		async_main {
+		DispatchQueue.main.async {
 			self.showElapsedTime()
 			if updateTrackDuration {
 				self.showTrackDuration()
@@ -812,7 +812,7 @@ extension AudioPlayerViewController {
 			return
 		}
 
-		async_main {
+		DispatchQueue.main.async {
 			self.startElapsedTimeTimer()
 		}
 
@@ -821,7 +821,7 @@ extension AudioPlayerViewController {
 		}
 
 		progressIndicatorAnimationRequested = true
-		async_main {
+		DispatchQueue.main.async {
 
 			if self.progressIndicatorAnimationRequested {
 				self.progressIndicatorAnimationRequested = false
@@ -862,7 +862,7 @@ extension AudioPlayerViewController {
 		}
 
 		// Invalidate the timer on the same run loop that it was created on.
-		async_main {
+		DispatchQueue.main.async {
 			self.elapsedTimeTimer?.invalidate()
 			self.elapsedTimeTimer = nil
 		}

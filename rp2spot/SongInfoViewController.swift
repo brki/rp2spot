@@ -94,7 +94,7 @@ class SongInfoViewController: UIViewController {
 				print("updateSpotifyTrackInfo(): Unable to get track information: error: \(error)")
 				return
 			}
-			async_main {
+			DispatchQueue.main.async {
 				self.songTitleLabel.text = track.name
 				self.albumNameLabel.text = track.album.name
 				self.artistNameLabel.text = track.artists.filter(

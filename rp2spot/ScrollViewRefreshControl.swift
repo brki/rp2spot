@@ -87,7 +87,7 @@ class ScrollViewRefreshControl {
 		operationQueue.addOperation(operation)
 
 		let inset = adjustedContentInset(scrollView)
-		async_main {
+		DispatchQueue.main.async {
 			self.view.activityIndicator?.startAnimating()
 			UIView.animate(withDuration: self.refreshViewAnimationDuration, animations: {
 				scrollView.contentInset = inset
@@ -128,7 +128,7 @@ class ScrollViewRefreshControl {
 		operationQueue.cancelAllOperations()
 
 		let inset = adjustedContentInset(scrollView)
-		async_main {
+		DispatchQueue.main.async {
 			self.view.activityIndicator?.stopAnimating()
 			UIView.animate(withDuration: self.refreshViewAnimationDuration,
 				animations: {
