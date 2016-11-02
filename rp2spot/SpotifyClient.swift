@@ -147,7 +147,7 @@ class SpotifyClient {
 	}
 
 	/**
-	Gets NSURLS for the provided (short form) Spotify track ids.
+	Gets URLS for the provided (short form) Spotify track ids.
 	*/
 	func URIsForTrackIds(_ trackIds: [String]) -> [URL] {
 		var URIs = [URL]()

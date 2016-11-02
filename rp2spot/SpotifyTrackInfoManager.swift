@@ -69,7 +69,7 @@ class SpotifyTrackInfoManager {
 	Finds locally cached tracks.
 
 	Given the list of URIs, return a tuple containg an array of track metadata for tracks
-	found in the cache, and an array of NSURLs for the tracks not found in the cache.
+	found in the cache, and an array of URLs for the tracks not found in the cache.
 	*/
 	func getCachedTrackInfo(_ trackURIs: [URL]) -> (found: [SPTTrack], missing: [URL]) {
 		var found = [SPTTrack]()
