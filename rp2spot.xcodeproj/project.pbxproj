@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		D316E1831CE263CD0047FC66 /* Spotify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D316E1821CE263CD0047FC66 /* Spotify.framework */; };
 		D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */; };
 		D31AAFEC1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */; };
 		D32EA3731CAAB2440024B598 /* UserSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */; };
@@ -34,6 +33,9 @@
 		D3A9DF7E1C94B0F500141D06 /* AudioStatusObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */; };
 		D3AD91101C7E0CA80076FE76 /* Utilities.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3AD910F1C7E0CA80076FE76 /* Utilities.swift */; };
 		D3B922D61C9B299200B60CE3 /* LocalPlaylistSongs.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3B922D51C9B299200B60CE3 /* LocalPlaylistSongs.swift */; };
+		D3BF38F41E38DD61001DF076 /* SpotifyAudioPlayback.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3BF38F11E38DD61001DF076 /* SpotifyAudioPlayback.framework */; };
+		D3BF38F51E38DD61001DF076 /* SpotifyAuthentication.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3BF38F21E38DD61001DF076 /* SpotifyAuthentication.framework */; };
+		D3BF38F61E38DD61001DF076 /* SpotifyMetadata.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D3BF38F31E38DD61001DF076 /* SpotifyMetadata.framework */; };
 		D3C0CA7D1C6248E10055B650 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */; };
 		D3C0CA821C6248E10055B650 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D3C0CA801C6248E10055B650 /* Main.storyboard */; };
 		D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = D3C0CA831C6248E10055B650 /* rp2spot.xcdatamodeld */; };
@@ -78,7 +80,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		D316E1821CE263CD0047FC66 /* Spotify.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = Spotify.framework; sourceTree = "<group>"; };
 		D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuthRenewalOperation.swift; sourceTree = "<group>"; };
 		D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIGestureRecognizer+extension.swift"; sourceTree = "<group>"; };
 		D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsViewController.swift; sourceTree = "<group>"; };
@@ -105,6 +106,9 @@
 		D3A9DF7D1C94B0F500141D06 /* AudioStatusObserver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioStatusObserver.swift; sourceTree = "<group>"; };
 		D3AD910F1C7E0CA80076FE76 /* Utilities.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Utilities.swift; sourceTree = "<group>"; };
 		D3B922D51C9B299200B60CE3 /* LocalPlaylistSongs.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LocalPlaylistSongs.swift; sourceTree = "<group>"; };
+		D3BF38F11E38DD61001DF076 /* SpotifyAudioPlayback.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyAudioPlayback.framework; sourceTree = "<group>"; };
+		D3BF38F21E38DD61001DF076 /* SpotifyAuthentication.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyAuthentication.framework; sourceTree = "<group>"; };
+		D3BF38F31E38DD61001DF076 /* SpotifyMetadata.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = SpotifyMetadata.framework; sourceTree = "<group>"; };
 		D3C0CA791C6248E10055B650 /* rp2spot.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = rp2spot.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D3C0CA7C1C6248E10055B650 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D3C0CA811C6248E10055B650 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
@@ -144,11 +148,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				D3FC5E611C6F542F00443F68 /* CoreData.framework in Frameworks */,
-				D316E1831CE263CD0047FC66 /* Spotify.framework in Frameworks */,
+				D3BF38F51E38DD61001DF076 /* SpotifyAuthentication.framework in Frameworks */,
 				D3FC5E5E1C6F34CA00443F68 /* SystemConfiguration.framework in Frameworks */,
 				D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */,
+				D3BF38F61E38DD61001DF076 /* SpotifyMetadata.framework in Frameworks */,
 				D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */,
 				D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */,
+				D3BF38F41E38DD61001DF076 /* SpotifyAudioPlayback.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -296,7 +302,9 @@
 		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				D316E1821CE263CD0047FC66 /* Spotify.framework */,
+				D3BF38F11E38DD61001DF076 /* SpotifyAudioPlayback.framework */,
+				D3BF38F21E38DD61001DF076 /* SpotifyAuthentication.framework */,
+				D3BF38F31E38DD61001DF076 /* SpotifyMetadata.framework */,
 				D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */,
 				D3FC5E601C6F542F00443F68 /* CoreData.framework */,
 				D3FC5E5D1C6F34CA00443F68 /* SystemConfiguration.framework */,

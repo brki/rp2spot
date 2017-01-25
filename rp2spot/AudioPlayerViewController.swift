@@ -66,8 +66,8 @@ class AudioPlayerViewController: UIViewController {
 		progressIndicator.setThumbImage(UIImage(named: "slider-thumb"), for: UIControlState())
 		self.progressIndicator.isUserInteractionEnabled = false
 
-		spotify.player.delegate = self
-		spotify.player.playbackDelegate = self
+		spotify.player?.delegate = self
+		spotify.player?.playbackDelegate = self
 
 		// Listen for a notification so that we can tell when
 		// a user has unplugged their headphones.
@@ -93,7 +93,10 @@ class AudioPlayerViewController: UIViewController {
 
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		updateUI(isPlaying: spotify.player.isPlaying)
+		guard let player = spotify.player else {
+			return
+		}
+		updateUI(isPlaying: player.playbackState?.isPlaying ?? false)
 		setProgress()
 	}
 
@@ -143,7 +146,11 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func togglePlayback(_ sender: AnyObject) {
-		if spotify.player.isPlaying {
+		guard let player = spotify.player else {
+			print("togglePlayback: no player available")
+			return
+		}
+		if player.playbackState.isPlaying {
 			pausePlaying()
 		} else {
 			self.startPlaying()
@@ -165,7 +172,11 @@ class AudioPlayerViewController: UIViewController {
 				self.hideActivityIndicator()
 				return
 			}
-			self.spotify.player.setIsPlaying(true) { error in
+			guard let player = self.spotify.player else {
+				print("startPlaying: no player available")
+				return
+			}
+			player.setIsPlaying(true) { error in
 				self.hideActivityIndicator()
 				if let err = error {
 					Utility.presentAlert("Unable to start playing", message: err.localizedDescription)
@@ -176,8 +187,12 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func pausePlaying(_ sender: AnyObject? = nil) {
-		playlist.trackPosition = spotify.player.currentPlaybackPosition
-		spotify.player.setIsPlaying(false) { error in
+		setPlaylistTrackPosition()
+		guard let player = self.spotify.player else {
+			print("pausePlaying: no player available")
+			return
+		}
+		player.setIsPlaying(false) { error in
 			if let err = error {
 				print("pausePlaying: error while trying to pause player: \(err)")
 				return
@@ -204,6 +219,15 @@ class AudioPlayerViewController: UIViewController {
 		}
 
 		// This is normal case, when the player is active and we're not at the first track.
+
+		// (added incrementIndex here temporarily)
+		// TODO perhaps: rework this function so that it checks if metadata.nextTrack is nil, and if so, queues a track, with a callback to start playing it
+		//  (or, if nil, perhaps it should just call playTracks() with the appropriate index).
+		// Also TODO: skiptoPrevious should check if there's a previous in metadata.  If not, call playTracks().
+		self.playlist.incrementIndex()
+
+
+
 		showActivityIndicator()
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
 			guard sessionValid else {
@@ -211,7 +235,11 @@ class AudioPlayerViewController: UIViewController {
 				self.hideActivityIndicator()
 				return
 			}
-			self.spotify.player.skipNext() { error in
+			guard let player = self.spotify.player else {
+				print("skipToNextTrack: no player available")
+				return
+			}
+			player.skipNext() { error in
 				self.hideActivityIndicator()
 				self.updateNowPlayingInfo()
 				if let err = error {
@@ -240,14 +268,17 @@ class AudioPlayerViewController: UIViewController {
 		}
 
 		// This is normal case, when the player is active and we're not at the first track.
-
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
 			guard sessionValid else {
 				print("Unable to renew session in skipToPreviousTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
 				self.hideActivityIndicator()
 				return
 			}
-			self.spotify.player.skipPrevious() { error in
+			guard let player = self.spotify.player else {
+				print("skipToPreviousTrack: no player available")
+				return
+			}
+			player.skipPrevious() { error in
 				self.hideActivityIndicator()
 				self.updateNowPlayingInfo()
 				if let err = error {
@@ -258,23 +289,27 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func stopPlaying(_ sender: AnyObject) {
-		guard spotify.player.isPlaying || status == .active else {
+		guard let player = self.spotify.player else {
+			print("stopPlaying: no player available")
+			return
+		}
+		guard spotify.isPlaying() || status == .active else {
 			return
 		}
 
 		// Do not start playing audio after interruption if user has pressed the stop button.
 		pausedDueToAudioInterruption = false
 
-		playlist.trackPosition = spotify.player.currentPlaybackPosition
+		setPlaylistTrackPosition()
 		// Pause music before stopping, to avoid a split second of leftover audio
 		// from the currently playing track being played when the audio player
 		// starts playing again (it could be a different song that start, or a different
 		// position in the same song).
-		spotify.player.setIsPlaying(false) { error in
+		player.setIsPlaying(false) { error in
 			if let pauseError = error {
 				print("stopPlaying: error while trying to pause playback: \(pauseError)")
 			}
-			self.spotify.player.stop() { error in
+			player.setIsPlaying(false) { error in
 				guard error == nil else {
 					print("stopPlaying: error while trying to stop player: \(error!)")
 					return
@@ -418,6 +453,10 @@ class AudioPlayerViewController: UIViewController {
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
+		guard let player = self.spotify.player else {
+			print("setNowPlayingInfo: no player available")
+			return
+		}
 
 		let artists = track.artists as! [SPTPartialArtist]
 
@@ -427,10 +466,12 @@ class AudioPlayerViewController: UIViewController {
 			MPMediaItemPropertyTitle: track.name as AnyObject,
 			MPMediaItemPropertyAlbumTitle: track.album.name as AnyObject,
 			MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
-			MPNowPlayingInfoPropertyElapsedPlaybackTime: spotify.player.currentPlaybackPosition as AnyObject,
+			MPNowPlayingInfoPropertyElapsedPlaybackTime: player.playbackState.position as AnyObject,
 			// This one is necessary for the pause / playback status in control center in the simulator:
-			MPNowPlayingInfoPropertyPlaybackRate: (spotify.player.isPlaying ? 1 : 0) as AnyObject
+			MPNowPlayingInfoPropertyPlaybackRate: (player.playbackState.isPlaying ? 1 : 0) as AnyObject
 		]
+
+		// TODO: add album image
 
 		if artistNames.characters.count > 0 {
 			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames as AnyObject?
@@ -446,6 +487,10 @@ class AudioPlayerViewController: UIViewController {
 	func hideActivityIndicator() {
 		activityIndicator.stopAnimating()
 	}
+
+	func setPlaylistTrackPosition() {
+		playlist.trackPosition = self.spotify.player?.playbackState?.position ?? 0.0
+	}
 }
 
 
@@ -460,12 +505,17 @@ extension AudioPlayerViewController {
 	then pause the audio.
 	*/
 	dynamic func audioRouteChanged(_ notification: Notification) {
-		guard spotify.player.isPlaying else {
+		guard let player = self.spotify.player else {
+			print("audioRouteChanged: no player available")
+			return
+		}
+
+		guard player.playbackState.isPlaying else {
 			return
 		}
 
 		// Save current track position so that playback can resume at the proper spot.
-		playlist.trackPosition = spotify.player.currentPlaybackPosition
+		setPlaylistTrackPosition()
 
 		guard let reasonCode = notification.userInfo?[AVAudioSessionRouteChangeReasonKey] as? UInt else {
 			print("audioRouteChanged: unable to get int value for key AVAudioSessionRouteChangeReasonKey")
@@ -473,7 +523,7 @@ extension AudioPlayerViewController {
 		}
 
 		if AVAudioSessionRouteChangeReason(rawValue: reasonCode) == .oldDeviceUnavailable {
-			spotify.player.setIsPlaying(false) { error in
+			player.setIsPlaying(false) { error in
 				guard error == nil else {
 					print("audioRouteChanged: error while trying to pause player: \(error)")
 					return
@@ -561,6 +611,10 @@ extension AudioPlayerViewController {
 
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChange metadata: SPTPlaybackMetadata!) {
+	}
+
+	// TODO: this is no longer a delegate method: move the logic elsewhere, if necessary.  Perhaps audioStreamingDidPopQueue should be used instead?
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangeToTrack trackMetadata: [AnyHashable: Any]!) {
 		// The trackMetadata object *should* have the track identifier too, but 
 		// trackMetadata itself is occaionally nil, despite the method signature 
@@ -587,9 +641,15 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 						print("Unable to renew session before replacing track URIS: willTriggerLogin: \(willTriggerLogin), error: \(error)")
 						return
 					}
-					self.spotify.player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
-						print("Replacing playlist URIs: error: \(error)")
+					guard let player = self.spotify.player else {
+						print("audioRouteChanged: no player available")
+						return
 					}
+
+					// TODO: rework this (no longer available in API).  Or rework the whole track queueing concept?
+//					player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
+//						print("Replacing playlist URIs: error: \(error)")
+//					}
 
 				}
 			}
@@ -602,12 +662,31 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		setProgress()
 	}
 
+	// This should be controlled with an operation queue, so that only one of these can execute at a time:
+	func queueNextTrack() {
+		guard
+			let player = self.spotify.player,
+			let metadata = player.metadata else {
+			print("queueNextTrack: no player/metadata available")
+			return
+		}
+
+		if metadata.nextTrack == nil, let nextTrackId = playlist.nextTrackId() {
+			player.queueSpotifyURI(SpotifyClient.fullSpotifyTrackId(nextTrackId)) { error in
+				if error != nil {
+					print("queueNextTrack: error queueing next track: \(error)")
+				}
+			}
+		}
+	}
+
 	/**
 	Somtimes this is called a long while before audioStreaming(_:didChangePlaybackStatus); it is being
 	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: URL!) {
-		let trackId = SPTTrack.identifier(fromURI: trackUri)!
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: String!) {
+		// TODO: should playlist hold trackUris instead of identifiers, since the spotify API has changed?
+		let trackId = SPTTrack.identifier(fromURI: URL(string: trackUri))!
 		if playlist.isLastTrack(trackId) {
 			updateUI(isPlaying: false)
 		}
@@ -615,12 +694,13 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		delegate?.trackStoppedPlaying(trackId)
 	}
 
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: URL!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: String!) {
 		if let interested = delegate {
-			interested.trackStartedPlaying(SPTTrack.identifier(fromURI: trackUri))
+			interested.trackStartedPlaying(SPTTrack.identifier(fromURI: URL(string: trackUri)))
 		}
-		setProgress()
+		setProgress(updateTrackDuration: true)
 		updateUI(isPlaying: true)
+		queueNextTrack()
 	}
 
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
@@ -633,7 +713,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		// and then hits the stop button to close the audio player before playback has
 		// started, do not start playing.
 		guard status == .active else {
-			spotify.player.stop(nil)
+			spotify.player?.setIsPlaying(false, callback: nil)
 			return
 		}
 		setProgress()
@@ -654,7 +734,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	@param audioStreaming The object that sent the message.
 	*/
 	func audioStreamingDidLosePermission(forPlayback audioStreaming: SPTAudioStreamingController!) {
-		playlist.trackPosition = spotify.player.currentPlaybackPosition
+		setPlaylistTrackPosition()
 
 		guard !AVAudioSession.sharedInstance().isOtherAudioPlaying else {
 			// If permission was lost and another application on this device is now playing audio,
@@ -675,11 +755,15 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 
+	func audioStreamingDidLogin(_ audioStreaming: SPTAudioStreamingController!) {
+		print("audioStreamingDidLogin")
+		self.playTracks()
+	}
 	/** Called when network connectivity is lost.
 	@param audioStreaming The object that sent the message.
 	*/
 	func audioStreamingDidDisconnect(_ audioStreaming: SPTAudioStreamingController!) {
-		playlist.trackPosition = spotify.player.currentPlaybackPosition
+		setPlaylistTrackPosition()
 		print("audioStreamingDidDisconnect")
 	}
 
@@ -700,7 +784,7 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	@param error The error that occurred.
 	*/
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didEncounterError error: Error!) {
-		playlist.trackPosition = spotify.player.currentPlaybackPosition
+		setPlaylistTrackPosition()
 
 		Utility.presentAlert(
 			"Error during playback",
@@ -750,13 +834,20 @@ extension AudioPlayerViewController {
 
 		var pannedProgress = Float(recognizer.location(in: progressIndicator).x / progressIndicator.bounds.width)
 		pannedProgress = max(0.0, min(1.0, pannedProgress))
-		let offset = spotify.player.currentTrackDuration * Double(pannedProgress)
+
+		guard
+			let player = spotify.player,
+			let trackDuration = player.metadata?.currentTrack?.duration else {
+				print("progressIndicatorContainerPanned: no player information available")
+				return
+		}
+
+		let offset = trackDuration * Double(pannedProgress)
 
 		switch (recognizer.state) {
 		case .began:
 			// If the pan is not starting over the thumb image, cancel the gesture recognizer.
-			let trackDuration = spotify.player.currentTrackDuration
-			let currentPosition = Float(spotify.player.currentPlaybackPosition / trackDuration)
+			let currentPosition = Float(player.playbackState.position / trackDuration)
 			guard abs(currentPosition - pannedProgress) < 0.15 else {
 				progressIndicatorPanGestureInvalid = true
 				progressIndicatorPanGestureRecognizer?.cancel()
@@ -770,7 +861,7 @@ extension AudioPlayerViewController {
 
 		case .ended:
 			// TODO: spotify ios-sdk bug here when trying to seek after having paused at last 1-2 seconds before track end?
-			spotify.player.seek(toOffset: offset) { error in
+			player.seek(to: offset) { error in
 				self.setElapsedTimeValue(offset)
 				self.setProgress()
 				if let err = error {
@@ -807,7 +898,7 @@ extension AudioPlayerViewController {
 			}
 		}
 
-		guard spotify.player.isPlaying else {
+		guard spotify.player?.playbackState?.isPlaying ?? false else {
 			stopProgressUpdating()
 			return
 		}
@@ -826,7 +917,13 @@ extension AudioPlayerViewController {
 			if self.progressIndicatorAnimationRequested {
 				self.progressIndicatorAnimationRequested = false
 				self.progressIndicatorAnimating = true
-				let remainder = self.spotify.player.currentTrackDuration - self.spotify.player.currentPlaybackPosition
+				guard
+					let player = self.spotify.player,
+					let duration = player.metadata.currentTrack?.duration
+					else {
+						return
+				}
+				let remainder = duration - player.playbackState.position
 
 				UIView.animate(
 					withDuration: remainder,
@@ -845,8 +942,14 @@ extension AudioPlayerViewController {
 	and stops any progress indicator animation that might be running.
 	*/
 	func setProgressIndicatorPosition() {
-		let duration = spotify.player.currentTrackDuration
-		let position = spotify.player.currentPlaybackPosition
+		// TODO: fix everywhere: player.metadata and player.playbackState are actually optionals
+		guard
+			let player = self.spotify.player,
+			let position = player.playbackState?.position,
+			let duration = player.metadata?.currentTrack?.duration
+			else {
+				return
+		}
 		let progress = Float(position / duration)
 
 		progressIndicator.value = progress
@@ -910,11 +1013,11 @@ extension AudioPlayerViewController {
 	}
 
 	func showTrackDuration() {
-		trackDurationLabel.text = formatTrackTime(spotify.player.currentTrackDuration)
+		trackDurationLabel.text = formatTrackTime(spotify.player?.metadata?.currentTrack?.duration ?? 0.0)
 	}
 
 	func showElapsedTime(_ sender: AnyObject? = nil) {
-		setElapsedTimeValue(spotify.player.currentPlaybackPosition)
+		setElapsedTimeValue(spotify.player?.playbackState?.position ?? 0.0)
 	}
 
 	func setElapsedTimeValue(_ elapsed: Double) {
@@ -939,9 +1042,9 @@ extension AudioPlayerViewController {
 	}
 
 	func willEnterForeground(_ notification: Notification) {
-		print("isPlaying: \(spotify.player.isPlaying)")
+		print("isPlaying: \(spotify.isPlaying())")
 		setProgress()
-		updateUI(isPlaying: spotify.player.isPlaying)
+		updateUI(isPlaying: spotify.isPlaying())
 
 		NotificationCenter.default.removeObserver(
 			self,

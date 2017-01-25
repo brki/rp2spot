@@ -26,10 +26,20 @@ class SpotifyClient {
 		return queue
 	}()
 
-	lazy var player: SPTAudioStreamingController = {
-		let player = SPTAudioStreamingController(clientId: self.auth.clientID)!
+	lazy var player: SPTAudioStreamingController? = {
+		var sharedInstance = SPTAudioStreamingController.sharedInstance()
+		guard let player = sharedInstance else {
+			print("SpotifyClient.player: unable to get SPTAudioStreamingController.sharedInstance")
+			return nil
+		}
+		do {
+			try player.start(withClientId: self.auth.clientID)
+		} catch {
+			print("SpotifyClient.player: unable to get start spotify player")
+			return nil
+		}
 		player.setTargetBitrate(UserSetting.sharedInstance.spotifyStreamingQuality, callback: nil)
-		player.`repeat` = false
+		player.setRepeat(.off, callback: nil)
 		return player
 	}()
 
@@ -37,11 +47,12 @@ class SpotifyClient {
 	The players current (playing or not) track ID, if any.
 	*/
 	var playerCurrentTrackId: String? {
-		let currentURI: URL? = player.currentTrackURI
-		guard currentURI != nil else {
-			return nil
+		guard
+			let uriString = player?.metadata.currentTrack?.uri,
+			let uri = NSURL(string: uriString) else {
+				return nil
 		}
-		return SPTTrack.identifier(fromURI: currentURI)
+		return SPTTrack.identifier(fromURI: uri as URL!)
 	}
 
 	init() {
@@ -88,7 +99,7 @@ class SpotifyClient {
 	}
 
 	func triggerSafariLogin() {
-		UIApplication.shared.openURL((auth.loginURL)!)
+		UIApplication.shared.openURL(auth.spotifyWebAuthenticationURL())
 	}
 
 	/**
@@ -161,23 +172,44 @@ class SpotifyClient {
 
 	func playTracks(_ URIs: [URL], fromIndex: Int = 0, trackStartTime: TimeInterval, handler: ((NSError?) -> Void)? = nil) {
 
-		func startPlaying() {
+		func startPlayback() {
+			guard let player = self.player else {
+				return
+			}
+			player.playSpotifyURI(URIs[fromIndex].absoluteString, startingWith: 0, startingWithPosition: trackStartTime) { error in
+				if error != nil {
+					print("playTracks: Error while initiating playback: \(error)")
+				}
+//				else if URIs.count > fromIndex + 1 {
+//					for i in (fromIndex + 1)...(URIs.count - 1) {
+//						player.queueSpotifyURI(URIs[i].absoluteString) { error in
+//							if error != nil {
+//								print("SpotifyClient.playTracks: error while queueing tracks: \(error)")
+//							}
+//						}
+//					}
+//				}
+				handler?(error as NSError?)
+			}
+		}
+
+		// TODO: recheck if this is necessary (it was once upon a time, in order to avoid an audio hiccup when a track was already playing).
+		func triggerPlayback() {
+			guard let player = self.player else {
+				return
+			}
 			// Stop player and clear track list before starting playback of new track list.
-			self.player.stop() { error in
-				guard error == nil else {
-					print("playTracks: error while attempting to stop playing")
-					handler?(error as NSError?)
-					return
-				}
-				let options = SPTPlayOptions()
-				options.trackIndex = Int32(fromIndex)
-				options.startTime = trackStartTime
-				self.player.playURIs(URIs, with: options) { error in
-					if error != nil {
-						print("playTracks: Error while initiating playback")
+			if player.playbackState?.isPlaying ?? false {
+				player.setIsPlaying(false) { error in
+					guard error == nil else {
+						print("playTracks: error while attempting to stop playing")
+						handler?(error as NSError?)
+						return
 					}
-					handler?(error as NSError?)
+					startPlayback()
 				}
+			} else {
+				startPlayback()
 			}
 		}
 
@@ -186,17 +218,24 @@ class SpotifyClient {
 			return
 		}
 
+		guard let player = self.player else {
+			print("SpotifyClient.playTracks: player not available")
+			return
+		}
+
 		if player.loggedIn {
-			startPlaying()
+			triggerPlayback()
 		} else {
-			player.login(with: auth.session) { error in
-				guard error == nil else {
-					print("playTracks: error while logging in: \(error!)")
-					handler?(error as NSError?)
-					return
-				}
-				startPlaying()
-			}
+			// TODO: handle this with auth delegates
+			player.login(withAccessToken: self.auth.session.accessToken)
+//			player.login(auth.session.accessToken) { error in
+//				guard error == nil else {
+//					print("playTracks: error while logging in: \(error!)")
+//					handler?(error as NSError?)
+//					return
+//				}
+//				startPlaying()
+//			}
 		}
 	}
 
@@ -212,19 +251,23 @@ class SpotifyClient {
 			}
 
 			// create a new playlist
-			SPTPlaylistList.createPlaylist(withName: playlistName, publicFlag: publicFlag, session: self.auth.session, callback: { error, playlist in
-				guard error == nil else {
-					handler(nil, false, error! as NSError?)
-					return
-				}
-
-				self.addTracksToPlaylist(playlist!, trackURIs: trackURIs, processedCount: 0) { error, processedCount in
-					if error != nil {
-						print("createPlaylistWithTracks: error adding tracks: processedCount: \(processedCount), error: \(error!)")
+			SPTPlaylistList.createPlaylist(
+				withName: playlistName,
+				forUser: self.auth.session.canonicalUsername,
+				publicFlag: publicFlag,
+				accessToken: self.auth.session.accessToken) { error, playlist in
+					guard error == nil else {
+						handler(nil, false, error! as NSError?)
+						return
 					}
-					handler(playlist, false, error)
-				}
-			})
+
+					self.addTracksToPlaylist(playlist!, trackURIs: trackURIs, processedCount: 0) { error, processedCount in
+						if error != nil {
+							print("createPlaylistWithTracks: error adding tracks: processedCount: \(processedCount), error: \(error!)")
+						}
+						handler(playlist, false, error)
+					}
+			}
 
 		}
 	}
@@ -242,7 +285,7 @@ class SpotifyClient {
 			tracksToProcess = trackURIs
 			leftoverTracks = nil
 		}
-		playlist.addTracks(toPlaylist: tracksToProcess, with: self.auth.session) { error in
+		playlist.addTracks(toPlaylist: tracksToProcess, withAccessToken: self.auth.session.accessToken) { error in
 
 			// If there was an error, or if there are no more tracks to process, call the completion handler:
 			guard error == nil else {
@@ -299,5 +342,9 @@ class SpotifyClient {
 
 			handler(userInfo.territory, canStream)
 		}
+	}
+
+	func isPlaying() -> Bool {
+		return self.player?.playbackState?.isPlaying ?? false
 	}
 }

@@ -119,6 +119,16 @@ struct AudioPlayerPlaylist {
 		return metadata
 	}
 
+	func nextTrackId() -> String? {
+		guard
+			let index = currentIndex,
+			index < list.count - 2,
+			let nextTrackId = list[index + 1].spotifyTrackId else {
+				return nil
+		}
+		return nextTrackId
+	}
+
 	/**
 	Gets a list of track URIs for the playlist, centered on the given index.
 	

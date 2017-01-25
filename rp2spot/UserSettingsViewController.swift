@@ -57,10 +57,12 @@ class UserSettingsViewController: UITableViewController {
 			if quality != previousQuality {
 				settings.spotifyStreamingQuality = quality
 				configureSpotifyStreamingQualityCells()
-				SpotifyClient.sharedInstance.player.setTargetBitrate(quality) { error in
-					if error != nil {
-						self.settings.spotifyStreamingQuality = previousQuality
-						self.configureSpotifyStreamingQualityCells()
+				if let player = SpotifyClient.sharedInstance.player {
+					player.setTargetBitrate(quality) { error in
+						if error != nil {
+							self.settings.spotifyStreamingQuality = previousQuality
+							self.configureSpotifyStreamingQualityCells()
+						}
 					}
 				}
 			}
