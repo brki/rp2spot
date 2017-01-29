@@ -426,6 +426,11 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 				return
 			}
 
+			// Ensure that any currently highlighted-as-playing row gets un-highlighted.
+			if let wasPlayingTrackId = self.currentlyPlayingTrackId {
+				self.trackStoppedPlaying(wasPlayingTrackId)
+			}
+
 			self.historyData.trackListWithSelectedIndex(indexPath) { playlist in
 
 				guard playlist.list.count > 0 else {

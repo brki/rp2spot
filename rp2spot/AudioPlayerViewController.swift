@@ -32,11 +32,17 @@ class AudioPlayerViewController: UIViewController {
 
 	var playlist = AudioPlayerPlaylist(list:[])
 
+	var currentTrackInfo: AudioPlayerPlaylist.PlaylistTrackInfo?
+
+	var nextQueuedTrackInfo: AudioPlayerPlaylist.PlaylistTrackInfo?
+
 	var spotify = SpotifyClient.sharedInstance
 
 	var sessionUpdateRequestTime: Foundation.Date?
 
 	var pausedDueToAudioInterruption = false
+
+	var wasPlaying = false
 
 	// ``nowPlayingCenter`` is used to set current song information, this will
 	// be displayed in the control center.
@@ -201,91 +207,13 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func skipToNextTrack(_ sender: AnyObject) {
-		guard status == .active && !playlist.windowNeedsAdjustment() else {
-			// This may be triggered by a remote control when the player is disabled.  If that
-			// is the case, then the tracklist and index will need to be communicated to the
-			// Spotify player controller again.
-			self.playlist.incrementIndex()
-			self.playTracks()
-			return
-		}
-
-		guard !self.playlist.currentTrackIsLastTrack() else {
-			// We do not want to wrap around  to the other side, which is what would
-			// happen if we're at the end and player.skipNext() is called.
-			// Instead, just start that last song playing again.
-			self.startPlaying()
-			return
-		}
-
-		// This is normal case, when the player is active and we're not at the first track.
-
-		// (added incrementIndex here temporarily)
-		// TODO perhaps: rework this function so that it checks if metadata.nextTrack is nil, and if so, queues a track, with a callback to start playing it
-		//  (or, if nil, perhaps it should just call playTracks() with the appropriate index).
-		// Also TODO: skiptoPrevious should check if there's a previous in metadata.  If not, call playTracks().
 		self.playlist.incrementIndex()
-
-
-
-		showActivityIndicator()
-		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
-			guard sessionValid else {
-				print("Unable to renew session in skipToNextTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
-				self.hideActivityIndicator()
-				return
-			}
-			guard let player = self.spotify.player else {
-				print("skipToNextTrack: no player available")
-				return
-			}
-			player.skipNext() { error in
-				self.hideActivityIndicator()
-				self.updateNowPlayingInfo()
-				if let err = error {
-					print("Error when trying to skip to next track: \(err)")
-				}
-			}
-		}
+		changeToNewTrack()
 	}
-	
+
 	@IBAction func skipToPreviousTrack(_ sender: AnyObject) {
-		guard status == .active && !playlist.windowNeedsAdjustment() else {
-			// This may be triggered by a remote control when the player is disabled.  If that
-			// is the case, then the tracklist and index will need to be communicated to the
-			// Spotify player controller again.
-			playlist.decrementIndex()
-			playTracks()
-			return
-		}
-
-		guard !playlist.currentTrackIsFirstTrack() else {
-			// We do not want to wrap around  to the other side, which is what would
-			// happen if we're at the first track and player.skipPrevious() is called.
-			// Instead, just start that last song playing again.
-			startPlaying()
-			return
-		}
-
-		// This is normal case, when the player is active and we're not at the first track.
-		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
-			guard sessionValid else {
-				print("Unable to renew session in skipToPreviousTrack(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
-				self.hideActivityIndicator()
-				return
-			}
-			guard let player = self.spotify.player else {
-				print("skipToPreviousTrack: no player available")
-				return
-			}
-			player.skipPrevious() { error in
-				self.hideActivityIndicator()
-				self.updateNowPlayingInfo()
-				if let err = error {
-					print("Error when trying to skip to previous track: \(err)")
-				}
-			}
-		}
+		self.playlist.decrementIndex()
+		changeToNewTrack()
 	}
 
 	@IBAction func stopPlaying(_ sender: AnyObject) {
@@ -299,24 +227,18 @@ class AudioPlayerViewController: UIViewController {
 
 		// Do not start playing audio after interruption if user has pressed the stop button.
 		pausedDueToAudioInterruption = false
-
 		setPlaylistTrackPosition()
-		// Pause music before stopping, to avoid a split second of leftover audio
-		// from the currently playing track being played when the audio player
-		// starts playing again (it could be a different song that start, or a different
-		// position in the same song).
 		player.setIsPlaying(false) { error in
-			if let pauseError = error {
-				print("stopPlaying: error while trying to pause playback: \(pauseError)")
+			guard error == nil else {
+				print("stopPlaying: error while trying to stop player: \(error!)")
+				return
 			}
-			player.setIsPlaying(false) { error in
-				guard error == nil else {
-					print("stopPlaying: error while trying to stop player: \(error!)")
-					return
-				}
-				self.updateNowPlayingInfo()
-				self.status = .disabled
+			self.updateNowPlayingInfo()
+			if let interested = self.delegate, let wasPlayingTrackId = self.playlist.currentTrack?.spotifyTrackId {
+				interested.trackStoppedPlaying(wasPlayingTrackId)
 			}
+			self.status = .disabled
+			self.wasPlaying = false
 		}
 	}
 
@@ -329,8 +251,9 @@ class AudioPlayerViewController: UIViewController {
 			playlist.setTrackMetadata(cachedMetadata)
 		}
 
-		guard let (index, trackURIs) = playlist.currentWindowTrackURIs() else {
-			print("playTracks: No currentIndex, so can not start playing.")
+		self.currentTrackInfo = playlist.currentTrackInfo()
+		guard let currentTrack = self.currentTrackInfo else {
+			print("playTracks: No current track, so can not start playing.")
 			return
 		}
 
@@ -347,11 +270,17 @@ class AudioPlayerViewController: UIViewController {
 				self.hideActivityIndicator()
 				return
 			}
+
+			// TODO: this may need changing when using the non-Safari auth flow:
 			guard !willTriggerLogin else {
 
 				// Register to be notified when the session is updated.
 				self.sessionUpdateRequestTime = Foundation.Date()
-				NotificationCenter.default.addObserver(self, selector: #selector(self.spotifySessionUpdated(_:)), name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION), object: self.spotify)
+				NotificationCenter.default.addObserver(
+						self,
+						selector: #selector(self.spotifySessionUpdated(_:)),
+						name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION),
+						object: self.spotify)
 
 				// Let the presenter hide the player:
 				self.hideActivityIndicator()
@@ -366,16 +295,27 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 
-			self.spotify.playTracks(trackURIs, fromIndex:index, trackStartTime: self.playlist.trackPosition) { error in
-				self.hideActivityIndicator()
+            self.spotify.playTrack(currentTrack.trackURIString, trackStartTime: self.playlist.trackPosition) { error in
 				guard error == nil else {
 					Utility.presentAlert(
-						"Unable to start playing",
-						message: error!.localizedDescription
+							"Unable to start playing",
+							message: error!.localizedDescription
 					)
 					return
 				}
 			}
+		}
+	}
+
+	/**
+	Triggers the playing of track identified by the currently selected index of the playlist.
+	Notifies delegate that previous track has stopped playing.
+	*/
+	func changeToNewTrack() {
+		let wasPlayingURI = spotify.player?.metadata?.currentTrack?.uri
+		playTracks()
+		if let trackURI = wasPlayingURI {
+			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(trackURI))
 		}
 	}
 
@@ -481,11 +421,15 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func showActivityIndicator() {
-		activityIndicator.startAnimating()
+		DispatchQueue.main.async {
+			self.activityIndicator.startAnimating()
+		}
 	}
 
 	func hideActivityIndicator() {
-		activityIndicator.stopAnimating()
+		DispatchQueue.main.async {
+			self.activityIndicator.stopAnimating()
+		}
 	}
 
 	func setPlaylistTrackPosition() {
@@ -612,72 +556,23 @@ extension AudioPlayerViewController {
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChange metadata: SPTPlaybackMetadata!) {
-	}
-
-	// TODO: this is no longer a delegate method: move the logic elsewhere, if necessary.  Perhaps audioStreamingDidPopQueue should be used instead?
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangeToTrack trackMetadata: [AnyHashable: Any]!) {
-		// The trackMetadata object *should* have the track identifier too, but 
-		// trackMetadata itself is occaionally nil, despite the method signature 
-		// indicating otherwise.  So, fetch the track id from the player.
-
-		guard let shortTrackId = spotify.playerCurrentTrackId else {
+		print("previous: \(metadata.prevTrack?.name), current: \(metadata.currentTrack?.name), next: \(metadata.nextTrack?.name)")
+		guard let fullTrackURI = metadata.currentTrack?.uri else {
 			return
 		}
-
-		// Cancel any currently-being-recognized pan gesture:
-		progressIndicatorPanGestureRecognizer?.cancel()
-
-		playlist.setCurrentTrack(shortTrackId)
-		updateNowPlayingInfo(shortTrackId)
-		setProgress(updateTrackDuration: true)
-
-		if playlist.windowNeedsAdjustment() {
-			playlist.setCurrentWindow()
-			if let (index, trackURIs) = playlist.currentWindowTrackURIs() {
-
-				spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
-
-					guard sessionValid else {
-						print("Unable to renew session before replacing track URIS: willTriggerLogin: \(willTriggerLogin), error: \(error)")
-						return
-					}
-					guard let player = self.spotify.player else {
-						print("audioRouteChanged: no player available")
-						return
-					}
-
-					// TODO: rework this (no longer available in API).  Or rework the whole track queueing concept?
-//					player.replaceURIs(trackURIs, withCurrentTrack: Int32(index)) { error in
-//						print("Replacing playlist URIs: error: \(error)")
-//					}
-
-				}
-			}
-		}
+		let trackURI = SpotifyClient.shortSpotifyTrackId(fullTrackURI)
+		updateNowPlayingInfo(trackURI)
 	}
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
+		print("didChangePlaybackStatus, isPlaying: \(isPlaying)")
 		updateUI(isPlaying: isPlaying)
 		updateNowPlayingInfo()
 		setProgress()
-	}
-
-	// This should be controlled with an operation queue, so that only one of these can execute at a time:
-	func queueNextTrack() {
-		guard
-			let player = self.spotify.player,
-			let metadata = player.metadata else {
-			print("queueNextTrack: no player/metadata available")
-			return
+		if isPlaying && !self.wasPlaying {
+			hideActivityIndicator()
 		}
-
-		if metadata.nextTrack == nil, let nextTrackId = playlist.nextTrackId() {
-			player.queueSpotifyURI(SpotifyClient.fullSpotifyTrackId(nextTrackId)) { error in
-				if error != nil {
-					print("queueNextTrack: error queueing next track: \(error)")
-				}
-			}
-		}
+		self.wasPlaying = isPlaying
 	}
 
 	/**
@@ -685,22 +580,35 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: String!) {
-		// TODO: should playlist hold trackUris instead of identifiers, since the spotify API has changed?
-		let trackId = SPTTrack.identifier(fromURI: URL(string: trackUri))!
-		if playlist.isLastTrack(trackId) {
-			updateUI(isPlaying: false)
-		}
+		print("didStopPlayingTrack \(trackUri)")
 		setProgress()
-		delegate?.trackStoppedPlaying(trackId)
+		if playlist.currentTrackIsLastTrack() {
+			// TODO: auto-fetch new track history and play?
+			self.spotify.player?.setIsPlaying(false, callback: nil)
+			// The delegate is _not_ notified that the track stopped playing, so that the table cell will remain highlighted.
+			updateUI(isPlaying: false)
+		} else {
+			skipToNextTrack(self)
+		}
 	}
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: String!) {
+		print("didStartPlayingTrack: \(trackUri)")
+		// Cancel any in-progress pan gesture.
+		progressIndicatorPanGestureRecognizer?.cancel()
+		guard let isPlaying = self.spotify.player?.playbackState?.isPlaying, isPlaying == true else {
+			// As of the spotify ios-sdk beta 25,
+			// a didStartPlayingTrack notification is sent after didStopPlayingTrack, even though isPlaying is set to
+			// false (in other words, sometimes it's calling this method, when it's not really playing anything).
+			return
+		}
 		if let interested = delegate {
 			interested.trackStartedPlaying(SPTTrack.identifier(fromURI: URL(string: trackUri)))
 		}
+		hideActivityIndicator()
 		setProgress(updateTrackDuration: true)
 		updateUI(isPlaying: true)
-		queueNextTrack()
+		self.updateNowPlayingInfo(SpotifyClient.shortSpotifyTrackId(trackUri))
 	}
 
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
@@ -764,6 +672,12 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 	*/
 	func audioStreamingDidDisconnect(_ audioStreaming: SPTAudioStreamingController!) {
 		setPlaylistTrackPosition()
+		spotify.player?.setIsPlaying(false) { error in
+			if let pauseError = error {
+				print("stopPlaying: error while trying to pause playback: \(pauseError)")
+			}
+		}
+
 		print("audioStreamingDidDisconnect")
 	}
 

@@ -14,9 +14,11 @@ struct AudioPlayerPlaylist {
 		let startIndex: Int
 		let endIndex: Int
 	}
-	let maxWindowSize = Constant.SPOTIFY_MAX_PLAYER_TRACKS
-	// Provides a window of ``maxWindowSize`` onto the larger playlist.
-	var currentWindow: PlaylistWindow?
+
+	struct PlaylistTrackInfo {
+		let index: Int
+		let trackURIString: String
+	}
 
 	let list: [PlayedSongData]
 	var currentIndex: Int?
@@ -31,21 +33,30 @@ struct AudioPlayerPlaylist {
 		return list[index]
 	}
 
+	var nextIndex: Int? {
+		guard
+            let index = currentIndex,
+                index < list.count - 1 else {
+			return nil
+		}
+        return index + 1
+	}
+
+	var previousIndex: Int? {
+		guard
+				let index = currentIndex,
+				index > 0 else {
+			return nil
+		}
+		return index - 1
+	}
+
 	init(list: [PlayedSongData], currentIndex: Int? = nil) {
 		self.list = list
 		self.currentIndex = currentIndex
 		for (index, song) in list.enumerated() {
 			trackToIndexMap[song.spotifyTrackId!] = index
 		}
-		setCurrentWindow()
-	}
-
-	mutating func setCurrentWindow() {
-		guard let index = currentIndex else {
-			currentWindow = nil
-			return
-		}
-		currentWindow = windowAroundIndex(index, maxCount: maxWindowSize)
 	}
 
 	func windowAroundIndex(_ index: Int, maxCount: Int) -> PlaylistWindow {
@@ -58,37 +69,9 @@ struct AudioPlayerPlaylist {
 		return PlaylistWindow(startIndex: startIndex, endIndex: endIndex)
 	}
 
-	func windowNeedsAdjustment() -> Bool {
-		guard let index = currentIndex, let window = currentWindow else {
-			return false
-		}
-
-		// If the current index is the first or last track, no adjustment necessary.
-		guard !(index == 0 || index == list.count - 1) else {
-			return false
-		}
-
-		// If the index is at either edge of the window, it should be adjusted.
-		return index - window.startIndex == 0 || index == window.endIndex
-	}
-
-	func isLastTrack(_ spotifyTrackId: String) -> Bool {
-		if let index = trackToIndexMap[spotifyTrackId] {
-			return index == list.count - 1
-		}
-		return false
-	}
-
 	func currentTrackIsLastTrack() -> Bool {
 		if let index = currentIndex {
 			return index == list.count - 1
-		}
-		return false
-	}
-
-	func currentTrackIsFirstTrack() -> Bool {
-		if let index = currentIndex {
-			return index == 0
 		}
 		return false
 	}
@@ -102,31 +85,17 @@ struct AudioPlayerPlaylist {
 		}
 	}
 
-	mutating func setCurrentTrack(_ trackId: String) {
-		if let index = trackToIndexMap[trackId] {
-			currentIndex = index
-		} else {
-			currentIndex = nil
-		}
+    func currentTrackInfo() -> PlaylistTrackInfo? {
+		return trackInfoForIndex(self.currentIndex)
 	}
 
-	func currentTrackMetadata() -> SPTTrack? {
-		guard let index = currentIndex,
-			let trackId = list[index].spotifyTrackId,
-			let metadata = trackMetadata[trackId] else {
-			return nil
-		}
-		return metadata
-	}
-
-	func nextTrackId() -> String? {
+	func trackInfoForIndex(_ trackIndex: Int?) -> PlaylistTrackInfo? {
 		guard
-			let index = currentIndex,
-			index < list.count - 2,
-			let nextTrackId = list[index + 1].spotifyTrackId else {
+            let index = trackIndex,
+            let trackId = list[index].spotifyTrackId else {
 				return nil
 		}
-		return nextTrackId
+		return PlaylistTrackInfo(index: index, trackURIString: SpotifyClient.fullSpotifyTrackId(trackId))
 	}
 
 	/**
@@ -153,23 +122,6 @@ struct AudioPlayerPlaylist {
 			return [URL]()
 		}
 		return trackURIsCenteredOnIndex(index, maxCount: maxCount)
-	}
-
-	/**
-	Gets the tracks of the current window, and the index with reference to that
-	window of the current track.  
-	
-	For example, if the playlist has 200 tracks, and the window is tracks
-	51 - 150, and the playlist's currentIndex is 71, indexInWindow will be 20.
-	*/
-	func currentWindowTrackURIs() -> (indexInWindow: Int, tracks: [URL])? {
-		guard let index = currentIndex, let window = currentWindow else {
-			return nil
-		}
-		let trackIds = list[window.startIndex ... window.endIndex].map({ $0.spotifyTrackId! })
-		let trackURIs = SpotifyClient.sharedInstance.URIsForTrackIds(trackIds)
-		let indexInWindow = index - window.startIndex
-		return (indexInWindow: indexInWindow, tracks: trackURIs)
 	}
 
 	/**

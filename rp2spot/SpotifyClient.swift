@@ -170,72 +170,21 @@ class SpotifyClient {
 		return URIs
 	}
 
-	func playTracks(_ URIs: [URL], fromIndex: Int = 0, trackStartTime: TimeInterval, handler: ((NSError?) -> Void)? = nil) {
-
-		func startPlayback() {
-			guard let player = self.player else {
-				return
-			}
-			player.playSpotifyURI(URIs[fromIndex].absoluteString, startingWith: 0, startingWithPosition: trackStartTime) { error in
-				if error != nil {
-					print("playTracks: Error while initiating playback: \(error)")
-				}
-//				else if URIs.count > fromIndex + 1 {
-//					for i in (fromIndex + 1)...(URIs.count - 1) {
-//						player.queueSpotifyURI(URIs[i].absoluteString) { error in
-//							if error != nil {
-//								print("SpotifyClient.playTracks: error while queueing tracks: \(error)")
-//							}
-//						}
-//					}
-//				}
-				handler?(error as NSError?)
-			}
-		}
-
-		// TODO: recheck if this is necessary (it was once upon a time, in order to avoid an audio hiccup when a track was already playing).
-		func triggerPlayback() {
-			guard let player = self.player else {
-				return
-			}
-			// Stop player and clear track list before starting playback of new track list.
-			if player.playbackState?.isPlaying ?? false {
-				player.setIsPlaying(false) { error in
-					guard error == nil else {
-						print("playTracks: error while attempting to stop playing")
-						handler?(error as NSError?)
-						return
-					}
-					startPlayback()
-				}
-			} else {
-				startPlayback()
-			}
-		}
-
-		guard URIs.count > 0 else {
-			print("playTracks: No spotify tracks URIs provided")
-			return
-		}
-
+	func playTrack(_ trackURIString: String, trackStartTime: TimeInterval, handler: ((NSError?) -> Void)? = nil) {
 		guard let player = self.player else {
 			print("SpotifyClient.playTracks: player not available")
 			return
 		}
-
 		if player.loggedIn {
-			triggerPlayback()
+			player.playSpotifyURI(trackURIString, startingWith: 0, startingWithPosition: trackStartTime) { error in
+				if error != nil {
+					print("playTracks: Error while initiating playback: \(error)")
+				}
+				handler?(error as NSError?)
+			}
 		} else {
-			// TODO: handle this with auth delegates
+			// TODO: handle this with auth delegates (start playback if appropriate).
 			player.login(withAccessToken: self.auth.session.accessToken)
-//			player.login(auth.session.accessToken) { error in
-//				guard error == nil else {
-//					print("playTracks: error while logging in: \(error!)")
-//					handler?(error as NSError?)
-//					return
-//				}
-//				startPlaying()
-//			}
 		}
 	}
 
