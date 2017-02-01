@@ -18,6 +18,12 @@ class AudioPlayerViewController: UIViewController {
 		disabled	// Player is non-active, and presumably invisible
 	}
 
+	struct State {
+		var trackURI: String? = nil
+		var isPlaying: Bool = false
+		var isCurrentState: Bool = false
+	}
+
 	@IBOutlet weak var playPauseButton: UIButton!
 	@IBOutlet weak var nextTrackButton: UIButton!
 	@IBOutlet weak var previousTrackButton: UIButton!
@@ -32,17 +38,13 @@ class AudioPlayerViewController: UIViewController {
 
 	var playlist = AudioPlayerPlaylist(list:[])
 
-	var currentTrackInfo: AudioPlayerPlaylist.PlaylistTrackInfo?
-
-	var nextQueuedTrackInfo: AudioPlayerPlaylist.PlaylistTrackInfo?
+	var targetState = State()
 
 	var spotify = SpotifyClient.sharedInstance
 
 	var sessionUpdateRequestTime: Foundation.Date?
 
 	var pausedDueToAudioInterruption = false
-
-	var wasPlaying = false
 
 	// ``nowPlayingCenter`` is used to set current song information, this will
 	// be displayed in the control center.
@@ -182,6 +184,11 @@ class AudioPlayerViewController: UIViewController {
 				print("startPlaying: no player available")
 				return
 			}
+			if !self.targetState.isPlaying {
+				self.targetState.isPlaying = true
+				self.targetState.isCurrentState = false
+			}
+
 			player.setIsPlaying(true) { error in
 				self.hideActivityIndicator()
 				if let err = error {
@@ -198,6 +205,8 @@ class AudioPlayerViewController: UIViewController {
 			print("pausePlaying: no player available")
 			return
 		}
+		targetState.isPlaying = false
+		targetState.isCurrentState = false
 		player.setIsPlaying(false) { error in
 			if let err = error {
 				print("pausePlaying: error while trying to pause player: \(err)")
@@ -238,7 +247,6 @@ class AudioPlayerViewController: UIViewController {
 				interested.trackStoppedPlaying(wasPlayingTrackId)
 			}
 			self.status = .disabled
-			self.wasPlaying = false
 		}
 	}
 
@@ -251,11 +259,11 @@ class AudioPlayerViewController: UIViewController {
 			playlist.setTrackMetadata(cachedMetadata)
 		}
 
-		self.currentTrackInfo = playlist.currentTrackInfo()
-		guard let currentTrack = self.currentTrackInfo else {
+		guard let trackInfo = playlist.currentTrackInfo() else {
 			print("playTracks: No current track, so can not start playing.")
 			return
 		}
+		self.targetState = State(trackURI: trackInfo.trackURIString, isPlaying: true, isCurrentState: false)
 
 		status = .active
 		showActivityIndicator()
@@ -295,7 +303,7 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 
-            self.spotify.playTrack(currentTrack.trackURIString, trackStartTime: self.playlist.trackPosition) { error in
+            self.spotify.playTrack(trackInfo.trackURIString, trackStartTime: self.playlist.trackPosition) { error in
 				guard error == nil else {
 					Utility.presentAlert(
 							"Unable to start playing",
@@ -566,17 +574,10 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
 		print("didChangePlaybackStatus, isPlaying: \(isPlaying)")
-		updateUI(isPlaying: isPlaying)
-		updateNowPlayingInfo()
-		setProgress()
-		if isPlaying && !self.wasPlaying {
-			hideActivityIndicator()
-		}
-		self.wasPlaying = isPlaying
 	}
 
 	/**
-	Somtimes this is called a long while before audioStreaming(_:didChangePlaybackStatus); it is being
+	Called before the streaming controller begins playing another track.
 	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: String!) {
@@ -594,21 +595,6 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: String!) {
 		print("didStartPlayingTrack: \(trackUri)")
-		// Cancel any in-progress pan gesture.
-		progressIndicatorPanGestureRecognizer?.cancel()
-		guard let isPlaying = self.spotify.player?.playbackState?.isPlaying, isPlaying == true else {
-			// As of the spotify ios-sdk beta 25,
-			// a didStartPlayingTrack notification is sent after didStopPlayingTrack, even though isPlaying is set to
-			// false (in other words, sometimes it's calling this method, when it's not really playing anything).
-			return
-		}
-		if let interested = delegate {
-			interested.trackStartedPlaying(SPTTrack.identifier(fromURI: URL(string: trackUri)))
-		}
-		hideActivityIndicator()
-		setProgress(updateTrackDuration: true)
-		updateUI(isPlaying: true)
-		self.updateNowPlayingInfo(SpotifyClient.shortSpotifyTrackId(trackUri))
 	}
 
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
@@ -656,6 +642,48 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			message: "This usually happens if your Spotify account is being used on another device."
 		)
 	}
+
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceive event: SpPlaybackEvent) {
+		guard let spotifyEvent = Constant.SpotifyPlaybackEvent.fromSpotifyEnum(event) else {
+			print("didReceive unmapped event: \(event)")
+			return
+		}
+		switch spotifyEvent {
+		case .notifyTrackChanged, .notifyPlay, .notifyPause:
+			let currentState = State(
+				trackURI: spotify.player?.metadata?.currentTrack?.uri,
+				isPlaying: spotify.player?.playbackState?.isPlaying ?? false,
+				isCurrentState: true
+			)
+			updateUIForState(state: currentState)
+		case .audioFlush:
+			setProgress()
+		default:
+			print("Unhandled event: \(spotifyEvent)")
+		}
+	}
+
+	func updateUIForState(state: State) {
+		guard
+			targetState.isCurrentState == false,
+			state.isPlaying == targetState.isPlaying,
+			state.trackURI == targetState.trackURI else {
+				return
+		}
+		targetState.isCurrentState = true
+		DispatchQueue.main.async {
+			self.updateUI(isPlaying: state.isPlaying)
+		}
+		setProgress(updateTrackDuration: true)
+		if state.isPlaying, let trackURI = state.trackURI {
+			let trackId = SpotifyClient.shortSpotifyTrackId(trackURI)
+			progressIndicatorPanGestureRecognizer?.cancel()
+			hideActivityIndicator()
+			self.updateNowPlayingInfo(trackId)
+			delegate?.trackStartedPlaying(trackId)
+		}
+
+	}
 }
 
 
@@ -690,16 +718,12 @@ extension AudioPlayerViewController: SPTAudioStreamingDelegate {
 		print("audioStreamingDidReconnect")
 	}
 
-	/** Called when the streaming controller encounters a fatal error.
-
-	At this point it may be appropriate to inform the user of the problem.
-
+	/** Called on error
 	@param audioStreaming The object that sent the message.
-	@param error The error that occurred.
+	@param error An NSError. Domain is SPTAudioStreamingErrorDomain and code is one of SpErrorCode
 	*/
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didEncounterError error: Error!) {
+	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceiveError error: Error!) {
 		setPlaylistTrackPosition()
-
 		Utility.presentAlert(
 			"Error during playback",
 			message: error.localizedDescription
@@ -775,10 +799,13 @@ extension AudioPlayerViewController {
 
 		case .ended:
 			// TODO: spotify ios-sdk bug here when trying to seek after having paused at last 1-2 seconds before track end?
+			progressIndicator.value = pannedProgress
+			stopProgressUpdating()
 			player.seek(to: offset) { error in
 				self.setElapsedTimeValue(offset)
-				self.setProgress()
+				// setProgress() will be called in audioStreaming(-:didReceive:)
 				if let err = error {
+					self.setProgress()
 					print("Error in progressIndicatorContainerPanned while trying to seek to offset: \(offset): \(err)")
 				}
 			}

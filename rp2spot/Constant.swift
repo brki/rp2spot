@@ -44,4 +44,27 @@ struct Constant {
 			return UIColor.colorWithRGB(self.rawValue, alpha: alpha)
 		}
 	}
+
+	// Mapping of used values from SpPlaybackEvent, which, in beta 25, is not available as a proper Swift enum.
+	enum SpotifyPlaybackEvent {
+		case notifyPlay
+		case notifyPause
+		case notifyTrackChanged
+		case audioFlush
+
+		static func fromSpotifyEnum(_ event:SpPlaybackEvent) -> SpotifyPlaybackEvent? {
+			switch event.rawValue {
+			case 0:
+				return .notifyPlay
+			case 1:
+				return .notifyPause
+			case 2:
+				return .notifyTrackChanged
+			case 12:
+				return .audioFlush
+			default:
+				return nil
+			}
+		}
+	}
 }
