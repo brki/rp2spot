@@ -58,6 +58,12 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
+	// When the player is paused, and a pan gesture is used to change the time,
+	// although the player is asked to adjust it's position, it does not adjust
+	// it's position until it starts playing again.
+	// For display purposes, it's good to know what the selected position is.
+	var seekedToPosition: TimeInterval? = nil
+
 	var progressIndicatorAnimating = false
 	var progressIndicatorAnimationRequested = false
 	var progressIndicatorPanGestureInvalid = false
@@ -414,9 +420,9 @@ class AudioPlayerViewController: UIViewController {
 			MPMediaItemPropertyTitle: track.name as AnyObject,
 			MPMediaItemPropertyAlbumTitle: track.album.name as AnyObject,
 			MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
-			MPNowPlayingInfoPropertyElapsedPlaybackTime: player.playbackState.position as AnyObject,
+			MPNowPlayingInfoPropertyElapsedPlaybackTime: (seekedToPosition ?? player.playbackState?.position ?? 0.0) as AnyObject,
 			// This one is necessary for the pause / playback status in control center in the simulator:
-			MPNowPlayingInfoPropertyPlaybackRate: (player.playbackState.isPlaying ? 1 : 0) as AnyObject
+			MPNowPlayingInfoPropertyPlaybackRate: ((player.playbackState?.isPlaying ?? false) ? 1 : 0) as AnyObject
 		]
 
 		// TODO: add album image
@@ -441,7 +447,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func setPlaylistTrackPosition() {
-		playlist.trackPosition = self.spotify.player?.playbackState?.position ?? 0.0
+		playlist.trackPosition = seekedToPosition ?? self.spotify.player?.playbackState?.position ?? 0.0
 	}
 }
 
@@ -585,8 +591,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		setProgress()
 		if playlist.currentTrackIsLastTrack() {
 			// TODO: auto-fetch new track history and play?
-			self.spotify.player?.setIsPlaying(false, callback: nil)
-			// The delegate is _not_ notified that the track stopped playing, so that the table cell will remain highlighted.
+			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(trackUri))
 			updateUI(isPlaying: false)
 		} else {
 			skipToNextTrack(self)
@@ -648,16 +653,20 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			print("didReceive unmapped event: \(event)")
 			return
 		}
+		let currentState = State(
+			trackURI: spotify.player?.metadata?.currentTrack?.uri,
+			isPlaying: spotify.player?.playbackState?.isPlaying ?? false,
+			isCurrentState: true
+		)
+		self.seekedToPosition = nil
 		switch spotifyEvent {
 		case .notifyTrackChanged, .notifyPlay, .notifyPause:
-			let currentState = State(
-				trackURI: spotify.player?.metadata?.currentTrack?.uri,
-				isPlaying: spotify.player?.playbackState?.isPlaying ?? false,
-				isCurrentState: true
-			)
 			updateUIForState(state: currentState)
 		case .audioFlush:
 			setProgress()
+			if let trackURI = currentState.trackURI {
+				self.updateNowPlayingInfo(SpotifyClient.shortSpotifyTrackId(trackURI))
+			}
 		default:
 			print("Unhandled event: \(spotifyEvent)")
 		}
@@ -674,13 +683,17 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		DispatchQueue.main.async {
 			self.updateUI(isPlaying: state.isPlaying)
 		}
+
 		setProgress(updateTrackDuration: true)
-		if state.isPlaying, let trackURI = state.trackURI {
-			let trackId = SpotifyClient.shortSpotifyTrackId(trackURI)
+		var trackId: String? = nil
+		if let trackURI = state.trackURI {
+			trackId = SpotifyClient.shortSpotifyTrackId(trackURI)
+		}
+		self.updateNowPlayingInfo(trackId)
+		if state.isPlaying, let playingTrackId = trackId {
 			progressIndicatorPanGestureRecognizer?.cancel()
 			hideActivityIndicator()
-			self.updateNowPlayingInfo(trackId)
-			delegate?.trackStartedPlaying(trackId)
+			delegate?.trackStartedPlaying(playingTrackId)
 		}
 
 	}
@@ -775,6 +788,7 @@ extension AudioPlayerViewController {
 
 		guard
 			let player = spotify.player,
+			let position = seekedToPosition ?? player.playbackState?.position,
 			let trackDuration = player.metadata?.currentTrack?.duration else {
 				print("progressIndicatorContainerPanned: no player information available")
 				return
@@ -785,7 +799,7 @@ extension AudioPlayerViewController {
 		switch (recognizer.state) {
 		case .began:
 			// If the pan is not starting over the thumb image, cancel the gesture recognizer.
-			let currentPosition = Float(player.playbackState.position / trackDuration)
+			let currentPosition = Float(position / trackDuration)
 			guard abs(currentPosition - pannedProgress) < 0.15 else {
 				progressIndicatorPanGestureInvalid = true
 				progressIndicatorPanGestureRecognizer?.cancel()
@@ -798,16 +812,17 @@ extension AudioPlayerViewController {
 			stopProgressUpdating()
 
 		case .ended:
-			// TODO: spotify ios-sdk bug here when trying to seek after having paused at last 1-2 seconds before track end?
 			progressIndicator.value = pannedProgress
 			stopProgressUpdating()
 			player.seek(to: offset) { error in
+				guard error == nil else {
+					self.setProgress()
+					print("Error in progressIndicatorContainerPanned while trying to seek to offset: \(offset): \(error!)")
+					return
+				}
 				self.setElapsedTimeValue(offset)
 				// setProgress() will be called in audioStreaming(-:didReceive:)
-				if let err = error {
-					self.setProgress()
-					print("Error in progressIndicatorContainerPanned while trying to seek to offset: \(offset): \(err)")
-				}
+				self.seekedToPosition = offset
 			}
 
 		case .changed:
@@ -860,11 +875,12 @@ extension AudioPlayerViewController {
 				self.progressIndicatorAnimating = true
 				guard
 					let player = self.spotify.player,
-					let duration = player.metadata.currentTrack?.duration
+					let duration = player.metadata?.currentTrack?.duration,
+					let position = self.seekedToPosition ?? player.playbackState?.position
 					else {
 						return
 				}
-				let remainder = duration - player.playbackState.position
+				let remainder = duration - position
 
 				UIView.animate(
 					withDuration: remainder,
@@ -883,12 +899,12 @@ extension AudioPlayerViewController {
 	and stops any progress indicator animation that might be running.
 	*/
 	func setProgressIndicatorPosition() {
-		// TODO: fix everywhere: player.metadata and player.playbackState are actually optionals
 		guard
 			let player = self.spotify.player,
-			let position = player.playbackState?.position,
+			let position = self.seekedToPosition ?? player.playbackState?.position,
 			let duration = player.metadata?.currentTrack?.duration
 			else {
+				print("setProgressIndicatorPosition: no info available, returning.")
 				return
 		}
 		let progress = Float(position / duration)
@@ -958,7 +974,7 @@ extension AudioPlayerViewController {
 	}
 
 	func showElapsedTime(_ sender: AnyObject? = nil) {
-		setElapsedTimeValue(spotify.player?.playbackState?.position ?? 0.0)
+		setElapsedTimeValue(seekedToPosition ?? spotify.player?.playbackState?.position ?? 0.0)
 	}
 
 	func setElapsedTimeValue(_ elapsed: Double) {
@@ -973,24 +989,25 @@ extension AudioPlayerViewController {
 
 		setProgressIndicatorPosition()
 		stopProgressUpdating()
+		updateNowPlayingInfo()
 
-		// Listen for foregrounding event, so that progress indicator updates will be triggered.
 		NotificationCenter.default.addObserver(
 			self,
-			selector: #selector(self.willEnterForeground(_:)),
-			name: NSNotification.Name.UIApplicationWillEnterForeground,
+			selector: #selector(self.didBecomeActive(_:)),
+			name: NSNotification.Name.UIApplicationDidBecomeActive,
 			object: nil)
 	}
 
-	func willEnterForeground(_ notification: Notification) {
-		print("isPlaying: \(spotify.isPlaying())")
-		setProgress()
+	func didBecomeActive(_ notification: Notification) {
+		setProgress(updateTrackDuration: true)
+		progressIndicator.layoutIfNeeded()
 		updateUI(isPlaying: spotify.isPlaying())
 
 		NotificationCenter.default.removeObserver(
 			self,
-			name: NSNotification.Name.UIApplicationWillEnterForeground,
+			name: NSNotification.Name.UIApplicationDidBecomeActive,
 			object: nil)
 	}
+
 	
 }

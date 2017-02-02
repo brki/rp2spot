@@ -265,6 +265,9 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 	}
 
 	func trackStartedPlaying(_ spotifyShortTrackId: String) {
+		guard currentlyPlayingTrackId != spotifyShortTrackId else {
+			return
+		}
 		currentlyPlayingTrackId = spotifyShortTrackId
 		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: true)
 	}
