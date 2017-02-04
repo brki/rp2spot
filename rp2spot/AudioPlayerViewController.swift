@@ -8,6 +8,7 @@
 
 import UIKit
 import AVFoundation
+import AlamofireImage
 import MediaPlayer
 
 class AudioPlayerViewController: UIViewController {
@@ -412,6 +413,8 @@ class AudioPlayerViewController: UIViewController {
 			return
 		}
 
+		// TODO: double check that this method is not being called too often.
+
 		let artists = track.artists as! [SPTPartialArtist]
 
 		let artistNames = artists.filter({ $0.name != nil}).map({ $0.name! }).joined(separator: ", ")
@@ -425,13 +428,47 @@ class AudioPlayerViewController: UIViewController {
 			MPNowPlayingInfoPropertyPlaybackRate: ((player.playbackState?.isPlaying ?? false) ? 1 : 0) as AnyObject
 		]
 
-		// TODO: add album image
+		setNowPlayingArtwork(track: track)
 
 		if artistNames.characters.count > 0 {
 			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames as AnyObject?
 		}
 
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
+	}
+
+	func setNowPlayingArtwork(track: SPTTrack) {
+		var imageInfo: Any?
+		// There are usually three covers available: small, medium, and large.
+		// We will try to use the medium one.
+		if let covers = track.album?.covers, covers.count > 1 {
+			imageInfo = covers[1]
+		} else {
+			imageInfo = track.album?.largestCover
+		}
+		guard let info = imageInfo as? SPTImage, let imageURL = info.imageURL else {
+			print ("No track album art info available")
+			return
+		}
+		let title = track.name
+		let urlRequest = URLRequest(url: imageURL)
+		ImageDownloader.default.download(urlRequest) { response in
+			guard let image = response.result.value else {
+				print("unable to get image, response: \(response.response)")
+				return
+			}
+			guard self.nowPlayingCenter.nowPlayingInfo != nil, self.nowPlayingCenter.nowPlayingInfo![MPMediaItemPropertyTitle] as? String == title else {
+				print("Track has changed, not setting outdated artwork image")
+				return
+			}
+			if #available(iOS 10.0, *) {
+				self.nowPlayingCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: info.size) { size in
+					return image
+				}
+			} else {
+				self.nowPlayingCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: image)
+			}
+		}
 	}
 
 	func showActivityIndicator() {
