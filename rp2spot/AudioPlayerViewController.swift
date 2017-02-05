@@ -621,15 +621,15 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	/**
 	Called before the streaming controller begins playing another track.
-	used here to toggle the pause button to a playbutton if the last available track has been reached.
 	*/
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStopPlayingTrack trackUri: String!) {
 		print("didStopPlayingTrack \(trackUri)")
 		setProgress()
 		if playlist.currentTrackIsLastTrack() {
 			// TODO: auto-fetch new track history and play?
-			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(trackUri))
-			updateUI(isPlaying: false)
+
+			// Hide the player controls.
+			self.stopPlaying(self)
 		} else {
 			skipToNextTrack(self)
 		}
