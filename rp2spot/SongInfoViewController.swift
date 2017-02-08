@@ -41,6 +41,9 @@ class SongInfoViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+		// TODO: use spotify track metadata to get a medium or large image for display here, instead of
+		// the potentially out-of-date small image url from the rphistory web service.
+		// Consider though, that the small image is probably also the one used for the table view cells.
 		view.backgroundColor = Constant.Color.sageGreen.color()
 
 		let imageURL = songInfo.imageURL(.small)
