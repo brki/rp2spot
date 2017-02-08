@@ -293,7 +293,30 @@ class SpotifyClient {
 		}
 	}
 
-	func isPlaying() -> Bool {
-		return self.player?.playbackState?.isPlaying ?? false
+	var isPlaying: Bool {
+		return player?.playbackState?.isPlaying ?? false
+	}
+
+	var currentTrack: SPTPlaybackTrack? {
+		return player?.metadata?.currentTrack ?? nil
+	}
+
+	var currentTrackURI: String? {
+		return currentTrack?.uri ?? nil
+	}
+
+	var currentTrackId: String? {
+		guard let uri = currentTrackURI else {
+			return nil
+		}
+		return SpotifyClient.shortSpotifyTrackId(uri)
+	}
+
+	var currentTrackDuration: TimeInterval? {
+		return currentTrack?.duration
+	}
+
+	var playbackPosition: TimeInterval? {
+		return player?.playbackState?.position
 	}
 }

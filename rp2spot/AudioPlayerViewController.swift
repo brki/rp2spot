@@ -20,14 +20,38 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	struct State {
-		var trackURI: String? = nil
-		var isPlaying: Bool = false
-		var isCurrentState: Bool = false
-	}
+		var currentTrackURI: String? = nil
+		var currentTrackPlayRequested: Bool = false
+		var nextTrackURI: String? = nil
+		var nextTrackQueuingRequested: Bool = false
 
-	struct NextTrackQueueRequestState {
-		var inProgress = false
-		var trackURI: String? = nil
+		mutating func clearNextTrackState() {
+			nextTrackQueuingRequested = false
+			nextTrackURI = nil
+		}
+		mutating func clearCurrentTrackState() {
+			currentTrackURI = nil
+			currentTrackPlayRequested = false
+		}
+		mutating func willPlayTrack(trackURI: String?) {
+			clearNextTrackState()
+			currentTrackURI = trackURI
+			currentTrackPlayRequested = true
+		}
+		mutating func willQueueNextTrack(trackURI: String?) {
+			nextTrackURI = trackURI
+			nextTrackQueuingRequested = true
+		}
+		/**
+		Update state for when a track is playing.
+		If the track is the current track, this will set currentTrackPlayRequested to false.
+		*/
+		mutating func trackIsPlaying(trackURI: String?) {
+			guard currentTrackURI == trackURI else {
+				return
+			}
+			currentTrackPlayRequested = false
+		}
 	}
 
 	@IBOutlet weak var playPauseButton: UIButton!
@@ -51,10 +75,6 @@ class AudioPlayerViewController: UIViewController {
 	var sessionUpdateRequestTime: Foundation.Date?
 
 	var pausedDueToAudioInterruption = false
-
-	var nextTrackQueuingRequested = false
-
-	var nextTrackQueuedURI: String?
 
 	// ``nowPlayingCenter`` is used to set current song information, this will
 	// be displayed in the control center.
@@ -117,10 +137,7 @@ class AudioPlayerViewController: UIViewController {
 
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		guard let player = spotify.player else {
-			return
-		}
-		updateUI(isPlaying: player.playbackState?.isPlaying ?? false)
+		setPlayPauseButton(isPlaying: spotify.isPlaying)
 		setProgress()
 	}
 
@@ -200,12 +217,8 @@ class AudioPlayerViewController: UIViewController {
 				print("startPlaying: no player available")
 				return
 			}
-			if !self.targetState.isPlaying {
-				self.targetState.isPlaying = true
-				self.targetState.isCurrentState = false
-				print("startPlaying: setting isCurrentState = false")
-			}
 
+			self.targetState.currentTrackPlayRequested = true
 			player.setIsPlaying(true) { error in
 				self.hideActivityIndicator()
 				if let err = error {
@@ -222,9 +235,8 @@ class AudioPlayerViewController: UIViewController {
 			print("pausePlaying: no player available")
 			return
 		}
-		targetState.isPlaying = false
-		targetState.isCurrentState = false
-		print("pausePlaying: setting isCurrentState = false")
+		targetState.currentTrackPlayRequested = false
+		print("pausePlaying: setting currentTrackPlayRequested = false")
 		player.setIsPlaying(false) { error in
 			if let err = error {
 				print("pausePlaying: error while trying to pause player: \(err)")
@@ -235,10 +247,9 @@ class AudioPlayerViewController: UIViewController {
 
 	@IBAction func skipToNextTrack(_ sender: AnyObject) {
 		self.playlist.incrementIndex()
-		let nextURI = nextTrackQueuedURI
-		nextTrackQueuedURI = nil
-		self.nextTrackQueuingRequested = false
-		if nextURI != nil && !nextTrackQueuingRequested {
+		let nextURI = targetState.nextTrackURI
+		targetState.clearNextTrackState()
+		if nextURI != nil {
 			// Let player continue to the already-queued next track.
 			playerSkipNext()
 		} else {
@@ -256,7 +267,7 @@ class AudioPlayerViewController: UIViewController {
 			print("stopPlaying: no player available")
 			return
 		}
-		guard spotify.isPlaying() || status == .active else {
+		guard spotify.isPlaying || status == .active else {
 			return
 		}
 
@@ -277,7 +288,6 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func playTracks(_ withPlaylist: AudioPlayerPlaylist? = nil) {
-
 		if let newPlaylist = withPlaylist {
 			playlist = newPlaylist
 			// Set any already cached metadata for the playlist.
@@ -289,8 +299,8 @@ class AudioPlayerViewController: UIViewController {
 			print("playTracks: No current track, so can not start playing.")
 			return
 		}
-		print("playTracks: setting isCurrentState = false")
-		self.targetState = State(trackURI: trackInfo.trackURIString, isPlaying: true, isCurrentState: false)
+		print("playTracks: calling willPlayTrack")
+		targetState.willPlayTrack(trackURI: trackInfo.trackURIString)
 
 		status = .active
 		showActivityIndicator()
@@ -330,10 +340,9 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 
-			self.nextTrackQueuedURI = nil
-			self.nextTrackQueuingRequested = false
+			self.targetState.clearNextTrackState()
 			self.spotify.playTrack(trackInfo.trackURIString, trackStartTime: self.playlist.trackPosition) { error in
-				print("playTrack called")
+				print("spotify.playTrack called")
 				guard error == nil else {
 					Utility.presentAlert(
 						"Unable to start playing",
@@ -342,10 +351,6 @@ class AudioPlayerViewController: UIViewController {
 					return
 				}
 			}
-//			if let nextTrack = self.spotify.player?.metadata?.nextTrack, nextTrack.uri == trackInfo.trackURIString {
-//				self.playerSkipNext()
-//			} else {
-//			}
 		}
 	}
 
@@ -353,19 +358,21 @@ class AudioPlayerViewController: UIViewController {
 	Triggers the playing of track identified by the currently selected index of the playlist.
 	Notifies delegate that previous track has stopped playing.
 	*/
+	// TODO: refactor this to accept a .increment / .decrement param, and handle common logic.
 	func changeToNewTrack() {
-		let wasPlayingURI = spotify.player?.metadata?.currentTrack?.uri
+		let wasPlayingURI = spotify.currentTrackURI
 		playTracks()
 		if let trackURI = wasPlayingURI {
 			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(trackURI))
 		}
 	}
 
+	// TODO: rename this?
 	func playerSkipNext() {
-		if let wasPlayingTrackURI = spotify.player?.metadata?.currentTrack?.uri {
+		if let wasPlayingTrackURI = spotify.currentTrackURI {
 			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(wasPlayingTrackURI))
 		}
-		self.targetState = State(trackURI: playlist.currentTrackInfo()?.trackURIString, isPlaying: true, isCurrentState: false)
+		targetState.willPlayTrack(trackURI: playlist.currentTrackInfo()?.trackURIString)
 		self.spotify.player?.skipNext() { error in
 			guard error == nil else {
 				print("Error while trying to skipNext(): \(error)")
@@ -407,7 +414,7 @@ class AudioPlayerViewController: UIViewController {
 		playTracks()
 	}
 
-	func updateUI(isPlaying: Bool) {
+	func setPlayPauseButton(isPlaying: Bool) {
 		let imageName = isPlaying ? "Pause" : "Play"
 		playPauseButton.setImage(UIImage(named: imageName), for: UIControlState())
 	}
@@ -452,7 +459,7 @@ class AudioPlayerViewController: UIViewController {
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
-		guard let player = self.spotify.player else {
+		guard self.spotify.player != nil else {
 			print("setNowPlayingInfo: no player available")
 			return
 		}
@@ -467,9 +474,9 @@ class AudioPlayerViewController: UIViewController {
 			MPMediaItemPropertyTitle: track.name as AnyObject,
 			MPMediaItemPropertyAlbumTitle: track.album.name as AnyObject,
 			MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
-			MPNowPlayingInfoPropertyElapsedPlaybackTime: (seekedToPosition ?? player.playbackState?.position ?? 0.0) as AnyObject,
+			MPNowPlayingInfoPropertyElapsedPlaybackTime: (seekedToPosition ?? spotify.playbackPosition ?? 0.0) as AnyObject,
 			// This one is necessary for the pause / playback status in control center in the simulator:
-			MPNowPlayingInfoPropertyPlaybackRate: ((player.playbackState?.isPlaying ?? false) ? 1 : 0) as AnyObject
+			MPNowPlayingInfoPropertyPlaybackRate: (spotify.isPlaying ? 1 : 0) as AnyObject
 		]
 
 		setNowPlayingArtwork(track: track)
@@ -528,7 +535,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func setPlaylistTrackPosition() {
-		playlist.trackPosition = seekedToPosition ?? self.spotify.player?.playbackState?.position ?? 0.0
+		playlist.trackPosition = seekedToPosition ?? spotify.playbackPosition ?? 0.0
 	}
 }
 
@@ -651,34 +658,29 @@ extension AudioPlayerViewController {
 extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChange metadata: SPTPlaybackMetadata!) {
-		print("previous: \(metadata.prevTrack?.name), current: \(metadata.currentTrack?.name), next: \(metadata.nextTrack?.name)")
+//		print("previous: \(metadata.prevTrack?.name), current: \(metadata.currentTrack?.name), next: \(metadata.nextTrack?.name)")
 		guard let fullTrackURI = metadata.currentTrack?.uri else {
 			return
 		}
 		let trackURI = SpotifyClient.shortSpotifyTrackId(fullTrackURI)
 		updateNowPlayingInfo(trackURI)
 
-		// If the next track is not yet set, queue it.
-		// This doesn't always work correctly (spotify api bug), but makes for a smoother playback experience
-		// when it does work.
-//		print("queueNextTrack from audioStreaming(_:didChange)")
-//		queueNextTrack(metadata: metadata)
-
 		// Check if next track info is set to expected value.
 		guard
-			nextTrackQueuingRequested,
+			targetState.nextTrackQueuingRequested,
 			let playerNextUri = metadata.nextTrack?.uri,
-			let playlistNextUri = playlist.nextTrackInfo()?.trackURIString else {
-			if playlist.currentTrackIsLastTrack() {
-				nextTrackQueuingRequested = false
-			}
-			return
+			let playlistNextUri = playlist.nextTrackInfo()?.trackURIString
+		else {
+				if playlist.currentTrackIsLastTrack() {
+					targetState.clearNextTrackState()
+				}
+				return
 		}
 		if playerNextUri == playlistNextUri {
-			print("HOHO: correct track queued")
-			nextTrackQueuingRequested = false
+			print("correct track queued")
+			targetState.nextTrackQueuingRequested = false
 		} else {
-			print("OPS?: wrong track queued")
+			print("wrong track queued.  grrrr.")
 		}
 	}
 
@@ -687,7 +689,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			print("queueNextTrack: no metadata provided")
 			return
 		}
-		guard !nextTrackQueuingRequested else {
+		guard !targetState.nextTrackQueuingRequested else {
 			print("queueNextTrack: queue request was already made")
 			return
 		}
@@ -695,16 +697,15 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			print("queueNextTrack: non-nil next track: \(metadata.nextTrack!.name)")
 			return
 		}
-		guard targetState.isCurrentState else {
-			print("queueNextTrack: target state is not current state")
+		guard !targetState.currentTrackPlayRequested else {
+			print("queueNextTrack: current track play currently requested, will not attempt to queue next track")
 			return
 		}
 		guard let nextTrack = playlist.trackInfoForIndex(playlist.nextIndex) else {
 			print("queueNextTrack: playlist has no next track")
 			return
 		}
-		self.nextTrackQueuingRequested = true
-		self.nextTrackQueuedURI = nextTrack.trackURIString
+		targetState.willQueueNextTrack(trackURI: nextTrack.trackURIString)
 		print("queueNextTrack: QUEUE REQUEST SENT")
 		spotify.player?.queueSpotifyURI(nextTrack.trackURIString) { error in
 			if error != nil {
@@ -713,9 +714,9 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		}
 	}
 
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
-		print("didChangePlaybackStatus, isPlaying: \(isPlaying)")
-	}
+//	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didChangePlaybackStatus isPlaying: Bool) {
+//		print("didChangePlaybackStatus, isPlaying: \(isPlaying)")
+//	}
 
 	/**
 	Called before the streaming controller begins playing another track.
@@ -727,30 +728,21 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			// TODO: auto-fetch new track history and play?
 
 			// Hide the player controls.
-			self.stopPlaying(self)
+			stopPlaying(self)
 			return
 		}
-		if nextTrackQueuedURI != nil {
+		if targetState.nextTrackURI != nil {
 			// The player will continue on to the next track.
+			// TODO: see if this can be refactored; call changeToAdjacentTrack()
 			if let trackId = playlist.currentTrack?.spotifyTrackId {
 				delegate?.trackStoppedPlaying(trackId)
 			}
-			self.playlist.incrementIndex()
-			self.targetState = State(trackURI: playlist.currentTrackInfo()?.trackURIString, isPlaying: true, isCurrentState: false)
-			nextTrackQueuedURI = nil
-			nextTrackQueuingRequested = false
+			playlist.incrementIndex()
+			targetState.willPlayTrack(trackURI: playlist.currentTrackInfo()?.trackURIString)
 		} else {
 			// The player needs to be told to start playing the next track from the (local) playlist.
 			skipToNextTrack(self)
 		}
-//		let (nextIsQueued, _) = nextTrackIsQueued(metadata: spotify.player?.metadata)
-//		if nextIsQueued {
-//			// The player will continue on to the next track.
-//			self.nextTrackQueuingRequested = false
-//		} else {
-//			// The player needs to be told to start playing the next track from the (local) playlist.
-//			skipToNextTrack(self)
-//		}
 	}
 
 	func nextTrackIsQueued(metadata playbackMetadata: SPTPlaybackMetadata?) -> (Bool, AudioPlayerPlaylist.PlaylistTrackInfo?) {
@@ -764,15 +756,13 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		return (playerNextTrackUri == nextTrack.trackURIString, nextTrack)
 	}
 
-	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: String!) {
-		print("didStartPlayingTrack: \(trackUri)")
-//		print("queueNextTrack from audioStreaming(_:didStartPlayingTrack)")
-//		queueNextTrack(metadata: spotify.player?.metadata)
-	}
-
-	func audioStreamingDidSkip(toNextTrack audioStreaming: SPTAudioStreamingController!) {
-		print("audioStreamingDidSkip")
-	}
+//	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: String!) {
+//		print("didStartPlayingTrack: \(trackUri)")
+//	}
+//
+//	func audioStreamingDidSkip(toNextTrack audioStreaming: SPTAudioStreamingController!) {
+//		print("audioStreamingDidSkip")
+//	}
 
 	/** Called when the audio streaming object becomes the active playback device on the user's account.
 	@param audioStreaming The object that sent the message.
@@ -822,55 +812,43 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceive event: SpPlaybackEvent) {
 		guard let spotifyEvent = Constant.SpotifyPlaybackEvent.fromSpotifyEnum(event) else {
-			print("didReceive unmapped event: \(event)")
+//			print("didReceive unmapped event: \(event)")
 			return
 		}
-		let currentState = State(
-			trackURI: spotify.player?.metadata?.currentTrack?.uri,
-			isPlaying: spotify.player?.playbackState?.isPlaying ?? false,
-			isCurrentState: true
-		)
+		let currentTrackURI = spotify.currentTrackURI
 		self.seekedToPosition = nil
 		switch spotifyEvent {
 		case .notifyTrackChanged, .notifyPlay, .notifyPause:
-			updateUIForState(state: currentState)
-			print("queueNextTrack from audioStreaming(_:didReceive)")
-			queueNextTrack(metadata: spotify.player?.metadata)
+			handleCurrentTrackCurrentState(trackURI: currentTrackURI)
 		case .audioFlush:
 			setProgress()
-			if let trackURI = currentState.trackURI {
+			if let trackURI = currentTrackURI {
 				self.updateNowPlayingInfo(SpotifyClient.shortSpotifyTrackId(trackURI))
 			}
-		default:
-			print("Unhandled event: \(spotifyEvent)")
 		}
 	}
-
-	func updateUIForState(state: State) {
-		guard
-			targetState.isCurrentState == false,
-			state.isPlaying == targetState.isPlaying,
-			state.trackURI == targetState.trackURI else {
-				return
+	
+	func handleCurrentTrackCurrentState(trackURI: String?) {
+		let isPlaying = spotify.isPlaying
+		if isPlaying {
+			targetState.trackIsPlaying(trackURI: trackURI)
 		}
-		print("updateUIForState: setting isCurrentState = true")
-		targetState.isCurrentState = true
+		guard !targetState.currentTrackPlayRequested else {
+			return	
+		}
+		queueNextTrack(metadata: spotify.player?.metadata)
 		DispatchQueue.main.async {
-			self.updateUI(isPlaying: state.isPlaying)
+			print("updateUI called from handleCurrentTrackCurrentState")
+			self.setPlayPauseButton(isPlaying: isPlaying)
 		}
-
 		setProgress(updateTrackDuration: true)
-		var trackId: String? = nil
-		if let trackURI = state.trackURI {
-			trackId = SpotifyClient.shortSpotifyTrackId(trackURI)
-		}
+		let trackId = trackURI == nil ? nil : SpotifyClient.shortSpotifyTrackId(trackURI!)
 		self.updateNowPlayingInfo(trackId)
-		if state.isPlaying, let playingTrackId = trackId {
+		if isPlaying, let playingTrackId = trackId {
 			progressIndicatorPanGestureRecognizer?.cancel()
 			hideActivityIndicator()
 			delegate?.trackStartedPlaying(playingTrackId)
 		}
-
 	}
 }
 
@@ -963,8 +941,8 @@ extension AudioPlayerViewController {
 
 		guard
 			let player = spotify.player,
-			let position = seekedToPosition ?? player.playbackState?.position,
-			let trackDuration = player.metadata?.currentTrack?.duration else {
+			let position = seekedToPosition ?? spotify.playbackPosition,
+			let trackDuration = spotify.currentTrackDuration else {
 				print("progressIndicatorContainerPanned: no player information available")
 				return
 		}
@@ -1029,7 +1007,7 @@ extension AudioPlayerViewController {
 			}
 		}
 
-		guard spotify.player?.playbackState?.isPlaying ?? false else {
+		guard spotify.isPlaying else {
 			stopProgressUpdating()
 			return
 		}
@@ -1049,9 +1027,8 @@ extension AudioPlayerViewController {
 				self.progressIndicatorAnimationRequested = false
 				self.progressIndicatorAnimating = true
 				guard
-					let player = self.spotify.player,
-					let duration = player.metadata?.currentTrack?.duration,
-					let position = self.seekedToPosition ?? player.playbackState?.position
+					let duration = self.spotify.currentTrackDuration,
+					let position = self.seekedToPosition ?? self.spotify.playbackPosition
 					else {
 						return
 				}
@@ -1075,12 +1052,11 @@ extension AudioPlayerViewController {
 	*/
 	func setProgressIndicatorPosition() {
 		guard
-			let player = self.spotify.player,
-			let position = self.seekedToPosition ?? player.playbackState?.position,
-			let duration = player.metadata?.currentTrack?.duration
-			else {
-				print("setProgressIndicatorPosition: no info available, returning.")
-				return
+			let position = self.seekedToPosition ?? spotify.playbackPosition,
+			let duration = spotify.currentTrackDuration
+		else {
+			print("setProgressIndicatorPosition: no info available, returning.")
+			return
 		}
 		let progress = Float(position / duration)
 
@@ -1145,11 +1121,11 @@ extension AudioPlayerViewController {
 	}
 
 	func showTrackDuration() {
-		trackDurationLabel.text = formatTrackTime(spotify.player?.metadata?.currentTrack?.duration ?? 0.0)
+		trackDurationLabel.text = formatTrackTime(spotify.currentTrackDuration ?? 0.0)
 	}
 
 	func showElapsedTime(_ sender: AnyObject? = nil) {
-		setElapsedTimeValue(seekedToPosition ?? spotify.player?.playbackState?.position ?? 0.0)
+		setElapsedTimeValue(seekedToPosition ?? spotify.playbackPosition ?? 0.0)
 	}
 
 	func setElapsedTimeValue(_ elapsed: Double) {
@@ -1176,13 +1152,11 @@ extension AudioPlayerViewController {
 	func didBecomeActive(_ notification: Notification) {
 		setProgress(updateTrackDuration: true)
 		progressIndicator.layoutIfNeeded()
-		updateUI(isPlaying: spotify.isPlaying())
+		setPlayPauseButton(isPlaying: spotify.isPlaying)
 
 		NotificationCenter.default.removeObserver(
 			self,
 			name: NSNotification.Name.UIApplicationDidBecomeActive,
 			object: nil)
 	}
-
-	
 }
