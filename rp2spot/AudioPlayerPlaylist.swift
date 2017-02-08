@@ -93,6 +93,16 @@ struct AudioPlayerPlaylist {
 		return trackInfoForIndex(self.nextIndex)
 	}
 
+	func playedSongDataForTrackId(trackId: String?) -> PlayedSongData? {
+		guard let id = trackId else {
+			return nil
+		}
+		guard let index = trackToIndexMap[id] else {
+			return nil
+		}
+		return list[index]
+	}
+
 	func trackInfoForIndex(_ trackIndex: Int?) -> PlaylistTrackInfo? {
 		guard
             let index = trackIndex,

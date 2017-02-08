@@ -30,8 +30,8 @@ class AudioPlayerViewController: UIViewController {
 			nextTrackURI = nil
 		}
 		mutating func clearCurrentTrackState() {
-			currentTrackURI = nil
 			currentTrackPlayRequested = false
+			currentTrackURI = nil
 		}
 		mutating func willPlayTrack(trackURI: String?) {
 			clearNextTrackState()
@@ -254,20 +254,13 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	@IBAction func skipToNextTrack(_ sender: AnyObject) {
-		self.playlist.incrementIndex()
-		let nextURI = targetState.nextTrackURI
-		targetState.clearNextTrackState()
-		if nextURI != nil {
-			// Let player continue to the already-queued next track.
-			playerSkipNext()
-		} else {
-			changeToNewTrack()
-		}
+		playlist.incrementIndex()
+		playPlaylistCurrentTrack()
 	}
 
 	@IBAction func skipToPreviousTrack(_ sender: AnyObject) {
 		self.playlist.decrementIndex()
-		changeToNewTrack()
+		playPlaylistCurrentTrack()
 	}
 
 	@IBAction func stopPlaying(_ sender: AnyObject) {
@@ -303,13 +296,10 @@ class AudioPlayerViewController: UIViewController {
 			playlist.setTrackMetadata(cachedMetadata)
 		}
 
-		guard let trackInfo = playlist.currentTrackInfo() else {
+		guard playlist.currentTrack != nil else {
 			print("playTracks: No current track, so can not start playing.")
 			return
 		}
-		print("playTracks: calling willPlayTrack")
-		targetState.willPlayTrack(trackURI: trackInfo.trackURIString)
-
 		status = .active
 		showActivityIndicator()
 
@@ -348,48 +338,52 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 
-			self.targetState.clearNextTrackState()
-			self.spotify.playTrack(trackInfo.trackURIString, trackStartTime: self.playlist.trackPosition) { error in
+			self.playPlaylistCurrentTrack()
+		}
+	}
+
+	func playPlaylistCurrentTrack(changeNow: Bool = true) {
+		if let oldTrackURI = targetState.currentTrackURI {
+			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(oldTrackURI))
+		}
+		targetState.clearCurrentTrackState()
+		guard let trackURI = playlist.currentTrackInfo()?.trackURIString else {
+			print("playPlaylistCurrentTrack: currentTrackInfo unexpectedly nil")
+			return
+		}
+		print("spotify.current: \(spotify.currentTrackURI), spotify.next: \(spotify.nextTrackURI), playlist.current: \(trackURI)")
+		self.targetState.willPlayTrack(trackURI: trackURI)
+		if spotify.isPlaying && spotify.currentTrackURI == trackURI {
+			// Do nothing
+			print("Spotify current track URI is target URI, don't do anything")
+		} else if spotify.nextTrackURI != trackURI {
+			print("Player being told to play a new track")
+			self.spotify.playTrack(trackURI, trackStartTime: self.playlist.trackPosition) { error in
 				print("spotify.playTrack called")
 				guard error == nil else {
 					Utility.presentAlert(
-						"Unable to start playing",
-						message: error!.localizedDescription
+							"Unable to start playing",
+							message: error!.localizedDescription
 					)
 					return
 				}
 			}
-		}
-	}
-
-	/**
-	Triggers the playing of track identified by the currently selected index of the playlist.
-	Notifies delegate that previous track has stopped playing.
-	*/
-	// TODO: refactor this to accept a .increment / .decrement param, and handle common logic.
-	func changeToNewTrack() {
-		let wasPlayingURI = spotify.currentTrackURI
-		playTracks()
-		if let trackURI = wasPlayingURI {
-			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(trackURI))
-		}
-	}
-
-	// TODO: rename this?
-	func playerSkipNext() {
-		if let wasPlayingTrackURI = spotify.currentTrackURI {
-			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(wasPlayingTrackURI))
-		}
-		targetState.willPlayTrack(trackURI: playlist.currentTrackInfo()?.trackURIString)
-		self.spotify.player?.skipNext() { error in
-			guard error == nil else {
-				print("Error while trying to skipNext(): \(error)")
-				Utility.presentAlert(
-					"Unable to skip to next track",
-					message: error!.localizedDescription
-				)
-				return
+		} else if changeNow || !spotify.isPlaying {
+			print("Player-skipping to next track")
+			self.spotify.player?.skipNext() { error in
+				guard error == nil else {
+					print("Error while trying to skipNext(): \(error)")
+					Utility.presentAlert(
+							"Unable to skip to next track",
+							message: error!.localizedDescription
+					)
+					return
+				}
 			}
+		} else {
+			// If execution reaches here, the correct next track is queued, and the player should continue on to
+			// play it.
+			print("Falling through to next track")
 		}
 	}
 
@@ -686,9 +680,16 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		}
 		if playerNextUri == playlistNextUri {
 			print("correct track queued")
+			if let trackDetails = playlist.playedSongDataForTrackId(trackId: SpotifyClient.shortSpotifyTrackId(playerNextUri)) {
+				print("track queued.  [\(playerNextUri)] (\(trackDetails.title))")
+			}
 			targetState.nextTrackQueuingRequested = false
 		} else {
-			print("wrong track queued.  grrrr.")
+			if let trackDetails = playlist.playedSongDataForTrackId(trackId: SpotifyClient.shortSpotifyTrackId(playerNextUri)) {
+				print("wrong track queued.  [\(playerNextUri)] (\(trackDetails.title))")
+			} else {
+				print("wrong track queued.  [\(playerNextUri)] (No info found in playlist).")
+			}
 		}
 	}
 
@@ -734,34 +735,13 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		setProgress()
 		guard !playlist.currentTrackIsLastTrack() else {
 			// TODO: auto-fetch new track history and play?
-
 			// Hide the player controls.
 			stopPlaying(self)
 			return
 		}
-		if targetState.nextTrackURI != nil {
-			// The player will continue on to the next track.
-			// TODO: see if this can be refactored; call changeToAdjacentTrack()
-			if let trackId = playlist.currentTrack?.spotifyTrackId {
-				delegate?.trackStoppedPlaying(trackId)
-			}
-			playlist.incrementIndex()
-			targetState.willPlayTrack(trackURI: playlist.currentTrackInfo()?.trackURIString)
-		} else {
-			// The player needs to be told to start playing the next track from the (local) playlist.
-			skipToNextTrack(self)
-		}
-	}
-
-	func nextTrackIsQueued(metadata playbackMetadata: SPTPlaybackMetadata?) -> (Bool, AudioPlayerPlaylist.PlaylistTrackInfo?) {
-		guard let nextTrack = playlist.trackInfoForIndex(playlist.nextIndex) else {
-			// There is no next track in the playlist.
-			return (true, nil)
-		}
-		guard let playerNextTrackUri = playbackMetadata?.nextTrack?.uri else {
-			return (false, nextTrack)
-		}
-		return (playerNextTrackUri == nextTrack.trackURIString, nextTrack)
+		print("didStopPlayingTrack: \(targetState)")
+		playlist.incrementIndex()
+		playPlaylistCurrentTrack(changeNow: false)
 	}
 
 //	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didStartPlayingTrack trackUri: String!) {
@@ -819,8 +799,9 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	}
 
 	func audioStreaming(_ audioStreaming: SPTAudioStreamingController!, didReceive event: SpPlaybackEvent) {
+//		print("didReceiveEvent: \(targetState)")
 		guard let spotifyEvent = Constant.SpotifyPlaybackEvent.fromSpotifyEnum(event) else {
-//			print("didReceive unmapped event: \(event)")
+			print("didReceive unmapped event: \(event)")
 			return
 		}
 		let currentTrackURI = spotify.currentTrackURI
@@ -844,6 +825,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		guard !targetState.currentTrackPlayRequested else {
 			return	
 		}
+		print("handleCurrentTrack: \(targetState)")
 		queueNextTrack(metadata: spotify.player?.metadata)
 		DispatchQueue.main.async {
 			print("updateUI called from handleCurrentTrackCurrentState")

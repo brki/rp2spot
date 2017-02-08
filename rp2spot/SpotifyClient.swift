@@ -319,4 +319,8 @@ class SpotifyClient {
 	var playbackPosition: TimeInterval? {
 		return player?.playbackState?.position
 	}
+
+	var nextTrackURI: String? {
+		return player?.metadata?.nextTrack?.uri ?? nil
+	}
 }
