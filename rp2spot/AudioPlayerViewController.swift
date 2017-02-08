@@ -104,6 +104,14 @@ class AudioPlayerViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 
+		do {
+			try AVAudioSession.sharedInstance().setCategory(
+				AVAudioSessionCategoryPlayback,
+				with: .defaultToSpeaker)
+		} catch {
+			print("Failed to set audio session category.  Error: \(error)")
+		}
+
 		// Set a smaller-than-default thumbnail image, and disable user interaction
 		// (user interaction will be handled by a gesture recognizer so that it works
 		// well while the thumb image is animating).
