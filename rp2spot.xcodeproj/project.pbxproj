@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D30809251E4D128B006B7CE5 /* CleanroomLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D30809241E4D128B006B7CE5 /* CleanroomLogger.framework */; };
 		D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */; };
 		D31AAFEC1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */; };
 		D32EA3731CAAB2440024B598 /* UserSettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */; };
@@ -80,6 +81,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		D30809241E4D128B006B7CE5 /* CleanroomLogger.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CleanroomLogger.framework; path = Carthage/Build/iOS/CleanroomLogger.framework; sourceTree = "<group>"; };
 		D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuthRenewalOperation.swift; sourceTree = "<group>"; };
 		D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIGestureRecognizer+extension.swift"; sourceTree = "<group>"; };
 		D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UserSettingsViewController.swift; sourceTree = "<group>"; };
@@ -147,6 +149,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D30809251E4D128B006B7CE5 /* CleanroomLogger.framework in Frameworks */,
 				D3FC5E611C6F542F00443F68 /* CoreData.framework in Frameworks */,
 				D3BF38F51E38DD61001DF076 /* SpotifyAuthentication.framework in Frameworks */,
 				D3FC5E5E1C6F34CA00443F68 /* SystemConfiguration.framework in Frameworks */,
@@ -302,6 +305,7 @@
 		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D30809241E4D128B006B7CE5 /* CleanroomLogger.framework */,
 				D3BF38F11E38DD61001DF076 /* SpotifyAudioPlayback.framework */,
 				D3BF38F21E38DD61001DF076 /* SpotifyAuthentication.framework */,
 				D3BF38F31E38DD61001DF076 /* SpotifyMetadata.framework */,
@@ -498,6 +502,7 @@
 			inputPaths = (
 				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/AlamofireImage.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/CleanroomLogger.framework",
 			);
 			outputPaths = (
 			);

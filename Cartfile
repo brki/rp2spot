@@ -1,3 +1,4 @@
 github "Alamofire/Alamofire" ~> 4.0
 github "Alamofire/AlamofireImage" ~> 3.0
+github "emaloney/CleanroomLogger" ~> 5.0.0
 # github "spotify/ios-sdk" "beta-25"  # doesn't work for the moment ...
