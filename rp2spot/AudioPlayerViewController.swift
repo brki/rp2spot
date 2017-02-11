@@ -467,9 +467,16 @@ class AudioPlayerViewController: UIViewController {
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
-		guard state.nowPlayingInfoTrackId != track.identifier else {
-			Log.verbose?.message("nowPlayingInfo already set for this track")
-			return
+		// Don't set the info if it is already set for this track ...
+		// except when running in the simulator, so that it will correctly show the
+		// the artwork and playback progress. (It needs the MPNowPlayingInfoPropertyPlaybackRate
+		// info).  This results in a flicker-to-unset/set artwork image when toggling playback in the
+		// simulator, but not on a real device.
+		if !Platform.isSimulator {
+			guard state.nowPlayingInfoTrackId != track.identifier else {
+				Log.verbose?.message("nowPlayingInfo already set for this track")
+				return
+			}
 		}
 		guard self.spotify.player != nil else {
 			Log.warning?.message("setNowPlayingInfo: no player available")
@@ -491,13 +498,13 @@ class AudioPlayerViewController: UIViewController {
 			MPNowPlayingInfoPropertyPlaybackRate: (spotify.isPlaying ? 1 : 0) as AnyObject
 		]
 
-		setNowPlayingArtwork(track: track)
-
 		if artistNames.characters.count > 0 {
 			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames as AnyObject?
 		}
 
+		Log.verbose?.value(nowPlayingInfo)
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
+		setNowPlayingArtwork(track: track)
 	}
 
 	func setNowPlayingArtwork(track: SPTTrack) {
@@ -520,17 +527,23 @@ class AudioPlayerViewController: UIViewController {
 				Log.warning?.message("unable to get image, response: \(response.response)")
 				return
 			}
-			guard self.nowPlayingCenter.nowPlayingInfo != nil, self.nowPlayingCenter.nowPlayingInfo![MPMediaItemPropertyTitle] as? String == title else {
+			guard
+				var nowPlayingInfo = self.nowPlayingCenter.nowPlayingInfo,
+				nowPlayingInfo[MPMediaItemPropertyTitle] as? String == title
+			else {
 				Log.debug?.message("Track has changed, not setting outdated artwork image")
 				return
 			}
+			Log.verbose?.message("Setting now playing info artwork")
 			if #available(iOS 10.0, *) {
-				self.nowPlayingCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: info.size) { size in
+				nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: info.size) { size in
 					return image
 				}
 			} else {
-				self.nowPlayingCenter.nowPlayingInfo![MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: image)
+				nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: image)
 			}
+			nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = (self.spotify.isPlaying ? 1 : 0) as AnyObject
+			self.nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
 		}
 	}
 
