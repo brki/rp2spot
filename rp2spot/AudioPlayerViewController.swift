@@ -610,19 +610,23 @@ extension AudioPlayerViewController {
 		}
 
 		if AVAudioSessionInterruptionType(rawValue: rawTypeValue) == .began {
-			Log.debug?.message("will pause playing due to audio interruption")
+			guard spotify.isPlaying else {
+				Log.debug?.message("AVAudioSessionInterruptionType began, but player is not currently playing, so ignoring it.")
+				return
+			}
+			Log.debug?.message("will pause playing due to audio interruption: spotify.isPlaying: \(spotify.isPlaying), pausedDueToAudioInterruption: \(pausedDueToAudioInterruption)")
 			pausePlaying()
 
 			// The pausedDueToAudioInterruption flag is used to determine whether audio should restart
 			// after the interruption has finished.  If the AVAudioSessionInterruption was triggered
 			// due to another app starting to play music, we do not want to re-start playing after
 			// the other app finishes.
-			if !AVAudioSession.sharedInstance().isOtherAudioPlaying {
+			if !AVAudioSession.sharedInstance().isOtherAudioPlaying{
 				pausedDueToAudioInterruption = true
 			}
 		} else {
 			if pausedDueToAudioInterruption && status == .active {
-				Log.debug?.message("will resume playing after audio interruption")
+				Log.debug?.message("will resume playing after audio interruption: spotify.isPlaying: \(spotify.isPlaying),pausedDueToAudioInterruption: \(pausedDueToAudioInterruption)")
 				pausedDueToAudioInterruption = false
 				startPlaying()
 			}
@@ -786,11 +790,6 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			spotify.player?.setIsPlaying(false, callback: nil)
 			return
 		}
-//		do {
-//			try AVAudioSession.sharedInstance().overrideOutputAudioPort(.speaker)
-//		} catch {
-//			print("Error trying to overrideOutputAudioPort: \(error)")
-//		}
 		// TODO: is there a better way to do this?  This gives an error "-50 (nil)"
 		//       but still has the desired effect of letting audio come out of the
 		//       phone's speakers.
