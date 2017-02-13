@@ -618,7 +618,10 @@ extension AudioPlayerViewController {
 		}
 		Log.debug?.value(notification)
 
-		guard let rawTypeValue = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt else {
+		guard
+			let userInfo = notification.userInfo,
+			let rawTypeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt
+		else {
 			return
 		}
 
@@ -638,11 +641,19 @@ extension AudioPlayerViewController {
 				pausedDueToAudioInterruption = true
 			}
 		} else {
-			if pausedDueToAudioInterruption && status == .active {
-				Log.debug?.message("will resume playing after audio interruption: spotify.isPlaying: \(spotify.isPlaying),pausedDueToAudioInterruption: \(pausedDueToAudioInterruption)")
-				pausedDueToAudioInterruption = false
-				startPlaying()
+			guard
+				let optionRawValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt,
+				AVAudioSessionInterruptionOptions(rawValue: optionRawValue) == .shouldResume
+			else {
+				Log.debug?.message("Audio interruption ended, but Options is not shouldResume, so not starting to play")
+				return
 			}
+			guard pausedDueToAudioInterruption && status == .active else {
+				Log.debug?.message("Audio interruption ended, but not (pausedDueToAudioInerruption && status == .active): spotify.isPlaying: \(spotify.isPlaying),pausedDueToAudioInterruption: \(pausedDueToAudioInterruption)")
+				return
+			}
+			pausedDueToAudioInterruption = false
+			startPlaying()
 		}
 	}
 	
@@ -1188,6 +1199,7 @@ extension AudioPlayerViewController {
 
 	func didBecomeActive(_ notification: Notification) {
 		Log.debug?.trace()
+		Log.verbose?.message("didBecomeActive: spotify.isPlaying: \(spotify.isPlaying), state: \(state)")
 		setProgress(updateTrackDuration: true)
 		progressIndicator.layoutIfNeeded()
 		setPlayPauseButton(isPlaying: spotify.isPlaying)
