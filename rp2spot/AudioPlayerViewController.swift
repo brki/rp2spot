@@ -196,7 +196,7 @@ class AudioPlayerViewController: UIViewController {
 		if player.playbackState.isPlaying {
 			pausePlaying()
 		} else {
-			self.startPlaying()
+			startPlaying()
 		}
 	}
 
@@ -385,7 +385,6 @@ class AudioPlayerViewController: UIViewController {
 					)
 					return
 				}
-				Log.debug?.trace()
 			}
 		} else {
 			// If execution reaches here, the correct next track is queued, and the player should continue on to
@@ -398,7 +397,7 @@ class AudioPlayerViewController: UIViewController {
 	Handles notification that the spotify session was updated (when user logs in).
 	*/
 	func spotifySessionUpdated(_ notification: Notification) {
-		Log.debug?.trace()
+		Log.verbose?.value(notification)
 		// Do not keep listening for the notification.
 		NotificationCenter.default.removeObserver(self, name: NSNotification.Name(rawValue: SpotifyClient.SESSION_UPDATE_NOTIFICATION), object: spotify)
 		let loginRequestTime = sessionUpdateRequestTime
@@ -576,7 +575,7 @@ extension AudioPlayerViewController {
 	then pause the audio.
 	*/
 	dynamic func audioRouteChanged(_ notification: Notification) {
-		Log.debug?.value(notification)
+		Log.verbose?.value(notification)
 		guard let player = self.spotify.player else {
 			Log.warning?.message("audioRouteChanged: no player available")
 			return
@@ -616,7 +615,7 @@ extension AudioPlayerViewController {
 		guard notification.name == NSNotification.Name.AVAudioSessionInterruption else {
 			return
 		}
-		Log.debug?.value(notification)
+		Log.verbose?.value(notification)
 
 		guard
 			let userInfo = notification.userInfo,
@@ -804,7 +803,6 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 	@param audioStreaming The object that sent the message.
 	*/
 	func audioStreamingDidBecomeActivePlaybackDevice(_ audioStreaming: SPTAudioStreamingController!) {
-		Log.debug?.trace()
 		// print("audioStreamingDidBecomeActivePlaybackDevice")
 
 		// If the user taps on a track before this device is the active playback device,
@@ -978,7 +976,6 @@ extension AudioPlayerViewController {
 	*/
 	func addprogressIndicatorGestureRecognizers() {
 		progressIndicatorPanGestureRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.progressIndicatorContainerPanned(_:)))
-
 		progressIndicatorContainer.addGestureRecognizer(progressIndicatorPanGestureRecognizer!)
 	}
 
@@ -1185,7 +1182,7 @@ extension AudioPlayerViewController {
 	}
 
 	func willResignActive(_ notification: Notification) {
-		Log.debug?.trace()
+		Log.verbose?.value(notification)
 		setProgressIndicatorPosition()
 		stopProgressUpdating()
 		updateNowPlayingInfo()
@@ -1198,7 +1195,7 @@ extension AudioPlayerViewController {
 	}
 
 	func didBecomeActive(_ notification: Notification) {
-		Log.debug?.trace()
+		Log.verbose?.value(notification)
 		Log.verbose?.message("didBecomeActive: spotify.isPlaying: \(spotify.isPlaying), state: \(state)")
 		setProgress(updateTrackDuration: true)
 		progressIndicator.layoutIfNeeded()
