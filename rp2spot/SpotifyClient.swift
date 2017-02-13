@@ -48,7 +48,7 @@ class SpotifyClient {
 	*/
 	var playerCurrentTrackId: String? {
 		guard
-			let uriString = player?.metadata.currentTrack?.uri,
+			let uriString = player?.metadata?.currentTrack?.uri,
 			let uri = NSURL(string: uriString) else {
 				return nil
 		}
