@@ -25,7 +25,9 @@ class AudioPlayerViewController: UIViewController {
 		var currentTrackPlayRequested: Bool = false
 		var nextTrackURI: String? = nil
 		var nextTrackQueuingRequested: Bool = false
-		var nowPlayingInfoTrackId: String? = nil
+		var nowPlayingTrackId: String? = nil
+		var nowPlayingPlaybackRate: Int? = nil
+		var nowPlayingArtworkSet = false
 
 		mutating func clearNextTrackState() {
 			nextTrackQueuingRequested = false
@@ -39,6 +41,9 @@ class AudioPlayerViewController: UIViewController {
 			clearNextTrackState()
 			currentTrackURI = trackURI
 			currentTrackPlayRequested = true
+			nowPlayingTrackId = nil
+			nowPlayingPlaybackRate = nil
+			nowPlayingArtworkSet = false
 		}
 		mutating func willQueueNextTrack(trackURI: String?) {
 			nextTrackURI = trackURI
@@ -250,7 +255,7 @@ class AudioPlayerViewController: UIViewController {
 			return
 		}
 		state.currentTrackPlayRequested = false
-		Log.verbose?.message("pausePlaying: setting currentTrackPlayRequested = false")
+		Log.verbose?.message("pausePlaying: will tell player to pause")
 		player.setIsPlaying(false) { error in
 			if let err = error {
 				Log.warning?.message("pausePlaying: error while trying to pause player: \(err)")
@@ -427,7 +432,7 @@ class AudioPlayerViewController: UIViewController {
 		playPauseButton.setImage(UIImage(named: imageName), for: UIControlState())
 	}
 
-	func updateNowPlayingInfo(_ trackId: String? = nil) {
+	func updateNowPlayingInfo(_ trackId: String? = nil, forcePositionUpdate: Bool = false) {
 		guard let nowPlayingId = trackId ?? playlist.currentTrack?.spotifyTrackId ?? spotify.playerCurrentTrackId else {
 			Log.debug?.message("no nowPlayingId available")
 			return
@@ -448,7 +453,7 @@ class AudioPlayerViewController: UIViewController {
 				// we should not set the now playing info with the old track info.
 				if self.spotify.playerCurrentTrackId == nowPlayingId {
 					if let trackInfo = self.playlist.trackMetadata[nowPlayingId] {
-						self.setNowPlayingInfo(trackInfo)
+						self.setNowPlayingInfo(trackInfo, forcePositionUpdate: forcePositionUpdate)
 					}
 				}
 				if error != nil {
@@ -458,55 +463,50 @@ class AudioPlayerViewController: UIViewController {
 			}
 			return
 		}
-		setNowPlayingInfo(track)
+		setNowPlayingInfo(track, forcePositionUpdate: forcePositionUpdate)
 	}
 
-	func setNowPlayingInfo(_ trackInfo: SPTTrack?) {
+	func setNowPlayingInfo(_ trackInfo: SPTTrack?, forcePositionUpdate: Bool = false) {
 		guard let track = trackInfo else {
 			nowPlayingCenter.nowPlayingInfo = nil
 			return
 		}
-		// Don't set the info if it is already set for this track ...
-		// except when running in the simulator, so that it will correctly show the
-		// the artwork and playback progress. (It needs the MPNowPlayingInfoPropertyPlaybackRate
-		// info).  This results in a flicker-to-unset/set artwork image when toggling playback in the
-		// simulator, but not on a real device.
-		if !Platform.isSimulator {
-			guard state.nowPlayingInfoTrackId != track.identifier else {
-				Log.verbose?.message("nowPlayingInfo already set for this track")
-				return
-			}
-		}
-		guard self.spotify.player != nil else {
-			Log.warning?.message("setNowPlayingInfo: no player available")
+		let playbackRate = (spotify.isPlaying ? 1 : 0)
+		let playbackRateChanged = state.nowPlayingPlaybackRate != playbackRate
+		let trackChanged = state.nowPlayingTrackId != track.identifier
+		guard trackChanged || playbackRateChanged || forcePositionUpdate else {
+			Log.verbose?.message("setNowPlayingInfo: track info already set")
 			return
 		}
+		state.nowPlayingPlaybackRate = playbackRate
+		state.nowPlayingTrackId = track.identifier
 		Log.debug?.value(trackInfo)
-		state.nowPlayingInfoTrackId = track.identifier
 
 		let artists = track.artists as! [SPTPartialArtist]
-
 		let artistNames = artists.filter({ $0.name != nil}).map({ $0.name! }).joined(separator: ", ")
-
 		var nowPlayingInfo: [String: AnyObject] = [
-			MPMediaItemPropertyTitle: track.name as AnyObject,
-			MPMediaItemPropertyAlbumTitle: track.album.name as AnyObject,
-			MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
-			MPNowPlayingInfoPropertyElapsedPlaybackTime: (seekedToPosition ?? spotify.playbackPosition ?? 0.0) as AnyObject,
-			// This one is necessary for the pause / playback status in control center in the simulator:
-			MPNowPlayingInfoPropertyPlaybackRate: (spotify.isPlaying ? 1 : 0) as AnyObject
+				MPMediaItemPropertyTitle: track.name as AnyObject,
+				MPMediaItemPropertyAlbumTitle: track.album.name as AnyObject,
+				MPMediaItemPropertyPlaybackDuration: track.duration as AnyObject,
+				MPNowPlayingInfoPropertyElapsedPlaybackTime: (seekedToPosition ?? spotify.playbackPosition ?? 0.0) as AnyObject,
+				// This one is necessary for the pause / playback status in control center in the simulator:
+				MPNowPlayingInfoPropertyPlaybackRate: playbackRate as AnyObject
 		]
 
 		if artistNames.characters.count > 0 {
 			nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames as AnyObject?
 		}
 
-		Log.verbose?.value(nowPlayingInfo)
+		if state.nowPlayingArtworkSet, let artwork = nowPlayingCenter.nowPlayingInfo?[MPMediaItemPropertyArtwork] {
+			nowPlayingInfo[MPMediaItemPropertyArtwork] = artwork as AnyObject
+		}
 		nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
-		setNowPlayingArtwork(track: track)
-	}
 
-	func setNowPlayingArtwork(track: SPTTrack) {
+		guard !state.nowPlayingArtworkSet else {
+			return
+		}
+		state.nowPlayingArtworkSet = true
+
 		var imageInfo: Any?
 		// There are usually three covers available: small, medium, and large.
 		// We will try to use the medium one.
@@ -515,24 +515,27 @@ class AudioPlayerViewController: UIViewController {
 		} else {
 			imageInfo = track.album?.largestCover
 		}
-		guard let info = imageInfo as? SPTImage, let imageURL = info.imageURL else {
-			print ("No track album art info available")
+		guard let info = imageInfo as? SPTImage, let imageURL = info.imageURL
+		else {
+			print("No track album art info available")
 			return
 		}
 		let title = track.name
 		let urlRequest = URLRequest(url: imageURL)
 		ImageDownloader.default.download(urlRequest) { response in
-			guard let image = response.result.value else {
+			guard let image = response.result.value
+			else {
 				Log.warning?.message("unable to get image, response: \(response.response)")
 				return
 			}
-			guard
-				var nowPlayingInfo = self.nowPlayingCenter.nowPlayingInfo,
-				nowPlayingInfo[MPMediaItemPropertyTitle] as? String == title
+			guard let currentInfo = self.nowPlayingCenter.nowPlayingInfo,
+				currentInfo[MPMediaItemPropertyTitle] as? String == title
 			else {
 				Log.debug?.message("Track has changed, not setting outdated artwork image")
 				return
 			}
+			nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = (self.seekedToPosition ?? self.spotify.playbackPosition ?? 0.0) as AnyObject
+			nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = (self.spotify.isPlaying ? 1 : 0) as AnyObject
 			Log.verbose?.message("Setting now playing info artwork")
 			if #available(iOS 10.0, *) {
 				nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: info.size) { size in
@@ -541,7 +544,7 @@ class AudioPlayerViewController: UIViewController {
 			} else {
 				nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(image: image)
 			}
-			nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = (self.spotify.isPlaying ? 1 : 0) as AnyObject
+			Log.error?.value(nowPlayingInfo)
 			self.nowPlayingCenter.nowPlayingInfo = nowPlayingInfo
 		}
 	}
@@ -859,14 +862,16 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		}
 		Log.debug?.value(spotifyEvent)
 		let currentTrackURI = spotify.currentTrackURI
-		self.seekedToPosition = nil
+		seekedToPosition = nil
 		switch spotifyEvent {
 		case .notifyTrackChanged, .notifyPlay, .notifyPause:
 			handleCurrentTrackCurrentState(trackURI: currentTrackURI)
 		case .audioFlush:
+			// Called after seeking in a track.
 			setProgress()
 			if let trackURI = currentTrackURI {
-				self.updateNowPlayingInfo(SpotifyClient.shortSpotifyTrackId(trackURI))
+				state.nowPlayingTrackId = nil
+				updateNowPlayingInfo(SpotifyClient.shortSpotifyTrackId(trackURI), forcePositionUpdate: true)
 			}
 		}
 	}
@@ -883,7 +888,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		Log.debug?.message("handleCurrentTrack: \(state)")
 		queueNextTrack(metadata: spotify.player?.metadata)
 		DispatchQueue.main.async {
-			Log.verbose?.message("updateUI called from handleCurrentTrackCurrentState")
+			Log.verbose?.message("updateUI called from handleCurrentTrackCurrentState: isPlaying: \(isPlaying)")
 			self.setPlayPauseButton(isPlaying: isPlaying)
 		}
 		setProgress(updateTrackDuration: true)
