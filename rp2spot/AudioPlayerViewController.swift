@@ -675,6 +675,14 @@ extension AudioPlayerViewController {
 //		remote.seekForwardCommand.addTarget(self, action: <#T##Selector#>)
 	}
 
+	func setRemotePreviousTrackEnabled(_ enabled: Bool) {
+		MPRemoteCommandCenter.shared().previousTrackCommand.isEnabled = enabled
+	}
+
+	func setRemoteNextTrackEnabled(_ enabled: Bool) {
+		MPRemoteCommandCenter.shared().nextTrackCommand.isEnabled = enabled
+	}
+
 //	func remoteSeek
 
 	func removeMPRemoteCommandCenterEventListeners() {
@@ -878,6 +886,8 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			Log.verbose?.message("updateUI called from handleCurrentTrackCurrentState: isPlaying: \(isPlaying)")
 			self.updateButtons(isPlaying: isPlaying)
 		}
+		setRemotePreviousTrackEnabled(!playlist.currentTrackIsFirstTrack())
+		setRemoteNextTrackEnabled(!playlist.currentTrackIsLastTrack())
 		setProgress(updateTrackDuration: true)
 		let trackId = trackURI == nil ? nil : SpotifyClient.shortSpotifyTrackId(trackURI!)
 		self.updateNowPlayingInfo(trackId)
