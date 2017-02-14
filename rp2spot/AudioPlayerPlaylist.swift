@@ -69,11 +69,18 @@ struct AudioPlayerPlaylist {
 		return PlaylistWindow(startIndex: startIndex, endIndex: endIndex)
 	}
 
-	func currentTrackIsLastTrack() -> Bool {
-		if let index = currentIndex {
-			return index == list.count - 1
+	func currentTrackIsFirstTrack() -> Bool {
+		guard let index = currentIndex else {
+			return false
 		}
-		return false
+		return index == 0
+	}
+
+	func currentTrackIsLastTrack() -> Bool {
+		guard let index = currentIndex else {
+			return false
+		}
+		return index == list.count - 1
 	}
 
 	mutating func setTrackMetadata(_ newTrackMetadata: [SPTTrack]?) {

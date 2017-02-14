@@ -144,7 +144,7 @@ class AudioPlayerViewController: UIViewController {
 
 	override func viewWillAppear(_ animated: Bool) {
 		super.viewWillAppear(animated)
-		setPlayPauseButton(isPlaying: spotify.isPlaying)
+		updateButtons(isPlaying: spotify.isPlaying)
 		setProgress()
 	}
 
@@ -427,9 +427,12 @@ class AudioPlayerViewController: UIViewController {
 		playTracks()
 	}
 
-	func setPlayPauseButton(isPlaying: Bool) {
+	func updateButtons(isPlaying: Bool) {
 		let imageName = isPlaying ? "Pause" : "Play"
 		playPauseButton.setImage(UIImage(named: imageName), for: UIControlState())
+
+		previousTrackButton.isEnabled = !playlist.currentTrackIsFirstTrack()
+		nextTrackButton.isEnabled = !playlist.currentTrackIsLastTrack()
 	}
 
 	func updateNowPlayingInfo(_ trackId: String? = nil, forcePositionUpdate: Bool = false) {
@@ -889,7 +892,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		queueNextTrack(metadata: spotify.player?.metadata)
 		DispatchQueue.main.async {
 			Log.verbose?.message("updateUI called from handleCurrentTrackCurrentState: isPlaying: \(isPlaying)")
-			self.setPlayPauseButton(isPlaying: isPlaying)
+			self.updateButtons(isPlaying: isPlaying)
 		}
 		setProgress(updateTrackDuration: true)
 		let trackId = trackURI == nil ? nil : SpotifyClient.shortSpotifyTrackId(trackURI!)
@@ -1204,7 +1207,7 @@ extension AudioPlayerViewController {
 		Log.verbose?.message("didBecomeActive: spotify.isPlaying: \(spotify.isPlaying), state: \(state)")
 		setProgress(updateTrackDuration: true)
 		progressIndicator.layoutIfNeeded()
-		setPlayPauseButton(isPlaying: spotify.isPlaying)
+		updateButtons(isPlaying: spotify.isPlaying)
 
 		NotificationCenter.default.removeObserver(
 			self,
