@@ -1180,7 +1180,13 @@ extension AudioPlayerViewController {
 	}
 
 	func formatTrackTime(_ interval: TimeInterval) -> String {
-		return String(format: "%d:%02.0f", Int(interval) / 60, round(interval.truncatingRemainder(dividingBy: 60)))
+		var minutes = Int(interval) / 60
+		var seconds = Int(round(interval.truncatingRemainder(dividingBy: 60)))
+		if seconds == 60 {
+			seconds = 0
+			minutes += 1
+		}
+		return String(format: "%d:%02d", minutes, seconds)
 	}
 
 	func willResignActive(_ notification: Notification) {
