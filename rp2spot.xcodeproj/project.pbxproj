@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		59A68B26E307DB90E09D7C8A /* Platform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A682D22ACFF03EE01BD0A5 /* Platform.swift */; };
+		59A68EDB8A31F586CF8004E7 /* SpotifyTrackInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59A68190817C581FD7941EAA /* SpotifyTrackInfo.swift */; };
 		D30809251E4D128B006B7CE5 /* CleanroomLogger.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D30809241E4D128B006B7CE5 /* CleanroomLogger.framework */; };
 		D317D2471CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */; };
 		D31AAFEC1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D31AAFEB1CDF9F91005E1A0A /* UIGestureRecognizer+extension.swift */; };
@@ -82,6 +83,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		59A68190817C581FD7941EAA /* SpotifyTrackInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyTrackInfo.swift; sourceTree = "<group>"; };
 		59A682D22ACFF03EE01BD0A5 /* Platform.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Platform.swift; sourceTree = "<group>"; };
 		D30809241E4D128B006B7CE5 /* CleanroomLogger.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CleanroomLogger.framework; path = Carthage/Build/iOS/CleanroomLogger.framework; sourceTree = "<group>"; };
 		D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyAuthRenewalOperation.swift; sourceTree = "<group>"; };
@@ -347,6 +349,7 @@
 				D39DA47F1C91FD9D00FC12F8 /* PlayedSongDataManager.swift */,
 				D3B922D51C9B299200B60CE3 /* LocalPlaylistSongs.swift */,
 				59A682D22ACFF03EE01BD0A5 /* Platform.swift */,
+				59A68190817C581FD7941EAA /* SpotifyTrackInfo.swift */,
 			);
 			name = Models;
 			sourceTree = "<group>";
@@ -561,6 +564,7 @@
 				D3FC5E671C6F5C0C00443F68 /* Constant.swift in Sources */,
 				D32FAC751CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift in Sources */,
 				59A68B26E307DB90E09D7C8A /* Platform.swift in Sources */,
+				59A68EDB8A31F586CF8004E7 /* SpotifyTrackInfo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

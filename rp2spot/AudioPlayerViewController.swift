@@ -28,6 +28,7 @@ class AudioPlayerViewController: UIViewController {
 		var nextTrackURI: String? = nil
 		var nextTrackQueuingRequested: Bool = false
 		var nowPlayingTrackId: String? = nil
+		var isMovingToPreviousTrack = false
 
 		mutating func clearNextTrackState() {
 			nextTrackQueuingRequested = false
@@ -41,6 +42,7 @@ class AudioPlayerViewController: UIViewController {
 			clearNextTrackState()
 			currentTrackURI = trackURI
 			currentTrackPlayRequested = true
+			isMovingToPreviousTrack = false
 			nowPlayingTrackId = nil
 		}
 		mutating func willQueueNextTrack(trackURI: String?) {
@@ -269,6 +271,7 @@ class AudioPlayerViewController: UIViewController {
 
 	@IBAction func skipToPreviousTrack(_ sender: AnyObject) {
 		self.playlist.decrementIndex()
+		state.isMovingToPreviousTrack = true
 		playPlaylistCurrentTrack()
 	}
 
@@ -300,23 +303,18 @@ class AudioPlayerViewController: UIViewController {
 	func playTracks(_ withPlaylist: AudioPlayerPlaylist? = nil) {
 		if let newPlaylist = withPlaylist {
 			playlist = newPlaylist
-			// Set any already cached metadata for the playlist.
-			let (cachedMetadata, _) = spotify.trackInfo.getCachedTrackInfo(playlist.trackURIs())
-			playlist.setTrackMetadata(cachedMetadata)
 		}
-
 		guard playlist.currentTrack != nil else {
 			Log.info?.message("playTracks: No current track, so can not start playing.")
 			return
 		}
 		status = .active
 		showActivityIndicator()
-
 		spotify.loginOrRenewSession() { willTriggerLogin, sessionValid, error in
 			guard error == nil else {
 				Utility.presentAlert(
-					"Unable to start playing",
-					message: error!.localizedDescription
+						"Unable to start playing",
+						message: error!.localizedDescription
 				)
 				self.status = .disabled
 				self.hideActivityIndicator()
@@ -346,7 +344,6 @@ class AudioPlayerViewController: UIViewController {
 				self.hideActivityIndicator()
 				return
 			}
-
 			self.playPlaylistCurrentTrack()
 		}
 	}
@@ -356,8 +353,51 @@ class AudioPlayerViewController: UIViewController {
 			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(oldTrackURI))
 		}
 		state.clearCurrentTrackState()
-		guard let trackURI = playlist.currentTrackInfo()?.trackURIString else {
+
+		// Fetch metadata if it's not already present.
+		guard playlist.currentTrackInfo() != nil else {
+			let trackIds = self.playlist.trackIdsCenteredOnCurrentIndex(maxCount: Constant.SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH)
+			self.spotify.trackInfo.trackMetadata(trackIds) {error, tracks in
+				guard self.status == .active else {
+					// On a slow network when a session needed to be renewed,
+					// it's possible that the stop button was already pressed.
+					self.hideActivityIndicator()
+					return
+				}
+				guard let trackInfos = tracks else {
+					// TODO: notify the user ...
+					Log.warning?.message("No track metadata available")
+					self.hideActivityIndicator()
+					return
+				}
+				self.playlist.setTrackMetadata(trackInfos)
+				// TODO: use the SpotifyTrackInfo tracks to update the displayed track details
+				self.playPlaylistCurrentTrack()
+			}
+			return
+		}
+
+		// Handle as gracefully as possible the case that a track that is expected to be available is not
+		// actually available.
+		var playlistTrackURI: String? = nil
+		var tryCount = 0
+		while playlistTrackURI == nil && tryCount < 5 {
+			tryCount += 1
+			playlistTrackURI = playlist.currentTrackInfo()?.trackInfo.trackURIString
+			if playlistTrackURI == nil {
+				// TODO: mark track visually as unavailable (add delegate method?) if not available.
+				if state.isMovingToPreviousTrack {
+					playlist.decrementIndex()
+				} else {
+					playlist.incrementIndex()
+				}
+			}
+		}
+		guard let trackURI = playlistTrackURI else {
 			Log.warning?.message("playPlaylistCurrentTrack: currentTrackInfo unexpectedly nil")
+			Utility.presentAlert(
+					"No playable tracks found",
+					message: "You may want to try refreshing the history list by selecting another date / time.")
 			return
 		}
 		self.state.willPlayTrack(trackURI: trackURI)
@@ -437,38 +477,14 @@ class AudioPlayerViewController: UIViewController {
 			Log.debug?.message("no nowPlayingId available")
 			return
 		}
-
-		// If the track information is not yet available, try to fetch it:
-		guard let track = playlist.trackMetadata[nowPlayingId] else {
-			// This happens when no data is available yet (e.g. before the metadata request delivers data).
-			setNowPlayingInfo(nil)
-
-			let trackURIs = playlist.trackURIsCenteredOnTrack(
-				nowPlayingId,
-				maxCount: Constant.SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH)
-
-			spotify.trackInfo.trackMetadata(trackURIs) { error, trackInfoList in
-				self.playlist.setTrackMetadata(trackInfoList)
-				// It's possible that the track has changed since the original request; if so
-				// we should not set the now playing info with the old track info.
-				if self.spotify.playerCurrentTrackId == nowPlayingId {
-					if let trackInfo = self.playlist.trackMetadata[nowPlayingId] {
-						self.setNowPlayingInfo(trackInfo, forcePositionUpdate: forcePositionUpdate)
-					}
-				}
-				if error != nil {
-					// This is non-critical, so do not show the user any error message.
-					Log.warning?.message("updateNowPlayingInfo: error when getting track metadata: \(error!)")
-				}
+		if let trackInfo = self.playlist.trackMetadata[nowPlayingId] {
+			DispatchQueue.main.async {
+				self.setNowPlayingInfo(trackInfo, forcePositionUpdate: forcePositionUpdate)
 			}
-			return
-		}
-		DispatchQueue.main.async {
-			self.setNowPlayingInfo(track, forcePositionUpdate: forcePositionUpdate)
 		}
 	}
 
-	func setNowPlayingInfo(_ trackInfo: SPTTrack?, forcePositionUpdate: Bool = false) {
+	func setNowPlayingInfo(_ trackInfo: SpotifyTrackInfo?, forcePositionUpdate: Bool = false) {
 		guard let track = trackInfo else {
 			nowPlayingCenter.nowPlayingInfo = nil
 			nowPlayingInfo = [String: Any]()
@@ -480,11 +496,10 @@ class AudioPlayerViewController: UIViewController {
 			// TODO: see where nowPlayingTrackId is being set
 			state.nowPlayingTrackId = track.identifier
 			nowPlayingInfo[MPMediaItemPropertyTitle] = track.name as AnyObject
-			nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = track.album.name as AnyObject
+			nowPlayingInfo[MPMediaItemPropertyAlbumTitle] = track.albumTitle as AnyObject
 			nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = track.duration as AnyObject
 			// This one is necessary for the pause / playback status in control center in the simulator:
-			let artists = track.artists as! [SPTPartialArtist]
-			let artistNames = artists.filter({ $0.name != nil}).map({ $0.name! }).joined(separator: ", ")
+			let artistNames = track.artists.joined(separator: ", ")
 			if artistNames.characters.count > 0 {
 				nowPlayingInfo[MPMediaItemPropertyArtist] = artistNames as AnyObject?
 			}
@@ -496,15 +511,10 @@ class AudioPlayerViewController: UIViewController {
 		// Set artwork if this is a new track.
 		// TODO: perhaps this should be done on a background thread, and the actual setting of self.nowPlayingCenter.nowPlayingInfo done on the main thread.
 		if trackChanged {
-			var imageInfo: Any?
 			// There are usually three covers available: small, medium, and large.
 			// We will try to use the medium one.
-			if let covers = track.album?.covers, covers.count > 1 {
-				imageInfo = covers[1]
-			} else {
-				imageInfo = track.album?.largestCover
-			}
-			guard let info = imageInfo as? SPTImage, let imageURL = info.imageURL
+			guard
+				let imageInfo = track.mediumCover ?? track.largeCover, let imageURL = imageInfo.imageURL
 			else {
 				print("No track album art info available")
 				return
@@ -526,7 +536,7 @@ class AudioPlayerViewController: UIViewController {
 				// Update playing state with latest values:
 				Log.verbose?.message("Setting now playing info artwork")
 				if #available(iOS 10.0, *) {
-					self.nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: info.size) { size in
+					self.nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: imageInfo.size) { size in
 						return image
 					}
 				} else {
@@ -714,7 +724,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		guard
 			state.nextTrackQueuingRequested,
 			let playerNextUri = metadata.nextTrack?.uri,
-			let playlistNextUri = playlist.nextTrackInfo()?.trackURIString
+			let playlistNextUri = playlist.nextTrackInfo()?.trackInfo.trackURIString
 		else {
 				if playlist.currentTrackIsLastTrack() {
 					state.clearNextTrackState()
@@ -760,11 +770,15 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			Log.debug?.message("queueNextTrack: playlist has no next track")
 			return
 		}
-		state.willQueueNextTrack(trackURI: nextTrack.trackURIString)
-		Log.debug?.message("queue request being sent")
-		spotify.player?.queueSpotifyURI(nextTrack.trackURIString) { error in
+		guard let trackURIString = nextTrack.trackInfo.trackURIString else {
+			Log.debug?.message("queueNextTrack: next track does not have a valid URI; not able to queue it.")
+			return
+		}
+		state.willQueueNextTrack(trackURI: trackURIString)
+		Log.verbose?.message("queue request being sent")
+		spotify.player?.queueSpotifyURI(trackURIString) { error in
 			if error != nil {
-				Log.warning?.message("Error while trying to queue next track: \(error)")
+				Log.warning?.message("Error while trying to queue next track (\(trackURIString)): \(error)")
 			}
 		}
 	}
@@ -870,7 +884,9 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 			}
 		}
 	}
-	
+
+	// TODO: double check here and elsewhere that comparisons of trackids will work correctly,
+	//       considering that there can be an originally-known trackId and a different regionally-playable trackId.
 	func handleCurrentTrackCurrentState(trackURI: String?) {
 		let isPlaying = spotify.isPlaying
 		if isPlaying {

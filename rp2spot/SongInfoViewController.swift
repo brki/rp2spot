@@ -99,12 +99,11 @@ class SongInfoViewController: UIViewController {
 			}
 			DispatchQueue.main.async {
 				self.songTitleLabel.text = track.name
-				self.albumNameLabel.text = track.album.name
-				self.artistNameLabel.text = track.artists.filter(
-					{($0 as! SPTPartialArtist).name != nil}
-					).map(
-						{($0 as! SPTPartialArtist).name! }).joined(separator: ", "
-				)
+				self.albumNameLabel.text = track.albumTitle
+				self.artistNameLabel.text = track.artists.joined(separator: ", ")
+				if let imageURL = (track.largeCover ?? track.mediumCover)?.imageURL {
+					self.albumArtworkImageView.af_setImage(withURL: imageURL)
+				}
 			}
 		}
 	}

@@ -16,11 +16,11 @@ cancelled.
 */
 class SpotifyTrackMetadataOperation: ConcurrentOperation {
 
-	var trackURIs: [URL]
-	var handler: ((NSError?, [SPTTrack]?) -> Void)?
+	var trackIds: [String]
+	var handler: ((NSError?, [SpotifyTrackInfo]?) -> Void)?
 
-	init(trackURIs: [URL], handler: ((NSError?, [SPTTrack]?) -> Void)? = nil) {
-		self.trackURIs = trackURIs
+	init(trackIds: [String], handler: ((NSError?, [SpotifyTrackInfo]?) -> Void)? = nil) {
+		self.trackIds = trackIds
 		self.handler = handler
 	}
 
@@ -29,16 +29,11 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 	}
 
 	override func main() {
-
-		let infoManager = SpotifyClient.sharedInstance.trackInfo
-		let (found, missing) = infoManager.getCachedTrackInfo(trackURIs)
-		guard missing.count > 0 else {
-			handler?(nil, found)
-			self.state = .Finished
-			return
-		}
-
-		SPTTrack.tracks(withURIs: missing, accessToken: nil, market: nil) { error, trackInfoList in
+		let spotify = SpotifyClient.sharedInstance
+		let trackURIS = spotify.URIsForTrackIds(trackIds)
+		let token = spotify.auth.session?.accessToken
+		let market = token == nil ? UserSetting.sharedInstance.spotifyRegionValue : "from_token"
+		SPTTrack.tracks(withURIs: trackURIS, accessToken: token, market: market) { error, trackInfoList in
 			guard !self.isCancelled else {
 				self.handler?(nil, nil)
 				self.state = .Finished
@@ -52,7 +47,7 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 			}
 
 			guard let infos = trackInfoList as? [SPTTrack] else {
-				print("When trying to fetch metadata for \(missing.count) tracks: trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
+				print("When trying to fetch metadata for tracks: trackInfoList is nil or does not contain expected SPTTrack types: \(trackInfoList)")
 				let err = NSError(domain: "SpotifyTrackMetadataOperation", code: 1,
 				                  userInfo: [NSLocalizedDescriptionKey: "Error processing track metadata"])
 				self.handler?(err, nil)
@@ -60,8 +55,9 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 				return
 			}
 
-			infoManager.addTracksToCache(infos)
-			self.handler?(nil, infos + found)
+			let trackInfos = infos.map {SpotifyTrackInfo(track: $0)}
+
+			self.handler?(nil, trackInfos)
 			self.state = .Finished
 		}
 	}

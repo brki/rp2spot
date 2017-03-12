@@ -25,7 +25,7 @@ struct Constant {
 	// The Spotify web service limits to a maximum of 50 URIs when fetching track information.
 	static let SPOTIFY_MAX_TRACKS_FOR_INFO_FETCH = 50
 
-	static let CACHE_SPOTIFY_TRACK_INFO_MAX_COUNT = 500
+	static let CACHE_SPOTIFY_TRACK_INFO_MAX_COUNT = 2000
 
 	static let RADIO_PARADISE_HISTORY_URL_BASE = Secrets.RADIO_PARADISE_HISTORY_URL_BASE
 	static let RADIO_PARADISE_IMAGE_URL_BASE = "https://www.radioparadise.com/graphics/covers/"

@@ -15,10 +15,10 @@ class SpotifyTrackInfoManager {
 	/**
 	An in-memory cache of the track metadata.
 	
-	The cache key is the short Spotify track id, the value is a SPTTrack.
+	The cache key is the short Spotify track id, the value is a SpotifyTrackInfo
 	*/
-	lazy var cache: NSCache<NSString, SPTTrack> = {
-		let cache = NSCache<NSString, SPTTrack>()
+	lazy var cache: NSCache<NSString, SpotifyTrackInfo> = {
+		let cache = NSCache<NSString, SpotifyTrackInfo>()
 		cache.countLimit = Constant.CACHE_SPOTIFY_TRACK_INFO_MAX_COUNT
 		return cache
 	}()
@@ -36,34 +36,40 @@ class SpotifyTrackInfoManager {
 	A network request is made only if some track-metadata objects
 	are not locally cached.
 	*/
-	func trackMetadata(_ trackURIs: [URL], handler: @escaping (NSError?, [SPTTrack]?) -> Void) {
-		let operation = SpotifyTrackMetadataOperation(trackURIs: trackURIs, handler:handler)
+	func fetchTrackMetadata(_ trackIds: [String], handler: @escaping (NSError?, [SpotifyTrackInfo]?) -> Void) {
+		let operation = SpotifyTrackMetadataOperation(trackIds: trackIds, handler: handler)
 		operationQueue.addOperation(operation)
+	}
+
+	func trackMetadata(_ trackIds: [String], handler: @escaping (NSError?, [SpotifyTrackInfo]?) -> Void) {
+		let (cachedTracks, missingTrackIds) = getCachedTrackInfo(trackIds)
+		guard missingTrackIds.count > 0 else {
+			handler(nil, cachedTracks)
+			return
+		}
+		fetchTrackMetadata(missingTrackIds) { error, trackInfos in
+			guard error == nil, let infos = trackInfos else {
+				handler(error, cachedTracks)
+				return
+			}
+			self.addTracksToCache(infos)
+			handler(nil, cachedTracks + infos)
+		}
 	}
 
 	/**
 	Gets the track metadata for the given track.
 	*/
-	func trackInfo(_ trackId: String, handler: @escaping (NSError?, SPTTrack?) -> Void) {
+	func trackInfo(_ trackId: String, handler: @escaping (NSError?, SpotifyTrackInfo?) -> Void) {
 		if let trackInfo = cache.object(forKey: trackId as NSString) {
 			handler(nil, trackInfo)
 			return
 		}
 
-		guard let URI = SpotifyClient.sharedInstance.trackURI(trackId) else {
-			let error = NSError(domain: "SpotifyTrackInfoManager",
-			                    code: 1,
-			                    userInfo: [NSLocalizedDescriptionKey: "Unable to generate spotify URL from provided trackId (\(trackId))"])
-			handler(error, nil)
-			return
-		}
-
-		trackMetadata([URI]) { error, trackInfos in
+		fetchTrackMetadata([trackId]) { error, trackInfos in
 			handler(error, trackInfos?[0])
 		}
 	}
-
-
 
 	/**
 	Finds locally cached tracks.
@@ -71,21 +77,20 @@ class SpotifyTrackInfoManager {
 	Given the list of URIs, return a tuple containg an array of track metadata for tracks
 	found in the cache, and an array of URLs for the tracks not found in the cache.
 	*/
-	func getCachedTrackInfo(_ trackURIs: [URL]) -> (found: [SPTTrack], missing: [URL]) {
-		var found = [SPTTrack]()
-		var missing = [URL]()
-		for uri in trackURIs {
-			let key = SpotifyClient.shortSpotifyTrackId(uri.absoluteString) as NSString
-			if let trackInfo = cache.object(forKey: key) {
+	func getCachedTrackInfo(_ trackIds: [String]) -> (found: [SpotifyTrackInfo], missing: [String]) {
+		var found = [SpotifyTrackInfo]()
+		var missing = [String]()
+		for trackId in trackIds {
+			if let trackInfo = cache.object(forKey: trackId as NSString) {
 				found.append(trackInfo)
 			} else {
-				missing.append(uri)
+				missing.append(trackId)
 			}
 		}
 		return (found: found, missing: missing)
 	}
 
-	func addTracksToCache(_ tracks: [SPTTrack]) {
+	func addTracksToCache(_ tracks: [SpotifyTrackInfo]) {
 		for track in tracks {
 			cache.setObject(track, forKey: track.identifier as NSString)
 		}
