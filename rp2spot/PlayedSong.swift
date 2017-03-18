@@ -109,5 +109,8 @@ class PlayedSong: NSManagedObject {
 		if !checkBeforeAssignment || self.largeImageURL != data.largeImageURL {
 			self.largeImageURL = data.largeImageURL
 		}
+		if !checkBeforeAssignment || self.uniqueId != data.uniqueId {
+			self.uniqueId = data.uniqueId
+		}
 	}
 }

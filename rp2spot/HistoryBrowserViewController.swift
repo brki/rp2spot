@@ -32,7 +32,7 @@ class HistoryBrowserViewController: UIViewController {
 	var deleteIndexPaths = [IndexPath]()
 	var updateIndexPaths = [IndexPath]()
 
-	var currentlyPlayingTrackId: String?
+	var currentlyPlayingUniqueId: String?
 
 	var shouldScrollPlayingSongCellToVisible = false
 
@@ -124,7 +124,7 @@ class HistoryBrowserViewController: UIViewController {
 			vc.localPlaylist = LocalPlaylistSongs(songs: songData)
 
 			for cell in tableView.visibleCells as! [PlainHistoryTableViewCell] {
-				if let _ = cell.spotifyTrackId, let indexPath = tableView.indexPath(for: cell) {
+				if let _ = cell.uniqueId, let indexPath = tableView.indexPath(for: cell) {
 					let song = historyData.songDataForObjectAtIndexPath(indexPath)
 					vc.firstVisibleDate = song?.playedAt
 					break
@@ -264,24 +264,24 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 		}
 	}
 
-	func trackStartedPlaying(_ spotifyShortTrackId: String) {
-		guard currentlyPlayingTrackId != spotifyShortTrackId else {
+	func trackStartedPlaying(_ uniqueId: String) {
+		guard currentlyPlayingUniqueId != uniqueId else {
 			return
 		}
-		currentlyPlayingTrackId = spotifyShortTrackId
-		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: true)
+		currentlyPlayingUniqueId = uniqueId
+		updatePlayingStatusOfVisibleCell(uniqueId, isPlaying: true)
 	}
 
-	func trackStoppedPlaying(_ spotifyShortTrackId: String) {
-		currentlyPlayingTrackId = nil
-		updatePlayingStatusOfVisibleCell(spotifyShortTrackId, isPlaying: false)
+	func trackStoppedPlaying(_ uniqueId: String) {
+		currentlyPlayingUniqueId = nil
+		updatePlayingStatusOfVisibleCell(uniqueId, isPlaying: false)
 	}
 
 	/**
-	Inspect the currently visisble cells.  If one of them has a matching track id,
+	Inspect the currently visisble cells.  If one of them has a matching uniqueId,
 	trigger a reload, so that it's playing status will be updated.
 	*/
-	func updatePlayingStatusOfVisibleCell(_ trackId: String, isPlaying: Bool) {
+	func updatePlayingStatusOfVisibleCell(_ uniqueId: String, isPlaying: Bool) {
 		DispatchQueue.main.async {
 			let ensurePlayingCellVisible = self.shouldScrollPlayingSongCellToVisible
 			self.shouldScrollPlayingSongCellToVisible = false
@@ -291,7 +291,7 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 			}
 
 			for path in indexPaths {
-				if let cell = self.tableView.cellForRow(at: path) as? PlainHistoryTableViewCell, cell.spotifyTrackId == trackId {
+				if let cell = self.tableView.cellForRow(at: path) as? PlainHistoryTableViewCell, cell.uniqueId == uniqueId {
 					self.tableView.reloadRows(at: [path], with: .fade)
 					return
 				}
@@ -308,7 +308,7 @@ extension HistoryBrowserViewController: AudioStatusObserver {
 			// The height of the player is 120, the playing cell can be at most 3 cells beyond the last visible cell.
 			let maxRowToTry = min(lastVisibleRow + 3, self.historyData.songCount - 1)
 			let searchIndexPaths = Array(lastVisibleRow + 1 ... maxRowToTry).map({ IndexPath(row: $0, section: section) })
-			if let indexPath = self.historyData.indexPathWithMatchingTrackId(trackId, inIndexPaths: searchIndexPaths) {
+			if let indexPath = self.historyData.indexPathWithMatchingUniqueId(uniqueId, inIndexPaths: searchIndexPaths) {
 				self.tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
 			}
 		}
@@ -387,7 +387,7 @@ extension HistoryBrowserViewController: UITableViewDataSource {
 		let cell = tableView.dequeueReusableCell(withIdentifier: "HistoryBrowserCell", for: indexPath) as! PlainHistoryTableViewCell
 
 		if let songData = historyData.songDataForObjectAtIndexPath(indexPath) {
-			cell.configureForSong(songData, currentlyPlayingTrackId: currentlyPlayingTrackId)
+			cell.configureForSong(songData, currentlyPlayingUniqueId: currentlyPlayingUniqueId)
 		}
 
 
@@ -430,8 +430,8 @@ extension HistoryBrowserViewController: UITableViewDelegate {
 			}
 
 			// Ensure that any currently highlighted-as-playing row gets un-highlighted.
-			if let wasPlayingTrackId = self.currentlyPlayingTrackId {
-				self.trackStoppedPlaying(wasPlayingTrackId)
+			if let wasPlayingUniqueId = self.currentlyPlayingUniqueId {
+				self.trackStoppedPlaying(wasPlayingUniqueId)
 			}
 
 			self.historyData.trackListWithSelectedIndex(indexPath) { playlist in

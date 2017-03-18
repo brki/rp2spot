@@ -293,8 +293,11 @@ class AudioPlayerViewController: UIViewController {
 				return
 			}
 			self.updateNowPlayingInfo()
-			if let interested = self.delegate, let wasPlayingTrackId = self.playlist.currentTrack?.spotifyTrackId {
-				interested.trackStoppedPlaying(wasPlayingTrackId)
+			if let interested = self.delegate,
+			   let wasPlayingTrackId = self.playlist.currentTrack?.spotifyTrackId,
+			   let uniqueId = self.playlist.uniqueID(spotifyTrackId: wasPlayingTrackId)
+			{
+				interested.trackStoppedPlaying(uniqueId)
 			}
 			self.status = .disabled
 		}
@@ -344,13 +347,16 @@ class AudioPlayerViewController: UIViewController {
 				self.hideActivityIndicator()
 				return
 			}
+			self.networkReachability = NetworkReachabilityState.state(self.reachability)
 			self.playPlaylistCurrentTrack()
 		}
 	}
 
 	func playPlaylistCurrentTrack(changeNow: Bool = true) {
-		if let oldTrackURI = state.currentTrackURI {
-			delegate?.trackStoppedPlaying(SpotifyClient.shortSpotifyTrackId(oldTrackURI))
+		if let oldTrackURI = state.currentTrackURI,
+	  		let uniqueId = playlist.uniqueID(spotifyTrackId: SpotifyClient.shortSpotifyTrackId(oldTrackURI))
+		{
+			delegate?.trackStoppedPlaying(uniqueId)
 		}
 		state.clearCurrentTrackState()
 
@@ -910,7 +916,11 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		if isPlaying, let playingTrackId = trackId {
 			progressIndicatorPanGestureRecognizer?.cancel()
 			hideActivityIndicator()
-			delegate?.trackStartedPlaying(playingTrackId)
+			guard let uniqueId = playlist.uniqueID(spotifyTrackId: playingTrackId) else {
+				Log.warning?.message("Unable to get uniqueID from playingTrackId")
+				return
+			}
+			delegate?.trackStartedPlaying(uniqueId)
 		}
 	}
 }

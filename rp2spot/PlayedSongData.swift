@@ -25,6 +25,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 	var spotifyTrackId: String?
 	var radioParadiseSongId: NSNumber
 	var artistName: String
+	var uniqueId: String
 
 	init?(response: HTTPURLResponse, representation: Any) {
 
@@ -68,6 +69,7 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.spotifyTrackId = representation["spotify_track_id"] as? String ?? nil
 		self.smallImageURL = representation["spotify_album_img_small_url"] as? String ?? nil
 		self.largeImageURL = representation["spotify_album_img_large_url"] as? String ?? nil
+		self.uniqueId = PlayedSongData.uniqueID(radioParadiseSongId: self.radioParadiseSongId, playedAt: self.playedAt)
 	}
 
 	/**
@@ -86,6 +88,14 @@ final class PlayedSongData: ResponseObjectSerializable, ResponseCollectionSerial
 		self.spotifyTrackId = song.spotifyTrackId
 		self.smallImageURL = song.smallImageURL
 		self.largeImageURL = song.largeImageURL
+		self.uniqueId = PlayedSongData.uniqueID(radioParadiseSongId: self.radioParadiseSongId, playedAt: self.playedAt)
+	}
+
+	/**
+	Get a unique id for the song-in-time, made of the source, source-song-id, and source-song-played-at-time.
+	*/
+	static func uniqueID(radioParadiseSongId: NSNumber, playedAt: Foundation.Date) -> String {
+		return String(format: "radioparadise:%d:%x", radioParadiseSongId, playedAt as CVarArg)
 	}
 
 	func imageURL(_ preferredSize: ImageSize = .small) -> URL? {

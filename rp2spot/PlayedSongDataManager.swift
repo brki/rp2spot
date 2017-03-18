@@ -407,11 +407,11 @@ extension PlayedSongDataManager {
 
 	This method uses the context's performBlockAndWait method.
 	*/
-	func indexPathWithMatchingTrackId(_ trackId: String, inIndexPaths indexPaths: [IndexPath]) -> IndexPath? {
+	func indexPathWithMatchingUniqueId(_ uniqueId: String, inIndexPaths indexPaths: [IndexPath]) -> IndexPath? {
 		var matchingPath: IndexPath?
 		context.performAndWait {
 			for indexPath in indexPaths {
-				if let song = self.objectAtIndexPath(indexPath), song.spotifyTrackId == trackId {
+				if let song = self.objectAtIndexPath(indexPath), song.uniqueId == uniqueId {
 					matchingPath = indexPath
 					break
 				}

@@ -83,6 +83,14 @@ struct AudioPlayerPlaylist {
 		return index == list.count - 1
 	}
 
+	func uniqueID(spotifyTrackId: String) -> String? {
+		guard let playedSongData = playedSongDataForTrackId(trackId: spotifyTrackId) else {
+			return nil
+		}
+		return playedSongData.uniqueId
+	}
+
+
 	mutating func setTrackMetadata(_ newTrackMetadata: [SpotifyTrackInfo]?) {
 		guard let metadata = newTrackMetadata else {
 			return
@@ -92,6 +100,9 @@ struct AudioPlayerPlaylist {
 			// Also allow accessing it by the regional track id.
 			if let regionTrackId = track.regionTrackId, regionTrackId != track.identifier {
 				trackMetadata[regionTrackId] = track
+				if let index = trackToIndexMap[track.identifier] {
+					trackToIndexMap[regionTrackId] = index
+				}
 			}
 		}
 	}

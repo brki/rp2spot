@@ -17,20 +17,22 @@ class PlainHistoryTableViewCell: UITableViewCell {
 		radius: 15.0
 	)
 
-	var spotifyTrackId: String?
+	var uniqueId: String?
 
 	@IBOutlet weak var albumImageView: UIImageView!
 	@IBOutlet weak var date: UILabel!
 	@IBOutlet weak var artist: UILabel!
 	@IBOutlet weak var songTitle: UILabel!
 
-	func configureForSong(_ song: PlayedSongData, currentlyPlayingTrackId: String?) {
+	func configureForSong(_ song: PlayedSongData, currentlyPlayingUniqueId: String?) {
 		let placeHolderImage = PlainHistoryTableViewCell.albumThumbnailPlaceholder
 		let imageURL = song.imageURL(.small)
 		self.songTitle.text = song.title
 		self.artist.text = song.artistName
 		self.date.text = Date.sharedInstance.shortLocalizedString(song.playedAt)
-		self.spotifyTrackId = song.spotifyTrackId
+		if song.spotifyTrackId != nil {
+			self.uniqueId = song.uniqueId
+		}
 
 		if let url = imageURL {
 			self.albumImageView.af_setImage(
@@ -42,14 +44,14 @@ class PlainHistoryTableViewCell: UITableViewCell {
 			self.albumImageView.image = placeHolderImage
 		}
 
-		assignBackgroundColor(currentlyPlayingTrackId: currentlyPlayingTrackId)
+		assignBackgroundColor(currentlyPlayingUniqueId: currentlyPlayingUniqueId)
 	}
 
-	func assignBackgroundColor(currentlyPlayingTrackId: String?) {
-		if spotifyTrackId == nil {
+	func assignBackgroundColor(currentlyPlayingUniqueId: String?) {
+		if uniqueId == nil {
 			self.backgroundColor = Constant.Color.lightOrange.color()
 			self.tintColor = Constant.Color.spotifyGreen.color()
-		} else if let current = currentlyPlayingTrackId, current == spotifyTrackId {
+		} else if let current = currentlyPlayingUniqueId, current == uniqueId {
 			self.backgroundColor = Constant.Color.spotifyGreen.color()
 			self.tintColor = UIColor.white
 		} else {

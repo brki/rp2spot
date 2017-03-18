@@ -21,6 +21,7 @@ extension PlayedSong {
     @NSManaged var largeImageURL: String?
     @NSManaged var smallImageURL: String?
     @NSManaged var spotifyTrackId: String?
+    @NSManaged var uniqueId: String
     @NSManaged var radioParadiseSongId: NSNumber
     @NSManaged var artistName: String
 

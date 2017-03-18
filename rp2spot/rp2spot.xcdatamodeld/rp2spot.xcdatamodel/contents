@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="9525" systemVersion="15D21" minimumToolsVersion="Automatic">
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="11759" systemVersion="16D32" minimumToolsVersion="Xcode 7.3" sourceLanguage="Objective-C" userDefinedModelVersionIdentifier="">
     <entity name="PlayedSong" representedClassName=".PlayedSong" syncable="YES">
         <attribute name="albumTitle" attributeType="String" syncable="YES"/>
         <attribute name="artistName" attributeType="String" syncable="YES"/>
         <attribute name="asin" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="largeImageURL" optional="YES" attributeType="String" syncable="YES"/>
-        <attribute name="playedAt" attributeType="Date" syncable="YES"/>
-        <attribute name="radioParadiseSongId" attributeType="Integer 64" defaultValueString="0" syncable="YES"/>
+        <attribute name="playedAt" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="radioParadiseSongId" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="smallImageURL" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="spotifyTrackId" optional="YES" attributeType="String" syncable="YES"/>
         <attribute name="title" attributeType="String" syncable="YES"/>
+        <attribute name="uniqueId" optional="YES" attributeType="String" syncable="YES"/>
         <uniquenessConstraints>
             <uniquenessConstraint>
                 <constraint value="playedAt"/>
@@ -17,6 +18,6 @@
         </uniquenessConstraints>
     </entity>
     <elements>
-        <element name="PlayedSong" positionX="-63" positionY="-18" width="128" height="180"/>
+        <element name="PlayedSong" positionX="-63" positionY="-18" width="128" height="195"/>
     </elements>
 </model>
