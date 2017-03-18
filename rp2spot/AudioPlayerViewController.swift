@@ -11,6 +11,7 @@ import AVFoundation
 import AlamofireImage
 import MediaPlayer
 import CleanroomLogger
+import Reachability
 
 class AudioPlayerViewController: UIViewController {
 
@@ -20,7 +21,26 @@ class AudioPlayerViewController: UIViewController {
 		disabled	// Player is non-active, and presumably invisible
 	}
 
+	enum NetworkReachabilityState {
+		case none, wifi, cellular
+
+		static func state(_ reachability: Reachability) -> NetworkReachabilityState {
+			if reachability.isReachable {
+				if reachability.isReachableViaWiFi {
+					return self.wifi
+				} else {
+					return self.cellular
+				}
+			}
+			return self.none
+		}
+	}
+
 	var nowPlayingInfo = [String: Any]()
+
+	let reachability = Reachability()!
+
+	var networkReachability: NetworkReachabilityState?
 
 	struct State {
 		var currentTrackURI: String? = nil
@@ -139,6 +159,14 @@ class AudioPlayerViewController: UIViewController {
 		// Listen for remote control events.
 		registerForRemoteEvents()
 
+		// Listen for network reachability changes
+		NotificationCenter.default.addObserver(self, selector: #selector(self.reachabilityChanged),name: ReachabilityChangedNotification,object: reachability)
+		do{
+			try reachability.startNotifier()
+		}catch{
+			print("could not start reachability notifier")
+		}
+
 		initprogressIndicator()
 	}
 
@@ -189,6 +217,7 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	deinit {
+		reachability.stopNotifier()
 		NotificationCenter.default.removeObserver(self)
 		removeMPRemoteCommandCenterEventListeners()
 	}
@@ -709,6 +738,29 @@ extension AudioPlayerViewController {
 		remote.pauseCommand.removeTarget(self)
 		remote.playCommand.removeTarget(self)
 		remote.stopCommand.removeTarget(self)
+	}
+
+	func reachabilityChanged(notification: NSNotification) {
+
+		let reachability = notification.object as! Reachability
+
+		if reachability.isReachable {
+			if reachability.isReachableViaWiFi {
+				// TODO: adjust to user-selected bitrate, if necessary.
+				networkReachability = .wifi
+				print("Reachable via WiFi")
+			} else {
+				// TODO: adjust to user-selected bitrate, if necessary.
+				networkReachability = .cellular
+				// TODO: perhaps if the previous networReachability state was .wifi, something can be done
+				//       here to avoid the "invalid context" error that sometimes happens after switching
+				//       from wifi to cellular.
+				print("Reachable via Cellular")
+			}
+		} else {
+			networkReachability = .none
+			print("Network not reachable")
+		}
 	}
 }
 

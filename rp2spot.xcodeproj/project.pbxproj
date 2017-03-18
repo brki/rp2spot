@@ -26,6 +26,7 @@
 		D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */ = {isa = PBXBuildFile; fileRef = D379645E1C70C7B9001FC20E /* PlayedSongData.swift */; };
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
+		D37E06A41E7D39CD00FE818E /* Reachability.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D37E06A31E7D39CD00FE818E /* Reachability.framework */; };
 		D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */; };
 		D38839FD1C9749AA001C4FE3 /* PlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */; };
 		D38839FF1C974B03001C4FE3 /* PlaylistTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */; };
@@ -102,6 +103,7 @@
 		D379645E1C70C7B9001FC20E /* PlayedSongData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlayedSongData.swift; sourceTree = "<group>"; };
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
+		D37E06A31E7D39CD00FE818E /* Reachability.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Reachability.framework; path = Carthage/Build/iOS/Reachability.framework; sourceTree = "<group>"; };
 		D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
 		D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistViewController.swift; sourceTree = "<group>"; };
 		D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistTableViewCell.swift; sourceTree = "<group>"; };
@@ -160,6 +162,7 @@
 				D3FC5E5C1C6F34B100443F68 /* AVFoundation.framework in Frameworks */,
 				D3BF38F61E38DD61001DF076 /* SpotifyMetadata.framework in Frameworks */,
 				D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */,
+				D37E06A41E7D39CD00FE818E /* Reachability.framework in Frameworks */,
 				D3FC5E591C6F2EB600443F68 /* Alamofire.framework in Frameworks */,
 				D3BF38F41E38DD61001DF076 /* SpotifyAudioPlayback.framework in Frameworks */,
 			);
@@ -309,6 +312,7 @@
 		D3FC5E551C6F2DE400443F68 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				D37E06A31E7D39CD00FE818E /* Reachability.framework */,
 				D30809241E4D128B006B7CE5 /* CleanroomLogger.framework */,
 				D3BF38F11E38DD61001DF076 /* SpotifyAudioPlayback.framework */,
 				D3BF38F21E38DD61001DF076 /* SpotifyAuthentication.framework */,
@@ -509,6 +513,7 @@
 				"$(SRCROOT)/Carthage/Build/iOS/Alamofire.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/AlamofireImage.framework",
 				"$(SRCROOT)/Carthage/Build/iOS/CleanroomLogger.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/Reachability.framework",
 			);
 			outputPaths = (
 			);
