@@ -31,7 +31,11 @@ class PlainHistoryTableViewCell: UITableViewCell {
 		self.artist.text = song.artistName
 		self.date.text = Date.sharedInstance.shortLocalizedString(song.playedAt)
 		if song.spotifyTrackId != nil {
+			// Only set the uniqueId if there's a playable track.  The uniqueId (or lack thereof) is used
+			// when determining the cell's background color.
 			self.uniqueId = song.uniqueId
+		} else {
+			self.uniqueId = nil
 		}
 
 		if let url = imageURL {
