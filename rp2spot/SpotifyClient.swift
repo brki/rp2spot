@@ -7,6 +7,9 @@
 //
 
 import UIKit
+import Reachability
+import CleanroomLogger
+
 
 class SpotifyClient {
 	static let SESSION_UPDATE_NOTIFICATION = "sessionUpdated"
@@ -17,6 +20,8 @@ class SpotifyClient {
 	let auth = SPTAuth.defaultInstance()!
 
 	let trackInfo = SpotifyTrackInfoManager.sharedInstance
+
+	let reachability = Reachability()!
 
 	var refreshSessionTimeoutBuffer = TimeInterval(60.0 * 10)  // 10 minutes
 
@@ -35,7 +40,7 @@ class SpotifyClient {
 		do {
 			try player.start(withClientId: self.auth.clientID)
 		} catch {
-			print("SpotifyClient.player: unable to get start spotify player")
+			print("SpotifyClient.player: unable to start spotify player")
 			return nil
 		}
 		player.setTargetBitrate(UserSetting.sharedInstance.spotifyStreamingQuality, callback: nil)
@@ -151,6 +156,17 @@ class SpotifyClient {
 
 		let expirationDateMinusBuffer = Foundation.Date(timeInterval: -refreshSessionTimeoutBuffer, since: session.expirationDate)
 		return (expirationDateMinusBuffer as NSDate).earlierDate(Foundation.Date()) == expirationDateMinusBuffer
+	}
+
+	func updateDesiredBitRate(handler: ((Error?) -> Void)? = nil) {
+		let connectionType: UserSetting.NetworkType = reachability.isReachableViaWiFi ? .wifi : .cellular
+		let bitRate = UserSetting.sharedInstance.spotifyStreamingQuality(forType: connectionType)
+		player?.setTargetBitrate(bitRate) { error in
+			if error == nil {
+				Log.debug?.message("Player bit rate set to: \(bitRate)")
+			}
+			handler?(error)
+		}
 	}
 
 	func trackURI(_ trackId: String) -> URL? {

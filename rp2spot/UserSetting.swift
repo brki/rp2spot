@@ -7,29 +7,80 @@
 //
 
 import Foundation
+import Reachability
 
 class UserSetting {
 	static let sharedInstance = UserSetting()
 
 	lazy var settings = UserDefaults.standard
 
-	var spotifyStreamingQuality: SPTBitrate {
+	lazy var reachability = Reachability()!
+
+	enum NetworkType {
+		case wifi, cellular
+	}
+
+	var spotifyStreamingWifiQuality: SPTBitrate {
 		get {
 			// Use objectForKey instead of integerForKey since integerForKey returns 0 when nothing set.
-			guard let quality = settings.object(forKey: "spotifyStreamingQuality") as? UInt else {
+			guard let quality = settings.object(forKey: "spotifyStreamingWifiQuality") as? UInt else {
 				let bitRate = SPTBitrate.normal
-				settings.set(Int(bitRate.rawValue), forKey: "spotifyStreamingQuality")
+				settings.set(Int(bitRate.rawValue), forKey: "spotifyStreamingWifiQuality")
 				return bitRate
 			}
 			guard let bitRate = SPTBitrate.init(rawValue: quality) else {
-				print("Unable to initialize SPTBitrate enum from user default setting")
+				print("Unable to initialize SPTBitrate enum from user default spotifyStreamingWifiQuality setting")
 				return SPTBitrate.normal
 			}
 			return bitRate
 		}
 		set {
-			settings.set(Int(newValue.rawValue), forKey: "spotifyStreamingQuality")
+			settings.set(Int(newValue.rawValue), forKey: "spotifyStreamingWifiQuality")
 		}
+	}
+
+	var spotifyStreamingCellularQuality: SPTBitrate {
+		get {
+			// Use objectForKey instead of integerForKey since integerForKey returns 0 when nothing set.
+			guard let quality = settings.object(forKey: "spotifyStreamingCellularQuality") as? UInt else {
+				let bitRate = SPTBitrate.normal
+				settings.set(Int(bitRate.rawValue), forKey: "spotifyStreamingCellularQuality")
+				return bitRate
+			}
+			guard let bitRate = SPTBitrate.init(rawValue: quality) else {
+				print("Unable to initialize SPTBitrate enum from user default spotifyStreamingCellularQuality setting")
+				return SPTBitrate.normal
+			}
+			return bitRate
+		}
+		set {
+			settings.set(Int(newValue.rawValue), forKey: "spotifyStreamingCellularQuality")
+		}
+	}
+
+	func setSpotifyStreamingQuality(_ quality: SPTBitrate, forType type: NetworkType) {
+		switch type {
+		case .wifi:
+			spotifyStreamingWifiQuality = quality
+		default:
+			spotifyStreamingCellularQuality = quality
+		}
+	}
+
+	func spotifyStreamingQuality(forType type: NetworkType) -> SPTBitrate {
+		switch type {
+		case .wifi:
+			return spotifyStreamingWifiQuality
+		default:
+			return spotifyStreamingCellularQuality
+		}
+	}
+
+	var spotifyStreamingQuality: SPTBitrate {
+		if reachability.isReachableViaWiFi {
+			return spotifyStreamingQuality(forType: .wifi)
+		}
+		return spotifyStreamingQuality(forType: .cellular)
 	}
 
 	// How many songs should be fetched in a history request:

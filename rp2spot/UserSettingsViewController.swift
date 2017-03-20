@@ -8,29 +8,22 @@
 
 class UserSettingsViewController: UITableViewController {
 
-	@IBOutlet weak var SpotifyStreamingQualityLowCell: UITableViewCell!
-	@IBOutlet weak var SpotifyStreamingQualityNormalCell: UITableViewCell!
-	@IBOutlet weak var SpotifyStreamingQualityHighCell: UITableViewCell!
 	@IBOutlet weak var maximumSongHistoryLabel: UILabel!
 	@IBOutlet weak var maximumSongHistoryStepper: UIStepper!
 	@IBOutlet weak var fetchSizeLabel: UILabel!
 	@IBOutlet weak var fetchSizeStepper: UIStepper!
 
-	let SECTION_SPOTIFY_STREAMING_QUALITY = 0
-
-	lazy var streamingQualityMap: [(SPTBitrate, UITableViewCell)] = [
-		(SPTBitrate.low, self.SpotifyStreamingQualityLowCell),			// row 0
-		(SPTBitrate.normal, self.SpotifyStreamingQualityNormalCell),	// row 1
-		(SPTBitrate.high, self.SpotifyStreamingQualityHighCell)			// row 2
-	]
-
 	let settings = UserSetting.sharedInstance
+
+	let streamingQualitySection = 0
+	let wifiRow = 0
+	let cellularRow = 1
+
+	// TODO: show (low / medium / high) text in wifi cells
 
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		tableView.backgroundColor = Constant.Color.lightGrey.color()
-
-		configureSpotifyStreamingQualityCells()
 
 		configureSongHistoryListControls()
 	}
@@ -49,39 +42,6 @@ class UserSettingsViewController: UITableViewController {
 		dismiss(animated: true, completion: nil)
 	}
 
-	override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-		switch indexPath.section {
-		case SECTION_SPOTIFY_STREAMING_QUALITY:
-			let (quality, _) = streamingQualityMap[indexPath.row]
-			let previousQuality = settings.spotifyStreamingQuality
-			if quality != previousQuality {
-				settings.spotifyStreamingQuality = quality
-				configureSpotifyStreamingQualityCells()
-				if let player = SpotifyClient.sharedInstance.player {
-					player.setTargetBitrate(quality) { error in
-						if error != nil {
-							self.settings.spotifyStreamingQuality = previousQuality
-							self.configureSpotifyStreamingQualityCells()
-						}
-					}
-				}
-			}
-		default:
-			break
-		}
-	}
-
-	func configureSpotifyStreamingQualityCells() {
-		let settingQuality = settings.spotifyStreamingQuality
-		for (quality, cell) in streamingQualityMap {
-			if quality == settingQuality {
-				cell.accessoryType = .checkmark
-			} else {
-				cell.accessoryType = .none
-			}
-		}
-	}
-
 	func configureSongHistoryListControls() {
 		let maxSongHistoryCount = settings.maxLocalSongHistoryCount
 		maximumSongHistoryStepper.value = Double(maxSongHistoryCount)
@@ -90,5 +50,13 @@ class UserSettingsViewController: UITableViewController {
 		let fetchSize = settings.historyFetchSongCount
 		fetchSizeStepper.value = Double(fetchSize)
 		fetchSizeLabel.text = String(fetchSize)
+	}
+
+	override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+		if let indexPath = self.tableView.indexPathForSelectedRow, indexPath.section == 0,
+			let destinationVC = segue.destination as? SpotifyStreamingQualityViewController {
+			let networkType = indexPath.row == wifiRow ? UserSetting.NetworkType.wifi : UserSetting.NetworkType.cellular
+			destinationVC.networkType = networkType
+		}
 	}
 }

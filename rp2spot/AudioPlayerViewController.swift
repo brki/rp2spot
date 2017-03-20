@@ -13,6 +13,7 @@ import MediaPlayer
 import CleanroomLogger
 import Reachability
 
+
 class AudioPlayerViewController: UIViewController {
 
 	enum PlayerStatus {
@@ -21,26 +22,7 @@ class AudioPlayerViewController: UIViewController {
 		disabled	// Player is non-active, and presumably invisible
 	}
 
-	enum NetworkReachabilityState {
-		case none, wifi, cellular
-
-		static func state(_ reachability: Reachability) -> NetworkReachabilityState {
-			if reachability.isReachable {
-				if reachability.isReachableViaWiFi {
-					return self.wifi
-				} else {
-					return self.cellular
-				}
-			}
-			return self.none
-		}
-	}
-
 	var nowPlayingInfo = [String: Any]()
-
-	let reachability = Reachability()!
-
-	var networkReachability: NetworkReachabilityState?
 
 	struct State {
 		var currentTrackURI: String? = nil
@@ -80,6 +62,23 @@ class AudioPlayerViewController: UIViewController {
 			currentTrackPlayRequested = false
 		}
 	}
+
+	let reachability = Reachability()!
+	enum NetworkReachabilityState {
+		case none, wifi, cellular
+
+		static func state(_ reachability: Reachability) -> NetworkReachabilityState {
+			if reachability.isReachable {
+				if reachability.isReachableViaWiFi {
+					return self.wifi
+				} else {
+					return self.cellular
+				}
+			}
+			return self.none
+		}
+	}
+	var lastKnownNetworkReachability: NetworkReachabilityState?
 
 	@IBOutlet weak var playPauseButton: UIButton!
 	@IBOutlet weak var nextTrackButton: UIButton!
@@ -126,6 +125,17 @@ class AudioPlayerViewController: UIViewController {
 	var progressIndicatorPanGestureInvalid = false
 	var elapsedTimeTimer: Timer?
 
+//	var restartPlayingOnPauseNotificiation = false
+
+	// playerNeedsRestart is set to true when a player restart is necessary to avoid
+	// a playback error (for example with the spotify ios-sdk beta 25, when dropping from
+	// wifi to cellular during playback).
+	var playerNeedsRestart = false
+
+	// onPauseAction will be called instead of the normal handling when a notifyPause
+	// is received.
+	var onPauseAction: (() -> Void)? = nil
+
 	var delegate: AudioStatusObserver?
 
 	override func viewDidLoad() {
@@ -163,8 +173,8 @@ class AudioPlayerViewController: UIViewController {
 		NotificationCenter.default.addObserver(self, selector: #selector(self.reachabilityChanged),name: ReachabilityChangedNotification,object: reachability)
 		do{
 			try reachability.startNotifier()
-		}catch{
-			print("could not start reachability notifier")
+		} catch {
+			Log.error?.message("could not start reachability notifier")
 		}
 
 		initprogressIndicator()
@@ -265,7 +275,7 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	func pausePlaying(_ sender: AnyObject? = nil) {
+	func pausePlaying(_ sender: AnyObject? = nil, handler: ((Error?) -> Void)? = nil) {
 		setPlaylistTrackPosition()
 		guard let player = self.spotify.player else {
 			Log.warning?.message("pausePlaying: no player available")
@@ -317,14 +327,14 @@ class AudioPlayerViewController: UIViewController {
 		pausedDueToAudioInterruption = false
 		setPlaylistTrackPosition()
 		player.setIsPlaying(false) { error in
-			guard error == nil else {
+			guard error == nil || (error as! NSError).code == SPTErrorCodeNotActiveDevice else {
 				Log.error?.message("stopPlaying: error while trying to stop player: \(error!)")
 				return
 			}
 			self.updateNowPlayingInfo()
 			if let interested = self.delegate,
-			   let wasPlayingTrackId = self.playlist.currentTrack?.spotifyTrackId,
-			   let uniqueId = self.playlist.uniqueID(spotifyTrackId: wasPlayingTrackId)
+				let wasPlayingTrackId = self.playlist.currentTrack?.spotifyTrackId,
+				let uniqueId = self.playlist.uniqueID(spotifyTrackId: wasPlayingTrackId)
 			{
 				interested.trackStoppedPlaying(uniqueId)
 			}
@@ -376,7 +386,7 @@ class AudioPlayerViewController: UIViewController {
 				self.hideActivityIndicator()
 				return
 			}
-			self.networkReachability = NetworkReachabilityState.state(self.reachability)
+			self.lastKnownNetworkReachability = NetworkReachabilityState.state(self.reachability)
 			self.playPlaylistCurrentTrack()
 		}
 	}
@@ -708,7 +718,7 @@ extension AudioPlayerViewController {
 		remote.togglePlayPauseCommand.addTarget(self, action: #selector(self.togglePlayback(_:)))
 
 		remote.pauseCommand.isEnabled = true
-		remote.pauseCommand.addTarget(self, action: #selector(self.pausePlaying(_:)))
+		remote.pauseCommand.addTarget(self, action: #selector(self.pausePlaying(_:handler:)))
 
 		remote.playCommand.isEnabled = true
 		remote.playCommand.addTarget(self, action: #selector(self.startPlaying(_:)))
@@ -741,26 +751,24 @@ extension AudioPlayerViewController {
 	}
 
 	func reachabilityChanged(notification: NSNotification) {
-
 		let reachability = notification.object as! Reachability
-
-		if reachability.isReachable {
-			if reachability.isReachableViaWiFi {
-				// TODO: adjust to user-selected bitrate, if necessary.
-				networkReachability = .wifi
-				print("Reachable via WiFi")
-			} else {
-				// TODO: adjust to user-selected bitrate, if necessary.
-				networkReachability = .cellular
-				// TODO: perhaps if the previous networReachability state was .wifi, something can be done
-				//       here to avoid the "invalid context" error that sometimes happens after switching
-				//       from wifi to cellular.
-				print("Reachable via Cellular")
+		let currentReachability = NetworkReachabilityState.state(reachability)
+		if currentReachability != .none {
+			spotify.updateDesiredBitRate() { error in
+				if error != nil {
+					Log.warning?.message("Error when trying to set target bit rate: \(error!)")
+				}
 			}
-		} else {
-			networkReachability = .none
-			print("Network not reachable")
 		}
+		if currentReachability == .cellular && lastKnownNetworkReachability == .wifi {
+			// In order to avoid an invalid context (error code 1006) error which happens quite frequently after
+			// changing from wifi to cellular while playing, mark that the player should be restarted before
+			// changing the track.
+			// TODO: test with in-track seeking after changing from wifi to cellular; that may also need to be handled.
+			// TODO: test if this is necessary if the player is currently stopped or paused.
+			playerNeedsRestart = true
+		}
+		lastKnownNetworkReachability = currentReachability
 	}
 }
 

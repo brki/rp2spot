@@ -27,6 +27,8 @@
 		D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37964601C70C862001FC20E /* Alamofire-extensions.swift */; };
 		D37A85741C7CF5E700F7B805 /* UIColor+extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */; };
 		D37E06A41E7D39CD00FE818E /* Reachability.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D37E06A31E7D39CD00FE818E /* Reachability.framework */; };
+		D37E06A61E7D89BC00FE818E /* SpotifyStreamingQualityViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E06A51E7D89BC00FE818E /* SpotifyStreamingQualityViewController.swift */; };
+		D37E06A81E7E872E00FE818E /* Spotify+extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = D37E06A71E7E872E00FE818E /* Spotify+extensions.swift */; };
 		D38233D41C7BABFC00DCA8AE /* AlamofireImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */; };
 		D38839FD1C9749AA001C4FE3 /* PlaylistViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */; };
 		D38839FF1C974B03001C4FE3 /* PlaylistTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */; };
@@ -104,6 +106,8 @@
 		D37964601C70C862001FC20E /* Alamofire-extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Alamofire-extensions.swift"; sourceTree = "<group>"; };
 		D37A85731C7CF5E700F7B805 /* UIColor+extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIColor+extension.swift"; sourceTree = "<group>"; };
 		D37E06A31E7D39CD00FE818E /* Reachability.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Reachability.framework; path = Carthage/Build/iOS/Reachability.framework; sourceTree = "<group>"; };
+		D37E06A51E7D89BC00FE818E /* SpotifyStreamingQualityViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SpotifyStreamingQualityViewController.swift; sourceTree = "<group>"; };
+		D37E06A71E7E872E00FE818E /* Spotify+extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Spotify+extensions.swift"; sourceTree = "<group>"; };
 		D38233D31C7BABFC00DCA8AE /* AlamofireImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AlamofireImage.framework; path = Carthage/Build/iOS/AlamofireImage.framework; sourceTree = "<group>"; };
 		D38839FC1C9749AA001C4FE3 /* PlaylistViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistViewController.swift; sourceTree = "<group>"; };
 		D38839FE1C974B03001C4FE3 /* PlaylistTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PlaylistTableViewCell.swift; sourceTree = "<group>"; };
@@ -192,6 +196,7 @@
 				D317D2461CA1B6ED0005F535 /* SpotifyAuthRenewalOperation.swift */,
 				D3EF74F11CA40D75001A0662 /* SpotifyTrackInfoManager.swift */,
 				D32FAC741CA42C960030AC71 /* SpotifyTrackMetadataOperation.swift */,
+				D37E06A71E7E872E00FE818E /* Spotify+extensions.swift */,
 			);
 			name = Spotify;
 			sourceTree = "<group>";
@@ -336,6 +341,7 @@
 				D3C98A051C86DCC700C2C9E4 /* HistoryDateSelectorViewController.swift */,
 				D3D6FF441C8DD65100B7E8A6 /* AudioPlayerViewController.swift */,
 				D32EA3721CAAB2440024B598 /* UserSettingsViewController.swift */,
+				D37E06A51E7D89BC00FE818E /* SpotifyStreamingQualityViewController.swift */,
 			);
 			name = "View Controllers";
 			sourceTree = "<group>";
@@ -538,6 +544,7 @@
 				D37964611C70C862001FC20E /* Alamofire-extensions.swift in Sources */,
 				D378C5101C9D8A87006A9BF0 /* String+extension.swift in Sources */,
 				D3C0CA851C6248E10055B650 /* rp2spot.xcdatamodeld in Sources */,
+				D37E06A61E7D89BC00FE818E /* SpotifyStreamingQualityViewController.swift in Sources */,
 				D39DA47E1C91F29500FC12F8 /* AudioPlayerPlaylist.swift in Sources */,
 				D3FC5E651C6F5AA100443F68 /* SpotifyClient.swift in Sources */,
 				D379645F1C70C7B9001FC20E /* PlayedSongData.swift in Sources */,
@@ -555,6 +562,7 @@
 				D3FC5E631C6F55F000443F68 /* CoreDataStack.swift in Sources */,
 				D3FC5E741C70AFF100443F68 /* Date.swift in Sources */,
 				D3C98A091C86E5B800C2C9E4 /* DateSelectionAcceptingProtocol.swift in Sources */,
+				D37E06A81E7E872E00FE818E /* Spotify+extensions.swift in Sources */,
 				D3C96A581C8E291A00CABFE1 /* HistoryBrowserViewController.swift in Sources */,
 				D3B922D61C9B299200B60CE3 /* LocalPlaylistSongs.swift in Sources */,
 				D361C7281C90C1B9000B803E /* SongInfoViewController.swift in Sources */,
