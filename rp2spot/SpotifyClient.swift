@@ -85,6 +85,23 @@ class SpotifyClient {
 		return fullId.replacingOccurrences(of: "spotify:track:", with: "")
 	}
 
+	func restartPlayer(handler: ((Error?) -> Void)? = nil) {
+		guard let spotifyPlayer = player else {
+			Log.warning?.message("Unable to get player in restartPlayer")
+			return
+		}
+		do {
+			try spotifyPlayer.stop()
+			Log.error?.trace()
+			try spotifyPlayer.start(withClientId: self.auth.clientID)
+			Log.error?.trace()
+			handler?(nil)
+		} catch {
+			print("SpotifyClient.player: error when restarting player: \(error)")
+			handler?(error)
+		}
+	}
+
 	/**
 	Post a session-updated notification to the default notification center.
 

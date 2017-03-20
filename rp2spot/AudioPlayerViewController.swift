@@ -31,6 +31,8 @@ class AudioPlayerViewController: UIViewController {
 		var nextTrackQueuingRequested: Bool = false
 		var nowPlayingTrackId: String? = nil
 		var isMovingToPreviousTrack = false
+		var shouldForceNewPlayRequest = false
+		var forcedNewPlayRequestTrackPosition: TimeInterval?
 
 		mutating func clearNextTrackState() {
 			nextTrackQueuingRequested = false
@@ -114,7 +116,7 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	// When the player is paused, and a pan gesture is used to change the time,
+	// When the player is paused, and a pan gesture is used to change the position,
 	// although the player is asked to adjust it's position, it does not adjust
 	// it's position until it starts playing again.
 	// For display purposes, it's good to know what the selected position is.
@@ -124,8 +126,6 @@ class AudioPlayerViewController: UIViewController {
 	var progressIndicatorAnimationRequested = false
 	var progressIndicatorPanGestureInvalid = false
 	var elapsedTimeTimer: Timer?
-
-//	var restartPlayingOnPauseNotificiation = false
 
 	// playerNeedsRestart is set to true when a player restart is necessary to avoid
 	// a playback error (for example with the spotify ios-sdk beta 25, when dropping from
@@ -392,6 +392,13 @@ class AudioPlayerViewController: UIViewController {
 	}
 
 	func playPlaylistCurrentTrack(changeNow: Bool = true) {
+		guard !playerNeedsRestart else {
+			restartPlayerBeforeAction {
+				self.state.shouldForceNewPlayRequest = true
+				self.playPlaylistCurrentTrack()
+			}
+			return
+		}
 		if let oldTrackURI = state.currentTrackURI,
 	  		let uniqueId = playlist.uniqueID(spotifyTrackId: SpotifyClient.shortSpotifyTrackId(oldTrackURI))
 		{
@@ -445,22 +452,16 @@ class AudioPlayerViewController: UIViewController {
 					message: "You may want to try refreshing the history list by selecting another date / time.")
 			return
 		}
-		self.state.willPlayTrack(trackURI: trackURI)
-		if spotify.isPlaying && spotify.currentTrackURI == trackURI {
+		state.willPlayTrack(trackURI: trackURI)
+		if state.shouldForceNewPlayRequest || spotify.nextTrackURI != trackURI {
+			triggerPlaybackOfTrack(withURI: trackURI)
+		} else if spotify.isPlaying && spotify.currentTrackURI == trackURI {
+			spotify.player?.setIsPlaying(true) { error in
+				Log.error?.message("Error: \(error)")
+			}
+			Log.error?.trace()
 			// Do nothing
 			Log.verbose?.message("Spotify current track URI is target URI, don't do anything")
-		} else if spotify.nextTrackURI != trackURI {
-			Log.debug?.message("Player being told to play a new track")
-			self.spotify.playTrack(trackURI, trackStartTime: self.playlist.trackPosition) { error in
-				Log.debug?.message("spotify.playTrack called")
-				guard error == nil else {
-					Utility.presentAlert(
-							"Unable to start playing",
-							message: error!.localizedDescription
-					)
-					return
-				}
-			}
 		} else if changeNow || !spotify.isPlaying {
 			Log.debug?.message("Player-skipping to next track")
 			self.spotify.player?.skipNext() { error in
@@ -479,6 +480,45 @@ class AudioPlayerViewController: UIViewController {
 			Log.verbose?.message("Falling through to next track")
 		}
 	}
+
+	func triggerPlaybackOfTrack(withURI URI: String) {
+		let startPlaybackPosition = state.forcedNewPlayRequestTrackPosition ?? 0.0
+		self.spotify.playTrack(URI, trackStartTime: startPlaybackPosition) { error in
+			Log.debug?.message("spotify.playTrack called")
+			self.state.shouldForceNewPlayRequest = false
+			self.state.forcedNewPlayRequestTrackPosition = nil
+			if error != nil {
+				Utility.presentAlert(
+					"Unable to start playing",
+					message: error!.localizedDescription
+				)
+			}
+		}
+	}
+
+
+	/**
+	Pause player and restart it before performing action.
+
+	The restart and provided action will be invoked after the notifyPause event is received in
+	the audioStreaming(_:didReceive event:) delegate method.
+	*/
+	func restartPlayerBeforeAction(action: @escaping () -> Void) {
+		playerNeedsRestart = false
+		self.onPauseAction = { [unowned self] in
+			self.spotify.restartPlayer { error in
+				action()
+			}
+		}
+		pausePlaying(nil) { error in
+			guard error == nil else {
+				Log.debug?.message("restartPlayerBeforeAction: error pausing: \(error!)")
+				return
+			}
+		}
+	}
+
+
 
 	/**
 	Handles notification that the spotify session was updated (when user logs in).
@@ -604,8 +644,12 @@ class AudioPlayerViewController: UIViewController {
 		}
 	}
 
-	func setPlaylistTrackPosition() {
-		playlist.trackPosition = seekedToPosition ?? spotify.playbackPosition ?? 0.0
+	func setPlaylistTrackPosition(_ position: TimeInterval? = nil) {
+		if let providedPosition = position {
+			playlist.trackPosition = providedPosition
+		} else {
+			playlist.trackPosition = seekedToPosition ?? spotify.playbackPosition ?? 0.0
+		}
 	}
 }
 
@@ -764,7 +808,6 @@ extension AudioPlayerViewController {
 			// In order to avoid an invalid context (error code 1006) error which happens quite frequently after
 			// changing from wifi to cellular while playing, mark that the player should be restarted before
 			// changing the track.
-			// TODO: test with in-track seeking after changing from wifi to cellular; that may also need to be handled.
 			// TODO: test if this is necessary if the player is currently stopped or paused.
 			playerNeedsRestart = true
 		}
@@ -940,6 +983,9 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		let currentTrackURI = spotify.currentTrackURI
 		seekedToPosition = nil
 		switch spotifyEvent {
+		case .notifyPause where onPauseAction != nil:
+			onPauseAction!()
+			onPauseAction = nil
 		case .notifyTrackChanged, .notifyPlay, .notifyPause:
 			handleCurrentTrackCurrentState(trackURI: currentTrackURI)
 		case .audioFlush:
@@ -1100,6 +1146,23 @@ extension AudioPlayerViewController {
 		case .ended:
 			progressIndicator.value = pannedProgress
 			stopProgressUpdating()
+			// TODO: find a better way to handle this: this code almost works (assuming startPlaying() is also adjusted to call playTracks() when playerNeedsRestart)
+			// but since the song data is often bufferered completely in the first few seconds of playback, it's also usually unnecessary.
+			// What doesn't work well here is that when the player is paused, it seems that the call to pause in restartPlayerBeforeAction() does
+			// not trigger a notifyPause event (which makes sense).
+			// Perhaps a better way would be to trigger a logout / login, instead of the pause.  Or, since it's working nicely elsewhere, and this
+			// should be a reasonably seldomly encountered problem (when a user trys to seek in a track after having dropped from wifi to cellular), accept
+			// this behaviour and hope that spotify makes some change to the ios-sdk to render this workaround unnecessary.
+//			guard !playerNeedsRestart else {
+//				state.forcedNewPlayRequestTrackPosition = offset
+//				// If the player is currently playing, calling playPlaylistCurrentTrack will
+//				// trigger the necessary restart.  Otherwise, it should be triggered when the
+//				// user presses the play button.
+//				if spotify.isPlaying {
+//					playPlaylistCurrentTrack()
+//				}
+//				return
+//			}
 			player.seek(to: offset) { error in
 				guard error == nil else {
 					self.setProgress()
