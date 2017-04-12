@@ -255,7 +255,7 @@ class AudioPlayerViewController: UIViewController {
 		showActivityIndicator()
 		spotify.loginOrRenewSession { willTriggerLogin, sessionValid, error in
 			guard sessionValid else {
-				Log.warning?.message("Unable to renew session in startPlaying(): willTriggerLogin: \(willTriggerLogin), error: \(error)")
+				Log.warning?.message("Unable to renew session in startPlaying(): willTriggerLogin: \(willTriggerLogin), error: \(String(describing: error))")
 				self.hideActivityIndicator()
 				return
 			}
@@ -327,7 +327,7 @@ class AudioPlayerViewController: UIViewController {
 		pausedDueToAudioInterruption = false
 		setPlaylistTrackPosition()
 		player.setIsPlaying(false) { error in
-			guard error == nil || (error as! NSError).code == SPTErrorCodeNotActiveDevice else {
+			guard error == nil || (error! as NSError).code == SPTErrorCodeNotActiveDevice else {
 				Log.error?.message("stopPlaying: error while trying to stop player: \(error!)")
 				return
 			}
@@ -457,7 +457,7 @@ class AudioPlayerViewController: UIViewController {
 			triggerPlaybackOfTrack(withURI: trackURI)
 		} else if spotify.isPlaying && spotify.currentTrackURI == trackURI {
 			spotify.player?.setIsPlaying(true) { error in
-				Log.error?.message("Error: \(error)")
+				Log.error?.message("Error: \(String(describing: error))")
 			}
 			Log.error?.trace()
 			// Do nothing
@@ -466,7 +466,7 @@ class AudioPlayerViewController: UIViewController {
 			Log.debug?.message("Player-skipping to next track")
 			self.spotify.player?.skipNext() { error in
 				guard error == nil else {
-					Log.warning?.message("Error while trying to skipNext(): \(error)")
+					Log.warning?.message("Error while trying to skipNext(): \(String(describing: error))")
 					Utility.presentAlert(
 							"Unable to skip to next track",
 							message: error!.localizedDescription
@@ -609,7 +609,7 @@ class AudioPlayerViewController: UIViewController {
 			ImageDownloader.default.download(urlRequest) { response in
 				guard let image = response.result.value
 				else {
-					Log.warning?.message("unable to get image, response: \(response.response)")
+					Log.warning?.message("unable to get image, response: \(String(describing: response.response))")
 					return
 				}
 				guard let currentInfo = self.nowPlayingCenter.nowPlayingInfo,
@@ -688,7 +688,7 @@ extension AudioPlayerViewController {
 			// TODO: does this make sense here?  Why not call self.pausePlaying()?
 			player.setIsPlaying(false) { error in
 				guard error == nil else {
-					Log.warning?.message("audioRouteChanged: error while trying to pause player: \(error)")
+					Log.warning?.message("audioRouteChanged: error while trying to pause player: \(String(describing: error))")
 					return
 				}
 			}
@@ -887,7 +887,7 @@ extension AudioPlayerViewController:  SPTAudioStreamingPlaybackDelegate {
 		Log.verbose?.message("queue request being sent")
 		spotify.player?.queueSpotifyURI(trackURIString) { error in
 			if error != nil {
-				Log.warning?.message("Error while trying to queue next track (\(trackURIString)): \(error)")
+				Log.warning?.message("Error while trying to queue next track (\(trackURIString)): \(String(describing: error))")
 			}
 		}
 	}
@@ -1146,12 +1146,11 @@ extension AudioPlayerViewController {
 		case .ended:
 			progressIndicator.value = pannedProgress
 			stopProgressUpdating()
-			// TODO: find a better way to handle this: this code almost works (assuming startPlaying() is also adjusted to call playTracks() when playerNeedsRestart)
-			// but since the song data is often bufferered completely in the first few seconds of playback, it's also usually unnecessary.
+			// TODO: find a better way to handle this: this code almost works (assuming startPlaying() is also adjusted to call playTracks() when playerNeedsRestart).
 			// What doesn't work well here is that when the player is paused, it seems that the call to pause in restartPlayerBeforeAction() does
 			// not trigger a notifyPause event (which makes sense).
 			// Perhaps a better way would be to trigger a logout / login, instead of the pause.  Or, since it's working nicely elsewhere, and this
-			// should be a reasonably seldomly encountered problem (when a user trys to seek in a track after having dropped from wifi to cellular), accept
+			// should be a reasonably seldomly encountered problem (when a user tries to seek in a track after having dropped from wifi to cellular), accept
 			// this behaviour and hope that spotify makes some change to the ios-sdk to render this workaround unnecessary.
 //			guard !playerNeedsRestart else {
 //				state.forcedNewPlayRequestTrackPosition = offset

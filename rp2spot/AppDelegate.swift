@@ -23,7 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 	}
 
 	func application(_ application: UIApplication, willFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey : Any]? = nil) -> Bool {
-		Log.enable(minimumSeverity: .info)
+		Log.enable(minimumSeverity: .debug)
 		UIApplication.shared.beginReceivingRemoteControlEvents()
 		return true
 	}

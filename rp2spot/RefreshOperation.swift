@@ -19,21 +19,17 @@ class RefreshOperation: ConcurrentOperation {
 		super.init()
 	}
 
-	override func main() {
-		if isCancelled {
-			state = .Finished
-			return
-		}
+	override func execute() {
 		_ = target?.perform(selector)
 	}
 
 	/**
 	When the refresh operation has finished, this method will be called.
-	
+
 	Move the operation to the finished state, so that it can be removed from it's queue.
 	*/
 	override func cancel() {
 		super.cancel()
-		state = .Finished
+		finish()
 	}
 }

@@ -22,13 +22,12 @@ class SpotifyAuthRenewalOperation: ConcurrentOperation {
 		self.authCompletionHandler = authCompletionHandler
 	}
 
-	override func main() {
-
+	override func execute() {
 		let spotify = SpotifyClient.sharedInstance
 		guard forceRenew || spotify.sessionShouldBeRenewedSoon() else {
 			// Force renew requested, or a session that will not expire soon already exists.
 			authCompletionHandler?(nil)
-			state = .Finished
+			finish()
 			return
 		}
 		spotify.auth.renewSession(spotify.auth.session) { error, session in
@@ -38,7 +37,7 @@ class SpotifyAuthRenewalOperation: ConcurrentOperation {
 				}
 				self.authCompletionHandler?(error as NSError?)
 			}
-			self.state = .Finished
+			self.finish()
 		}
 	}
 }

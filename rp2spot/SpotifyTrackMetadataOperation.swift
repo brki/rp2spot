@@ -28,7 +28,7 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 		handler?(nil, nil)
 	}
 
-	override func main() {
+	override func execute() {
 		let spotify = SpotifyClient.sharedInstance
 		let trackURIS = spotify.URIsForTrackIds(trackIds)
 		let token = spotify.auth.session?.accessToken
@@ -36,13 +36,13 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 		SPTTrack.tracks(withURIs: trackURIS, accessToken: token, market: market) { error, trackInfoList in
 			guard !self.isCancelled else {
 				self.handler?(nil, nil)
-				self.state = .Finished
+				self.finish()
 				return
 			}
 
 			guard error == nil else {
 				self.handler?(error! as NSError, nil)
-				self.state = .Finished
+				self.finish()
 				return
 			}
 
@@ -51,14 +51,14 @@ class SpotifyTrackMetadataOperation: ConcurrentOperation {
 				let err = NSError(domain: "SpotifyTrackMetadataOperation", code: 1,
 				                  userInfo: [NSLocalizedDescriptionKey: "Error processing track metadata"])
 				self.handler?(err, nil)
-				self.state = .Finished
+				self.finish()
 				return
 			}
 
 			let trackInfos = infos.map {SpotifyTrackInfo(track: $0)}
 
 			self.handler?(nil, trackInfos)
-			self.state = .Finished
+			self.finish()
 		}
 	}
 }
